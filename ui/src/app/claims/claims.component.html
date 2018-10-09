@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Toggle Tabs</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css?family=Roboto+Slab|Roboto:300,700" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div class="tab-slider--nav">
+      <ul class="tab-slider--tabs">
+        <li class="tab-slider--trigger" [class.active]="viewMode == 'tab1'" rel="tab1" (click)="clickTab('tab1')">Institutional</li>
+        <li class="tab-slider--trigger" [class.active]="viewMode == 'tab2'" rel="tab2" (click)="clickTab('tab2')">Professional</li>
+        <li class="tab-slider--trigger" [class.active]="viewMode == 'tab3'" rel="tab3" (click)="clickTab('tab3')">Modified Claims</li>
+        <li class="tab-slider--trigger" [class.active]="viewMode == 'tab4'" rel="tab4" (click)="clickTab('tab4')">Test Claim</li>
+      </ul>
+    </div>
+    <div class="tab-slider--container" [ngSwitch]="viewMode">
+      <div id="tab1" class="tab-slider--body" *ngSwitchCase="'tab1'">
+	    <div>
+			<h2>Search Claims</h2>
+			<form [formGroup]="searchForm">
+				<select formControlName="category">
+					<option [ngValue]="null">Select Category</option>
+					<option *ngFor="let option of options" [ngValue]="option">{{option.label}}</option>
+				</select>
+				<div class="form-group row">
+					<div #parent></div>
+				</div>
+				<div><button type="button" (click)="addComponent()" class="btn btn-default">+ Add another </button></div>
+			</form>
+		</div>
+		<h5>Search Results</h5>
+		<table id="table1" datatable [dtOptions]="dtOptions" class="row-border hover">
+		  <thead>
+		  <tr>
+			<th></th>
+			<th>Subscriber ID</th>
+			<th>Claim Type</th>
+			<th>Procedure Code</th>
+			<th>Diagnosis Code</th>
+			<th>Modifier</th>
+			<th>Patient Account Number</th>
+			<th>DOS From Date</th>
+			<th>DOS To Date</th>
+		  </tr>
+		  </thead>
+		  <tbody>
+		  <tr *ngFor="let claims of activeInstitutionalClaims">
+			<td><input type="checkbox" name="{{claims.id}}" id="{{claims.id}}" (change)="toggleActiveInstitutionalClaims(claims.id, $event.target.checked)"></td>
+			<td>{{claims.subscriberId}}</td>
+			<td>{{claims.claimtype}}</td>
+			<td>{{claims.procedureCode}}</td>
+			<td>{{claims.diagnosisCode}}</td>
+			<td>{{claims.modifier}}</td>
+			<td>{{claims.patientAccountNumber}}</td>
+			<td>{{claims.fromDate}}</td>
+			<td>{{claims.toDate}}</td>
+		  </tr>
+		  </tbody>
+		</table>
+		<button (click)="openEditModal('Institutional', claims)" class="btn btn-success">Edit Selection(s)</button>
+      </div>
+      <div id="tab2" class="tab-slider--body" *ngSwitchCase="'tab2'">
+		<h2>Search Results</h2>
+		<table id="table2" datatable [dtOptions]="dtOptions" class="row-border hover">
+		  <thead>
+		  <tr>
+			<th></th>
+			<th>Subscriber ID</th>
+			<th>Claim Type</th>
+			<th>Procedure Code</th>
+			<th>Diagnosis Code</th>
+			<th>Modifier</th>
+			<th>Patient Account Number</th>
+			<th>DOS From Date</th>
+			<th>DOS To Date</th>
+		  </tr>
+		  </thead>
+		  <tbody>
+		  <tr *ngFor="let claims of activeProfessionalClaims">
+			<td><input type="checkbox" name="{{claims.id}}" id="{{claims.id}}" (change)="toggleActiveProfessionalClaims(claims.id, $event.target.checked)"></td>
+			<td>{{claims.subscriberId}}</td>
+			<td>{{claims.claimtype}}</td>
+			<td>{{claims.procedureCode}}</td>
+			<td>{{claims.diagnosisCode}}</td>
+			<td>{{claims.modifier}}</td>
+			<td>{{claims.patientAccountNumber}}</td>
+			<td>{{claims.fromDate}}</td>
+			<td>{{claims.toDate}}</td>
+		  </tr>
+		  </tbody>
+		</table>
+		<button (click)="openEditModal('Professional')" class="btn btn-success">Edit Selection(s)</button>
+      </div>
+	  <div id="tab3" class="tab-slider--body" *ngSwitchCase="'tab3'">
+		<h2>Modified Claims</h2>
+		<table id="table3" datatable [dtOptions]="dtOptions" class="row-border hover">
+		  <thead>
+		  <tr>
+			<th>Subscriber ID</th>
+			<th>Claim Type</th>
+			<th>Procedure Code</th>
+			<th>Diagnosis Code</th>
+			<th>Modifier</th>
+			<th>Patient Account Number</th>
+			<th>DOS From Date</th>
+			<th>DOS To Date</th>
+			<th></th>
+		  </tr>
+		  </thead>
+		  <tbody>
+		  <tr *ngFor="let claims of modifiedClaims">
+			<td>{{claims.subscriberId}}</td>
+			<td>{{claims.claimtype}}</td>
+			<td>{{claims.procedureCode}}</td>
+			<td>{{claims.diagnosisCode}}</td>
+			<td>{{claims.modifier}}</td>
+			<td>{{claims.patientAccountNumber}}</td>
+			<td>{{claims.fromDate}}</td>
+			<td>{{claims.toDate}}</td>
+			<td>
+			  <button class="btn btn-danger" (click)="deleteClaims(claims)">
+				<i class="fa fa-trash"></i>
+			  </button>
+			</td>
+		  </tr>
+		  </tbody>
+		</table>
+      </div>
+      <div id="tab4" class="tab-slider--body" *ngSwitchCase="'tab4'">
+        <h2>Add Test Claims</h2>
+        	<input placeholder="Institutional or Professional" [(ngModel)]="claimtype">
+			<input placeholder="from date" [(ngModel)]="fromDate">
+			<input placeholder="to date" [(ngModel)]="toDate">
+			<input placeholder="place of service" [(ngModel)]="placeOfService">
+			<input placeholder="provider id" [(ngModel)]="providerId">
+			<input placeholder="provider type" [(ngModel)]="providerType">
+			<input placeholder="provider specialty" [(ngModel)]="providerSpecialty">
+			<input placeholder="procedure code" [(ngModel)]="procedureCode">
+			<input placeholder="diagnosis code" [(ngModel)]="diagnosisCode">
+			<input placeholder="network indicator" [(ngModel)]="networkIndicator">
+			<input placeholder="subscriber Id" [(ngModel)]="subscriberId">
+			<input placeholder="patient Account Number" [(ngModel)]="patientAccountNumber">
+			<input placeholder="SCCF Number" [(ngModel)]="sccfNumber">
+			<input placeholder="revenue code" [(ngModel)]="revenueCode">
+			<input placeholder="bill type" [(ngModel)]="billType">
+			<input placeholder="modifier" [(ngModel)]="modifier">
+			<input placeholder="plan code" [(ngModel)]="planCode">
+			<input placeholder="SF Message Code" [(ngModel)]="sfMessageCode">
+			<input placeholder="pricing method" [(ngModel)]="pricingMethod">
+			<input placeholder="pricing rule" [(ngModel)]="pricingRule">
+			<input placeholder="delivery method" [(ngModel)]="deliveryMethod">
+			<input placeholder="input date" [(ngModel)]="inputDate">
+			<input placeholder="file name" [(ngModel)]="fileName">
+			<button class="btn btn-primary" (click)="addClaims()">Add</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<div class="modal-header">
+  <h4 class="modal-title">{{title}}</h4>
+  <button type="button" class="close" aria-label="Close"
+   (click)="activeModal.dismiss('Cross click')">
+  </button>
+</div>
+<form [formGroup]="claimsForm" (ngSubmit)="onSubmit(claimsForm)">
+<div class="modal-body">
+  <div class="row">
+      <div class="form-group">
+	    <label for="subscriberId">Sub ID</label>
+        <input type="text" class="form-control" formControlName="subscriberId"/>
+      </div>
+      <div class="form-group">
+	    <label for="suffix">Suffix</label>
+        <input type="text" class="form-control" formControlName="suffix"/>
+      </div>
+      <div class="form-group">
+	    <label for="patientAccountNumber">Patient Account Number</label>
+		<input type="text" class="form-control" formControlName="patientAccountNumber"/>
+	  </div>
+  </div>
+  <div class="row">
+      <div class="form-group">
+	    <label for="procedureCode">Procedure Code</label>
+        <input type="text" class="form-control" formControlName="procedureCode"/>
+      </div>
+      <div class="form-group">
+	    <label for="diagnosisCode">Diagnosis Code</label>
+        <input type="text" class="form-control" formControlName="diagnosisCode"/>
+      </div>
+      <div class="form-group">
+	    <label for="modifier">Modifier</label>
+		<input type="text" class="form-control" formControlName="modifier"/>
+	  </div>
+  </div>
+  <div class="row">
+        <div class="form-group">
+	    <label for="fromDate">DOS From Date</label>
+        <input type="text" class="form-control" formControlName="fromDate"/>
+      </div>
+      <div class="form-group">
+	    <label for="toDate">DOS To Date</label>
+        <input type="text" class="form-control" formControlName="toDate"/>
+      </div>
+      <div class="form-group">
+	    <label for="claimtype">Claim Type</label>
+        <input type="text" class="form-control" formControlName="claimtype"/>
+      </div>
+  </div>
+  <div class="row">
+      <div class="form-group">
+	    <label for="providerId">Provider ID</label>
+        <input type="text" class="form-control" formControlName="providerId"/>
+      </div>
+	  <div class="form-group">
+	    <label for="providerType">Facility Type</label>
+        <input type="text" class="form-control" formControlName="providerType"/>
+      </div>
+      <div class="form-group">
+	    <label for="providerSpecialty">Taxonomy</label>
+        <input type="text" class="form-control" formControlName="providerSpecialty"/>
+      </div>
+  </div>
+  <div class="row">
+      <div class="form-group">
+	    <label for="sccfNumber">SCCF Number</label>
+        <input type="text" class="form-control" formControlName="sccfNumber"/>
+      </div>
+	  <div class="form-group">
+	    <label for="planCode">Plan Code Host/Local</label>
+        <input type="text" class="form-control" formControlName="planCode"/>
+      </div>
+      <div class="form-group">
+	    <label for="sfMessageCode">SF Message Code</label>
+        <input type="text" class="form-control" formControlName="sfMessageCode"/>
+      </div>
+  </div>
+  <div class="row">
+      <div class="form-group">
+	    <label for="pricingMethod">Pricing Method</label>
+        <input type="text" class="form-control" formControlName="pricingMethod"/>
+      </div>
+	  <div class="form-group">
+	    <label for="pricingRule">Pricing Rule</label>
+        <input type="text" class="form-control" formControlName="pricingRule"/>
+      </div>
+      <div class="form-group">
+	    <label for="deliveryMethod">Delivery Method</label>
+        <input type="text" class="form-control" formControlName="deliveryMethod"/>
+      </div>
+  </div>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-secondary" (click)="activeModal.dismiss('Close clicked')">Cancel</button>
+  <button type="submit" [disabled]="!claimsForm.valid" class="btn btn-success">Save changes</button>
+</div>
+</form>
