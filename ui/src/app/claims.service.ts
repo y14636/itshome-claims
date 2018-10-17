@@ -13,6 +13,10 @@ export class ClaimsService {
     return this.httpClient.get(environment.gateway + '/claims');
   }
   
+  getSearchResults(search: string) {
+    return this.httpClient.post(environment.gateway + '/searchclaims', search);
+  }
+
   getModifiedClaimsList() {
     return this.httpClient.get(environment.gateway + '/modifiedclaims');
   }

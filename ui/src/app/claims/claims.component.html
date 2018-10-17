@@ -13,7 +13,7 @@
         <li class="tab-slider--trigger" [class.active]="viewMode == 'tab1'" rel="tab1" (click)="clickTab('tab1')">Institutional</li>
         <li class="tab-slider--trigger" [class.active]="viewMode == 'tab2'" rel="tab2" (click)="clickTab('tab2')">Professional</li>
         <li class="tab-slider--trigger" [class.active]="viewMode == 'tab3'" rel="tab3" (click)="clickTab('tab3')">Modified Claims</li>
-        <li class="tab-slider--trigger" [class.active]="viewMode == 'tab4'" rel="tab4" (click)="clickTab('tab4')">Test Claim</li>
+        <!-- <li class="tab-slider--trigger" [class.active]="viewMode == 'tab4'" rel="tab4" (click)="clickTab('tab4')">Test Claim</li> -->
       </ul>
     </div>
     <div class="tab-slider--container" [ngSwitch]="viewMode">
@@ -24,9 +24,9 @@
 				<div class="form-row">
 					<div class="col-lg-2" formArrayName="selectItems" *ngFor="let select-item of getControls(searchForm, 'selectItems'); let j = index;">
 					   <div [formGroupName]="j">
-						<select class="form-control" formControlName="category">
-							<option [ngValue]="option" *ngFor="let option of options">{{option.name}}</option>
-						</select>
+						   <select class="form-control" formControlName="category">
+							   <option [ngValue]="option" *ngFor="let option of options">{{option.name}}</option>
+						   </select>
 					   </div>
 					</div>
 				</div>
@@ -38,13 +38,12 @@
 							<button *ngIf="i > 0" type="button" class="btn btn-default" (click)="removeObject(i)" >Remove</button>
 						 </span>
 					   </div>
-						<!-- procedureCode value: {{ searchForm.controls.procedureCodeItems.controls[i].controls.procedureCode.value }} -->
 					</div>
 				</div>
-				<div class="form-row" *ngIf="selectedOption > 0">
+				<div class="form-row" *ngIf="selectedOption > 0 && showButton">
 					<button type="button" class="btn btn-default" (click)="addSelectItems()">Add Search Criteria</button>
 				</div>
-				<div class="form-row" *ngIf="selectedOption > 0">
+				<div class="form-row float-right" *ngIf="selectedOption > 0">
 					<button type="submit" class="btn btn-primary search-button">Search</button>
 				</div>
 			</form>
@@ -62,8 +61,8 @@
 			<th>Diagnosis Code</th>
 			<th>Modifier</th>
 			<th>Patient Account Number</th>
-			<th>DOS From Date</th>
-			<th>DOS To Date</th>
+			<th>From Date (DOS)</th>
+			<th>To Date (DOS)</th>
 		  </tr>
 		  </thead>
 		  <tbody>
@@ -94,8 +93,8 @@
 			<th>Diagnosis Code</th>
 			<th>Modifier</th>
 			<th>Patient Account Number</th>
-			<th>DOS From Date</th>
-			<th>DOS To Date</th>
+			<th>From Date (DOS)</th>
+			<th>To Date (DOS)</th>
 		  </tr>
 		  </thead>
 		  <tbody>
@@ -149,7 +148,7 @@
 		  </tbody>
 		</table>
       </div>
-      <div id="tab4" class="tab-slider--body" *ngSwitchCase="'tab4'">
+      <!-- <div id="tab4" class="tab-slider--body" *ngSwitchCase="'tab4'">
         <h2>Add Test Claims</h2>
 					<input placeholder="Institutional or Professional" [(ngModel)]="claimtype">
 					<input placeholder="service Id" [(ngModel)]="serviceId">
@@ -177,7 +176,7 @@
 			<input placeholder="input date" [(ngModel)]="inputDate">
 			<input placeholder="file name" [(ngModel)]="fileName">
 			<button class="btn btn-primary" (click)="addClaims()">Add</button>
-      </div>
+      </div> -->
     </div>
   </div>
 </body>

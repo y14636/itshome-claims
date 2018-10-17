@@ -9,12 +9,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/y14636/itshome-claims/claims"
 	"github.com/y14636/itshome-claims/modifiedclaims"
+	"github.com/y14636/itshome-claims/searchclaims"
 )
 
-// GetClaimsResultsHandler returns all current claim items
-// func GetClaimsResultsHandler(c *gin.Context) {
-// 	c.JSON(http.StatusOK, claims.GetResults())
-// }
+//GetClaimsResultsHandler returns claim items from search
+func GetClaimsResultsHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, searchclaims.GetResults(c.Param("search")))
+}
 
 // GetClaimsListHandler returns all current claim items
 func GetClaimsListHandler(c *gin.Context) {

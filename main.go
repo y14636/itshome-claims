@@ -24,6 +24,7 @@ func main() {
 	r.GET("/claims", handlers.GetClaimsListHandler)
 	//r.GET("/claims", handlers.GetClaimsResultsHandler)
 	r.GET("/modifiedclaims", handlers.GetModifiedClaimsListHandler)
+	r.POST("/searchclaims/:search", handlers.GetClaimsResultsHandler)
 	r.POST("/claims", handlers.AddClaimsHandler)
 	r.POST("/modifiedclaims", handlers.AddModifiedClaimsHandler)
 	r.DELETE("/modifiedclaims/:id", handlers.DeleteClaimsHandler)

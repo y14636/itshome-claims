@@ -18,6 +18,7 @@ export class EditModalComponent implements OnInit {
   @Input ()procedureCode: 						string;
   @Input ()diagnosisCode: 						string;
   @Input ()modifier: 							string;
+  prefix:										string;
   fromDate: 									string;
   toDate: 										string;
   claimtype: 									string;
@@ -53,56 +54,24 @@ export class EditModalComponent implements OnInit {
   getClaimsListByIds() {
     this.claimsService.getClaimsList().subscribe((data: Claims[]) => {
 		if (this.selectedActiveInstitutionalClaimIds !== undefined && this.selectedActiveInstitutionalClaimIds.length > 0) {
-		    this.selectedActiveInstitutionalClaims = data.filter(claim => claim.id === this.selectedActiveInstitutionalClaimIds[0]);
-		    console.log("This institutional claim sub id= " + this.selectedActiveInstitutionalClaims[0].subscriberId);
-		    this.subscriberId = this.selectedActiveInstitutionalClaims[0].subscriberId.length > 0 ? this.selectedActiveInstitutionalClaims[0].subscriberId.slice(0, 9) : this.selectedActiveInstitutionalClaims[0].subscriberId;
-		    this.suffix = this.selectedActiveInstitutionalClaims[0].subscriberId.length > 9 ? this.selectedActiveInstitutionalClaims[0].subscriberId.slice(-2) : 'N/A';
-		    this.patientAccountNumber = this.selectedActiveInstitutionalClaims[0].patientAccountNumber;
-		    this.procedureCode = this.selectedActiveInstitutionalClaims[0].procedureCode;
-		    this.diagnosisCode = this.selectedActiveInstitutionalClaims[0].diagnosisCode;
-		    this.modifier = this.selectedActiveInstitutionalClaims[0].modifier;
-		    this.fromDate = this.selectedActiveInstitutionalClaims[0].fromDate;
-		    this.toDate = this.selectedActiveInstitutionalClaims[0].toDate;
-			this.claimtype = this.selectedActiveInstitutionalClaims[0].claimtype;
-			this.serviceId = this.selectedActiveInstitutionalClaims[0].serviceId;
-			this.receiptDate = this.selectedActiveInstitutionalClaims[0].receiptDate;
-			this.providerType = this.selectedActiveInstitutionalClaims[0].providerType;
-			this.providerId = this.selectedActiveInstitutionalClaims[0].providerId;
-			this.providerSpecialty = this.selectedActiveInstitutionalClaims[0].providerSpecialty;
-			this.sccfNumber = this.selectedActiveInstitutionalClaims[0].sccfNumber;
-			this.planCode = this.selectedActiveInstitutionalClaims[0].planCode;
-			this.sfMessageCode = this.selectedActiveInstitutionalClaims[0].sfMessageCode;
-			this.pricingMethod = this.selectedActiveInstitutionalClaims[0].pricingMethod;
-			this.pricingRule = this.selectedActiveInstitutionalClaims[0].pricingRule;
-			this.deliveryMethod = this.selectedActiveInstitutionalClaims[0].deliveryMethod;
+			this.selectedActiveInstitutionalClaims = data.filter(claim => claim.id === this.selectedActiveInstitutionalClaimIds[0]);
+			this.populateForm(this.selectedActiveInstitutionalClaims);
 		} else if (this.selectedActiveProfessionalClaimIds !== undefined && this.selectedActiveProfessionalClaimIds) {
 			this.selectedActiveProfessionalClaims = data.filter(claim => claim.id === this.selectedActiveProfessionalClaimIds[0]);
-			console.log("This profession claim sub id= " + this.selectedActiveProfessionalClaims[0].subscriberId);
-			this.subscriberId = this.selectedActiveProfessionalClaims[0].subscriberId.length > 0 ? this.selectedActiveProfessionalClaims[0].subscriberId.slice(0, 9) : this.selectedActiveProfessionalClaims[0].subscriberId;
-			this.suffix = this.selectedActiveProfessionalClaims[0].subscriberId.length > 9 ? this.selectedActiveProfessionalClaims[0].subscriberId.slice(-2) : 'N/A';
-			this.patientAccountNumber = this.selectedActiveProfessionalClaims[0].patientAccountNumber;
-			this.procedureCode = this.selectedActiveProfessionalClaims[0].procedureCode;
-			this.diagnosisCode = this.selectedActiveProfessionalClaims[0].diagnosisCode;
-			this.modifier = this.selectedActiveProfessionalClaims[0].modifier;
-			this.fromDate = this.selectedActiveProfessionalClaims[0].fromDate;
-			this.toDate = this.selectedActiveProfessionalClaims[0].toDate;
-			this.claimtype = this.selectedActiveProfessionalClaims[0].claimtype;
-			this.serviceId = this.selectedActiveProfessionalClaims[0].serviceId;
-			this.receiptDate = this.selectedActiveProfessionalClaims[0].receiptDate;
-			this.providerType = this.selectedActiveProfessionalClaims[0].providerType;
-			this.providerId = this.selectedActiveProfessionalClaims[0].providerId;
-			this.providerSpecialty = this.selectedActiveProfessionalClaims[0].providerSpecialty;
-			this.sccfNumber = this.selectedActiveProfessionalClaims[0].sccfNumber;
-			this.planCode = this.selectedActiveProfessionalClaims[0].planCode;
-			this.sfMessageCode = this.selectedActiveProfessionalClaims[0].sfMessageCode;
-			this.pricingMethod = this.selectedActiveProfessionalClaims[0].pricingMethod;
-			this.pricingRule = this.selectedActiveProfessionalClaims[0].pricingRule;
-			this.deliveryMethod = this.selectedActiveProfessionalClaims[0].deliveryMethod;
+			this.populateForm(this.selectedActiveProfessionalClaims);
 		}
 	  this.updateClaimForm();
     });
   }
   
+  isaNumber(text) {
+	var isNumber = false;
+	if (!isNaN(parseInt(text, 10))) {
+		isNumber = true;
+	}
+	return isNumber;
+  }
+
   private createForm() {
     this.claimsForm = this.formBuilder.group({
       subscriberId: '',
@@ -111,6 +80,7 @@ export class EditModalComponent implements OnInit {
 	  procedureCode: '',
 	  diagnosisCode: '',
 	  modifier: '',
+	  prefix: [{value: '', disabled: true}],
 	  fromDate: [{value: '', disabled: true}],
 	  toDate: [{value: '', disabled: true}],
 	  claimtype: [{value: '', disabled: true}],
@@ -128,6 +98,37 @@ export class EditModalComponent implements OnInit {
 
     });
   }
+
+  populateForm(selectedClaims: Claims[]) {
+	console.log("This institutional claim sub id= " + selectedClaims[0].subscriberId);
+	var sub = selectedClaims[0].subscriberId.slice(0, 1);
+	if (sub != null && this.isaNumber(sub)) {
+		this.subscriberId = selectedClaims[0].subscriberId.slice(0, 9);
+	} else {
+		this.subscriberId = selectedClaims[0].subscriberId.length > 0 ? selectedClaims[0].subscriberId.slice(3, 12) : selectedClaims[0].subscriberId;
+	}
+	this.prefix = selectedClaims[0].subscriberId.length > 12 ? selectedClaims[0].subscriberId.slice(0, 3) : 'N/A';
+	this.suffix = selectedClaims[0].subscriberId.length > 9 ? selectedClaims[0].subscriberId.slice(-2) : 'N/A';
+	this.patientAccountNumber = selectedClaims[0].patientAccountNumber;
+	this.procedureCode = selectedClaims[0].procedureCode;
+	this.diagnosisCode = selectedClaims[0].diagnosisCode;
+	this.modifier = selectedClaims[0].modifier;
+	this.fromDate = selectedClaims[0].fromDate;
+	this.toDate = selectedClaims[0].toDate;
+	this.claimtype = selectedClaims[0].claimtype;
+	this.serviceId = selectedClaims[0].serviceId;
+	this.receiptDate = selectedClaims[0].receiptDate;
+	this.providerType = selectedClaims[0].providerType;
+	this.providerId = selectedClaims[0].providerId;
+	this.providerSpecialty = selectedClaims[0].providerSpecialty;
+	this.sccfNumber = selectedClaims[0].sccfNumber;
+	this.planCode = selectedClaims[0].planCode;
+	this.sfMessageCode = selectedClaims[0].sfMessageCode;
+	this.pricingMethod = selectedClaims[0].pricingMethod;
+	this.pricingRule = selectedClaims[0].pricingRule;
+	this.deliveryMethod = selectedClaims[0].deliveryMethod;
+  }
+
   onSubmit(form) {
 	  var newClaims : Claims = {
 		  id: '',
@@ -143,7 +144,7 @@ export class EditModalComponent implements OnInit {
 		  procedureCode: form.getRawValue().procedureCode,
 		  diagnosisCode: form.getRawValue().diagnosisCode,
 		  networkIndicator: 'na',
-		  subscriberId: form.getRawValue().subscriberId + form.getRawValue().suffix,
+		  subscriberId: form.getRawValue().prefix + form.getRawValue().subscriberId + form.getRawValue().suffix,
 		  patientAccountNumber: form.getRawValue().patientAccountNumber,
 		  sccfNumber: form.getRawValue().sccfNumber,
 		  revenueCode: 'na',
@@ -173,6 +174,7 @@ export class EditModalComponent implements OnInit {
 		this.diagnosisCode = '';
 		//this.networkIndicator = '';
 		this.subscriberId = '';
+		this.prefix = '';
 		this.suffix = '';
 		this.patientAccountNumber = '';
 		this.sccfNumber = '';
@@ -197,6 +199,7 @@ export class EditModalComponent implements OnInit {
 
   updateClaimForm() {
 	  this.claimsForm.patchValue({
+		  prefix: this.prefix,
 		  subscriberId: this.subscriberId,
 		  suffix: this.suffix,
 		  patientAccountNumber: this.patientAccountNumber,
