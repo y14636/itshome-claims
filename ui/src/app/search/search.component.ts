@@ -14,12 +14,12 @@ export class SearchComponent implements OnInit {
     this._ref.destroy();
   }
   
-  save(){
-    if(this.procedureCode)
-      alert(`procedureCode: ${this.procedureCode}`);
-    else
-      alert('Please enter value to save');
-  }
+  // save(){
+    // if(this.procedureCode)
+      // alert(`procedureCode: ${this.procedureCode}`);
+    // else
+      // alert('Please enter value to save');
+  // }
 
   ngOnInit() {
   }

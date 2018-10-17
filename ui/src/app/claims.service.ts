@@ -33,6 +33,8 @@ export class ClaimsService {
 export class Claims {
   id: string;
   claimtype: string;
+  serviceId: string;
+  receiptDate: string;
   fromDate: string;
   toDate: string;
   placeOfService: string;

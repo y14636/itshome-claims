@@ -6,3 +6,19 @@ button {
 td {
   vertical-align: unset;
 }
+
+.search-div {
+	position: relative;
+}
+
+.search-button {
+	float: right;
+}
+
+.select-div {
+	vertical-align: middle;
+}
+
+.search-results-header {
+	padding-top: 20px;
+}

@@ -21,6 +21,8 @@ export class EditModalComponent implements OnInit {
   fromDate: 									string;
   toDate: 										string;
   claimtype: 									string;
+  serviceId:									string;
+  receiptDate:									string;
   providerType: 								string;
   providerId: 									string;
   providerSpecialty: 							string;
@@ -62,6 +64,8 @@ export class EditModalComponent implements OnInit {
 		    this.fromDate = this.selectedActiveInstitutionalClaims[0].fromDate;
 		    this.toDate = this.selectedActiveInstitutionalClaims[0].toDate;
 			this.claimtype = this.selectedActiveInstitutionalClaims[0].claimtype;
+			this.serviceId = this.selectedActiveInstitutionalClaims[0].serviceId;
+			this.receiptDate = this.selectedActiveInstitutionalClaims[0].receiptDate;
 			this.providerType = this.selectedActiveInstitutionalClaims[0].providerType;
 			this.providerId = this.selectedActiveInstitutionalClaims[0].providerId;
 			this.providerSpecialty = this.selectedActiveInstitutionalClaims[0].providerSpecialty;
@@ -83,6 +87,8 @@ export class EditModalComponent implements OnInit {
 			this.fromDate = this.selectedActiveProfessionalClaims[0].fromDate;
 			this.toDate = this.selectedActiveProfessionalClaims[0].toDate;
 			this.claimtype = this.selectedActiveProfessionalClaims[0].claimtype;
+			this.serviceId = this.selectedActiveProfessionalClaims[0].serviceId;
+			this.receiptDate = this.selectedActiveProfessionalClaims[0].receiptDate;
 			this.providerType = this.selectedActiveProfessionalClaims[0].providerType;
 			this.providerId = this.selectedActiveProfessionalClaims[0].providerId;
 			this.providerSpecialty = this.selectedActiveProfessionalClaims[0].providerSpecialty;
@@ -108,6 +114,8 @@ export class EditModalComponent implements OnInit {
 	  fromDate: [{value: '', disabled: true}],
 	  toDate: [{value: '', disabled: true}],
 	  claimtype: [{value: '', disabled: true}],
+	  serviceId: [{value: '', disabled: true}],
+	  receiptDate: [{value: '', disabled: true}],
 	  providerType: [{value: '', disabled: true}],
 	  providerId: [{value: '', disabled: true}],
 	  providerSpecialty: [{value: '', disabled: true}],
@@ -124,6 +132,8 @@ export class EditModalComponent implements OnInit {
 	  var newClaims : Claims = {
 		  id: '',
 		  claimtype: form.getRawValue().claimtype,
+		  serviceId: form.getRawValue().serviceId,
+		  receiptDate: form.getRawValue().receiptDate,
 		  fromDate: form.getRawValue().fromDate,
 		  toDate: form.getRawValue().toDate,
 		  placeOfService: 'na',
@@ -151,6 +161,8 @@ export class EditModalComponent implements OnInit {
     this.claimsService.addModifiedClaims(newClaims).subscribe(() => {
 		//this.getAll();
 		this.claimtype = '';
+		//this.serviceId = '';
+		//this.receiptDate = '';
 		this.fromDate = '';
 		this.toDate = '';
 		//this.placeOfService = '';
@@ -194,6 +206,8 @@ export class EditModalComponent implements OnInit {
 		  fromDate: this.fromDate,
 		  toDate: this.toDate,
 		  claimtype: this.claimtype,
+		  serviceId: this.serviceId,
+		  receiptDate: this.receiptDate,
 		  providerType: this.providerType,
 		  providerId: this.providerId,
 		  providerSpecialty: this.providerSpecialty,

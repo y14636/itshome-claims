@@ -20,18 +20,38 @@
       <div id="tab1" class="tab-slider--body" *ngSwitchCase="'tab1'">
 	    <div>
 			<h2>Search Claims</h2>
-			<form [formGroup]="searchForm">
-				<select formControlName="category">
-					<option [ngValue]="null">Select Category</option>
-					<option *ngFor="let option of options" [ngValue]="option">{{option.label}}</option>
-				</select>
-				<div class="form-group row">
-					<div #parent></div>
+			<form [formGroup]="searchForm" novalidate (ngSubmit)="onSubmit(searchForm.value, searchForm.valid, $event)">
+				<div class="form-row">
+					<div class="col-lg-2" formArrayName="selectItems" *ngFor="let select-item of getControls(searchForm, 'selectItems'); let j = index;">
+					   <div [formGroupName]="j">
+						<select class="form-control" formControlName="category">
+							<option [ngValue]="option" *ngFor="let option of options">{{option.name}}</option>
+						</select>
+					   </div>
+					</div>
 				</div>
-				<div><button type="button" (click)="addComponent()" class="btn btn-default">+ Add another </button></div>
+				<div *ngIf="selectedOption > 0" class="form-row">
+					<div class="col-lg-2" formArrayName="inputItems" *ngFor="let item of getControls(searchForm, 'inputItems'); let i = index;">
+					   <div [formGroupName]="i">
+						 <input type="text" class="form-control" [formControlName]="'inputName' + i">
+						 <span class="input-group-btn">
+							<button *ngIf="i > 0" type="button" class="btn btn-default" (click)="removeObject(i)" >Remove</button>
+						 </span>
+					   </div>
+						<!-- procedureCode value: {{ searchForm.controls.procedureCodeItems.controls[i].controls.procedureCode.value }} -->
+					</div>
+				</div>
+				<div class="form-row" *ngIf="selectedOption > 0">
+					<button type="button" class="btn btn-default" (click)="addSelectItems()">Add Search Criteria</button>
+				</div>
+				<div class="form-row" *ngIf="selectedOption > 0">
+					<button type="submit" class="btn btn-primary search-button">Search</button>
+				</div>
 			</form>
 		</div>
-		<h5>Search Results</h5>
+		<div class="search-results-header">
+			<h5>Search Results</h5>
+		</div>
 		<table id="table1" datatable [dtOptions]="dtOptions" class="row-border hover">
 		  <thead>
 		  <tr>
@@ -131,9 +151,11 @@
       </div>
       <div id="tab4" class="tab-slider--body" *ngSwitchCase="'tab4'">
         <h2>Add Test Claims</h2>
-        	<input placeholder="Institutional or Professional" [(ngModel)]="claimtype">
-			<input placeholder="from date" [(ngModel)]="fromDate">
-			<input placeholder="to date" [(ngModel)]="toDate">
+					<input placeholder="Institutional or Professional" [(ngModel)]="claimtype">
+					<input placeholder="service Id" [(ngModel)]="serviceId">
+					<input placeholder="receipt date" [(ngModel)]="receiptDate">
+					<input placeholder="from date" [(ngModel)]="fromDate">
+					<input placeholder="to date" [(ngModel)]="toDate">
 			<input placeholder="place of service" [(ngModel)]="placeOfService">
 			<input placeholder="provider id" [(ngModel)]="providerId">
 			<input placeholder="provider type" [(ngModel)]="providerType">
