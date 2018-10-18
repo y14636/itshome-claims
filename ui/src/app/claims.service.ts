@@ -14,7 +14,7 @@ export class ClaimsService {
   }
   
   getSearchResults(search: string) {
-    return this.httpClient.post(environment.gateway + '/searchclaims', search);
+    return this.httpClient.get(environment.gateway + '/searchclaims/' + search);
   }
 
   getModifiedClaimsList() {

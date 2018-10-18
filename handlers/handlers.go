@@ -14,7 +14,12 @@ import (
 
 //GetClaimsResultsHandler returns claim items from search
 func GetClaimsResultsHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, searchclaims.GetResults(c.Param("search")))
+	searchString := c.Param("search")
+	if err := searchclaims.GetResults(searchString); err != nil {
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, "")
 }
 
 // GetClaimsListHandler returns all current claim items

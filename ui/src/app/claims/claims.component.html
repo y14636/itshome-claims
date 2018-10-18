@@ -23,10 +23,13 @@
 			<form [formGroup]="searchForm" novalidate (ngSubmit)="onSubmit(searchForm.value, searchForm.valid, $event)">
 				<div class="form-row">
 					<div class="col-lg-2" formArrayName="selectItems" *ngFor="let select-item of getControls(searchForm, 'selectItems'); let j = index;">
-					   <div [formGroupName]="j">
-						   <select class="form-control" formControlName="category">
+					   <div [formGroupName]="j" class="input-group">
+						   <select class="form-control select-form-fixer" formControlName="category">
 							   <option [ngValue]="option" *ngFor="let option of options">{{option.name}}</option>
-						   </select>
+							 </select>
+							 <span class="input-group-addon">
+								<button *ngIf="j > 0" type="button" class="btn btn-danger btn-sm close-button-fixer" (click)="removeObject(j)" ><span aria-hidden="true">&times;</span></button>
+							 </span>	
 					   </div>
 					</div>
 				</div>
@@ -34,9 +37,6 @@
 					<div class="col-lg-2" formArrayName="inputItems" *ngFor="let item of getControls(searchForm, 'inputItems'); let i = index;">
 					   <div [formGroupName]="i">
 						 <input type="text" class="form-control" [formControlName]="'inputName' + i">
-						 <span class="input-group-btn">
-							<button *ngIf="i > 0" type="button" class="btn btn-default" (click)="removeObject(i)" >Remove</button>
-						 </span>
 					   </div>
 					</div>
 				</div>

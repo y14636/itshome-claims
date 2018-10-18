@@ -355,6 +355,7 @@ export class ClaimsComponent implements OnInit {
   // }
   
   removeObject(index) {
+		console.log("removing index->", index);
 	  this.inputItems.removeAt(index);
 		this.selectItems.removeAt(index);
 		if (this.selectItems.length < 6) {

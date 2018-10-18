@@ -22,3 +22,12 @@ td {
 .search-results-header {
 	padding-top: 20px;
 }
+
+.select-form-fixer {
+	padding: 0px;
+}
+
+.close-button-fixer {
+	margin-left: .05em;
+	margin-top: 0em;
+}

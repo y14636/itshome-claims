@@ -1,18 +1,18 @@
 <div class="modal-header">
   <h4 class="modal-title">{{title}}</h4>
   <button type="button" class="close" aria-label="Close"
-   (click)="activeModal.dismiss('Cross click')">
+   (click)="activeModal.dismiss('Cross click')"><span aria-hidden="true">&times;</span>
   </button>
 </div>
 <form [formGroup]="claimsForm" (ngSubmit)="onSubmit(claimsForm)">
 <div class="modal-body">
-  <div class="row">
+  <div class="row form-row">
       <div class="form-group">
           <label for="prefix">Prefix</label>
             <input type="text" class="form-control" formControlName="prefix"/>
           </div>    
       <div class="form-group">
-	    <label for="subscriberId">Sub ID</label>
+	    <label for="subscriberId">Subscriber ID</label>
         <input type="text" class="form-control" formControlName="subscriberId"/>
       </div>
       <div class="form-group">
@@ -24,7 +24,7 @@
 		<input type="text" class="form-control" formControlName="patientAccountNumber"/>
 	  </div>
   </div>
-  <div class="row">
+  <div class="row form-row">
       <div class="form-group">
 	    <label for="procedureCode">Procedure Code</label>
         <input type="text" class="form-control" formControlName="procedureCode"/>
@@ -36,13 +36,13 @@
       <div class="form-group">
 	    <label for="modifier">Modifier</label>
 		<input type="text" class="form-control" formControlName="modifier"/>
-	  </div>
-  </div>
-  <div class="row">
+    </div>
     <div class="form-group">
 	    <label for="serviceId">Service ID</label>
         <input type="text" class="form-control" formControlName="serviceId"/>
       </div>
+  </div>
+  <div class="row form-row">
       <div class="form-group">
         <label for="receiptDate">Receipt Date</label>
           <input type="text" class="form-control" formControlName="receiptDate"/>
@@ -55,12 +55,12 @@
 	    <label for="toDate">To Date (DOS)</label>
         <input type="text" class="form-control" formControlName="toDate"/>
       </div>
-  </div>
-  <div class="row">
       <div class="form-group">
-          <label for="claimtype">Claim Type</label>
-            <input type="text" class="form-control" formControlName="claimtype"/>
-          </div>    
+        <label for="claimtype">Claim Type</label>
+          <input type="text" class="form-control" formControlName="claimtype"/>
+        </div>    
+  </div>
+  <div class="row form-row">
       <div class="form-group">
 	    <label for="providerId">Provider ID</label>
         <input type="text" class="form-control" formControlName="providerId"/>
@@ -73,12 +73,12 @@
 	    <label for="providerSpecialty">Taxonomy</label>
         <input type="text" class="form-control" formControlName="providerSpecialty"/>
       </div>
-  </div>
-  <div class="row">
       <div class="form-group">
-	    <label for="sccfNumber">SCCF Number</label>
-        <input type="text" class="form-control" formControlName="sccfNumber"/>
-      </div>
+        <label for="sccfNumber">SCCF Number</label>
+          <input type="text" class="form-control" formControlName="sccfNumber"/>
+        </div>  
+  </div>
+  <div class="row form-row">
 	  <div class="form-group">
 	    <label for="planCode">Plan Code Host/Local</label>
         <input type="text" class="form-control" formControlName="planCode"/>
@@ -87,16 +87,16 @@
 	    <label for="sfMessageCode">SF Message Code</label>
         <input type="text" class="form-control" formControlName="sfMessageCode"/>
       </div>
-  </div>
-  <div class="row">
       <div class="form-group">
-	    <label for="pricingMethod">Pricing Method</label>
-        <input type="text" class="form-control" formControlName="pricingMethod"/>
-      </div>
-	  <div class="form-group">
-	    <label for="pricingRule">Pricing Rule</label>
-        <input type="text" class="form-control" formControlName="pricingRule"/>
-      </div>
+        <label for="pricingMethod">Pricing Method</label>
+          <input type="text" class="form-control" formControlName="pricingMethod"/>
+        </div>
+      <div class="form-group">
+        <label for="pricingRule">Pricing Rule</label>
+          <input type="text" class="form-control" formControlName="pricingRule"/>
+        </div>  
+  </div>
+  <div class="row form-row">
       <div class="form-group">
 	    <label for="deliveryMethod">Delivery Method</label>
         <input type="text" class="form-control" formControlName="deliveryMethod"/>

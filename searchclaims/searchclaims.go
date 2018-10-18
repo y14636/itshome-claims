@@ -2,6 +2,7 @@ package searchclaims
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"strconv"
@@ -97,6 +98,16 @@ type Results struct {
 
 func GetResults(search string) []Results {
 	//fmt.Println("search string=", search)
+	searchJson := search
+	var result map[string]interface{}
+	json.Unmarshal([]byte(searchJson), &result)
+	inputItems := result["inputItems"].(map[string]interface{})
+
+	for key, value := range inputItems {
+		// Each value is an interface{} type, that is type asserted as a string
+		fmt.Println(key, value.(string))
+	}
+
 	return qList
 }
 
