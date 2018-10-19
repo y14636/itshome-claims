@@ -9,17 +9,22 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/y14636/itshome-claims/claims"
 	"github.com/y14636/itshome-claims/modifiedclaims"
-	"github.com/y14636/itshome-claims/searchclaims"
 )
+
+// //GetClaimsResultsHandler returns claim items from search
+// func GetClaimsResultsHandler(c *gin.Context) {
+// 	searchString := c.Param("search")
+// 	if err := searchclaims.GetResults(searchString); err != nil {
+// 		c.JSON(http.StatusInternalServerError, err)
+// 		return
+// 	}
+// 	c.JSON(http.StatusOK, "")
+// }
 
 //GetClaimsResultsHandler returns claim items from search
 func GetClaimsResultsHandler(c *gin.Context) {
 	searchString := c.Param("search")
-	if err := searchclaims.GetResults(searchString); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
-		return
-	}
-	c.JSON(http.StatusOK, "")
+	c.JSON(http.StatusOK, claims.GetResults(searchString))
 }
 
 // GetClaimsListHandler returns all current claim items

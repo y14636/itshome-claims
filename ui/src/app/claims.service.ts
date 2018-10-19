@@ -13,8 +13,12 @@ export class ClaimsService {
     return this.httpClient.get(environment.gateway + '/claims');
   }
   
+  // getSearchResults(search: string) {
+  //   return this.httpClient.get(environment.gateway + '/searchclaims/' + search);
+  // }
+
   getSearchResults(search: string) {
-    return this.httpClient.get(environment.gateway + '/searchclaims/' + search);
+    return this.httpClient.get(environment.gateway + '/claims/' + search);
   }
 
   getModifiedClaimsList() {

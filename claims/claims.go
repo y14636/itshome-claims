@@ -2,10 +2,12 @@ package claims
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"sync"
 
 	_ "github.com/denisenkom/go-mssqldb"
@@ -14,6 +16,7 @@ import (
 
 var (
 	list                      []Claims
+	rList                     []Claims
 	qList                     []Results
 	mtx                       sync.RWMutex
 	once                      sync.Once
@@ -54,8 +57,10 @@ func initializeList() {
 	defer condb.Close()
 
 	//dummy Institutional claims
-	Add("11", "N/A", "20180110", "20180101", "20180110", "NA", "000000001000", "0001", "314000000X", "52260", "N3010", "NA", "PAY20089098001", "99999999", "30120180400000000",
+	Add("11", "N/A", "20180110", "20180101", "20180110", "NA", "000000001000", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098001", "99999999", "30120180400000000",
 		"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile1.dat")
+	Add("12", "N/A", "20180710", "20180701", "20180710", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "99999999", "30120180400000000",
+		"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
 	//dummy Professional claims
 	Add("20", "600", "20180110", "20180105", "20180110", "30", "000000001001", "A4", "111N00000X  ", "99212", "M5134", "3", "PAY20089098001", "11111111", "30120180400000001",
 		"NA", "111", "50", "302", "P302", "40", "9", "A", "20180110", "testfile2.dat")
@@ -97,8 +102,54 @@ type Results struct {
 	Answer   string `json:"answer"`
 }
 
-func GetResults() []Results {
-	return qList
+func GetResults(search string) []Claims {
+	rList = []Claims{}
+
+	//fmt.Println("search string=", search)
+	b := []byte(search)
+	var f interface{}
+	json.Unmarshal(b, &f)
+	m := f.(map[string]interface{})
+	for k, v := range m {
+		switch vv := v.(type) {
+		case string:
+			fmt.Println(k, "is string", vv)
+		case float64:
+			fmt.Println(k, "is float64", vv)
+		case []interface{}:
+			fmt.Println(k, "is an array:")
+			if k == "inputItems" {
+				for i, u := range vv {
+					fmt.Println("Key:", i, "Value:", u)
+					str := fmt.Sprintf("%v", u)
+					out := strings.TrimLeft(strings.TrimRight(str, "]"), "map[")
+					inputArray := strings.Fields(out)
+					//fmt.Println("param1", inputArray[0])
+					//param1 := inputArray[0]
+					//fmt.Println("param2", inputArray[1])
+					//param2 := inputArray[1]
+					paramValue := strings.SplitAfter(inputArray[0], ":")
+					paramName := strings.SplitAfter(inputArray[1], ":")
+					if paramName[1] == "subscriberId" {
+						location, err := findClaimsLocation(paramValue[1])
+						if err != nil {
+							log.Fatal(err)
+						}
+						fmt.Println("identified list item=", list[location])
+						rList = append(rList, list[location])
+						fmt.Println("1st rList=", rList)
+					}
+					fmt.Println("paramName", paramName[1])
+					fmt.Println("paramValue", paramValue[1])
+				}
+			}
+		default:
+			fmt.Println(k, "is of a type I don't know how to handle")
+		}
+	}
+	fmt.Println("size of array=", len(rList))
+	return rList
+	//return qList
 }
 
 // Get retrieves all elements from the claims list
@@ -187,7 +238,11 @@ func findClaimsLocation(id string) (int, error) {
 	mtx.RLock()
 	defer mtx.RUnlock()
 	for i, t := range list {
-		if isMatchingID(t.ID, id) {
+		// if isMatchingID(t.ID, id) {
+		// 	return i, nil
+		// }
+		fmt.Println("Subscriber ID=", t.SubscriberId)
+		if isMatchingID(t.SubscriberId, id) {
 			return i, nil
 		}
 	}

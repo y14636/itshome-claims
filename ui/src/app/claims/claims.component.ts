@@ -221,23 +221,28 @@ export class ClaimsComponent implements OnInit {
     this.dtOptions = {
 	  searching:false
     };
-    this.getAll();
-	this.getModifiedClaims();
+		this.getAll();
+	  this.getModifiedClaims();
   }
 
   getAll() {
     this.claimsService.getClaimsList().subscribe((data: Claims[]) => {
-      this.activeInstitutionalClaims = data.filter(claim => claim.claimtype === '11' || claim.claimtype === '12');
+      this.activeInstitutionalClaims = data.filter(claim => claim.claimtype === '11');
 	  this.activeProfessionalClaims = data.filter(claim => claim.claimtype === '20');
     });
   }
 
   getModifiedClaims() {
-	this.claimsService.getModifiedClaimsList().subscribe((data: Claims[]) => {
-		this.modifiedClaims = data.filter(claim => claim);
-	});	
+	  this.claimsService.getModifiedClaimsList().subscribe((data: Claims[]) => {
+		  this.modifiedClaims = data.filter(claim => claim);
+	  });	
   }
-  
+	
+	searchActiveInstitutionalClaims(strFormData) {
+		this.claimsService.getSearchResults(strFormData).subscribe((data: Claims[]) => {
+			this.activeInstitutionalClaims = data.filter(claim => claim);
+		});
+	}
   // addClaims() {
   //   var newClaims : Claims = {
 	//   id: '',
@@ -367,7 +372,7 @@ export class ClaimsComponent implements OnInit {
 	  e.preventDefault();
 			//alert('Form data are: '+JSON.stringify(model));
 			let strFormData = JSON.stringify(model);
-			this.claimsService.getSearchResults(strFormData).subscribe(() => {});
+			this.searchActiveInstitutionalClaims(strFormData);
 	//   let strFormData = JSON.stringify(model);
 	//   let jsonObj = JSON.parse(strFormData);
 	//   let items = jsonObj.inputItems;

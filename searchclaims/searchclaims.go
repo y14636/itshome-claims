@@ -98,16 +98,25 @@ type Results struct {
 
 func GetResults(search string) []Results {
 	//fmt.Println("search string=", search)
-	searchJson := search
-	var result map[string]interface{}
-	json.Unmarshal([]byte(searchJson), &result)
-	inputItems := result["inputItems"].(map[string]interface{})
-
-	for key, value := range inputItems {
-		// Each value is an interface{} type, that is type asserted as a string
-		fmt.Println(key, value.(string))
+	b := []byte(search)
+	var f interface{}
+	json.Unmarshal(b, &f)
+	m := f.(map[string]interface{})
+	for k, v := range m {
+		switch vv := v.(type) {
+		case string:
+			fmt.Println(k, "is string", vv)
+		case float64:
+			fmt.Println(k, "is float64", vv)
+		case []interface{}:
+			fmt.Println(k, "is an array:")
+			for i, u := range vv {
+				fmt.Println(i, u)
+			}
+		default:
+			fmt.Println(k, "is of a type I don't know how to handle")
+		}
 	}
-
 	return qList
 }
 
