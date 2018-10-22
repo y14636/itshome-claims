@@ -13,40 +13,45 @@
         <li class="tab-slider--trigger" [class.active]="viewMode == 'tab1'" rel="tab1" (click)="clickTab('tab1')">Institutional</li>
         <li class="tab-slider--trigger" [class.active]="viewMode == 'tab2'" rel="tab2" (click)="clickTab('tab2')">Professional</li>
         <li class="tab-slider--trigger" [class.active]="viewMode == 'tab3'" rel="tab3" (click)="clickTab('tab3')">Modified Claims</li>
-        <!-- <li class="tab-slider--trigger" [class.active]="viewMode == 'tab4'" rel="tab4" (click)="clickTab('tab4')">Test Claim</li> -->
       </ul>
     </div>
     <div class="tab-slider--container" [ngSwitch]="viewMode">
       <div id="tab1" class="tab-slider--body" *ngSwitchCase="'tab1'">
-	    <div>
+			<div>
 			<h2>Search Claims</h2>
-			<form [formGroup]="searchForm" novalidate (ngSubmit)="onSubmit(searchForm.value, searchForm.valid, $event)">
+			<form [formGroup]="instSearchForm" novalidate (ngSubmit)="onSubmit('Institutional', instSearchForm.value, instSearchForm.valid, $event)">
 				<div class="form-row">
-					<div class="col-lg-2" formArrayName="selectItems" *ngFor="let select-item of getControls(searchForm, 'selectItems'); let j = index;">
+					<div class="col-lg-2" formArrayName="instSelectItems" *ngFor="let select-item of getControls(instSearchForm, 'instSelectItems'); let j = index;">
 					   <div [formGroupName]="j" class="input-group">
 						   <select class="form-control select-form-fixer" formControlName="category">
 							   <option [ngValue]="option" *ngFor="let option of options">{{option.name}}</option>
 							 </select>
 							 <span class="input-group-addon">
-								<button *ngIf="j > 0" type="button" class="btn btn-danger btn-sm close-button-fixer" (click)="removeObject(j)" ><span aria-hidden="true">&times;</span></button>
+								<button *ngIf="j > 0" type="button" class="btn btn-danger btn-sm close-button-fixer" (click)="removeObject(j, 'Institutional')" ><span aria-hidden="true">&times;</span></button>
 							 </span>	
 					   </div>
 					</div>
 				</div>
-				<div *ngIf="selectedOption > 0" class="form-row">
-					<div class="col-lg-2" formArrayName="inputItems" *ngFor="let item of getControls(searchForm, 'inputItems'); let i = index;">
+				<div *ngIf="selectedInstOption > 0" class="form-row">
+					<div class="col-lg-2" formArrayName="instInputItems" *ngFor="let item of getControls(instSearchForm, 'instInputItems'); let i = index;">
 					   <div [formGroupName]="i">
 						 <input type="text" class="form-control" [formControlName]="'inputName' + i">
 					   </div>
 					</div>
 				</div>
-				<div class="form-row" *ngIf="selectedOption > 0 && showButton">
-					<button type="button" class="btn btn-default" (click)="addSelectItems()">Add Search Criteria</button>
+				<div class="form-row" *ngIf="selectedInstOption > 0 && showInstButton">
+					<button type="button" class="btn btn-default" (click)="addSelectItems(instSearchForm, 'Institutional')">Add Search Criteria</button>
 				</div>
-				<div class="form-row float-right" *ngIf="selectedOption > 0">
-					<button type="submit" class="btn btn-primary search-button">Search</button>
+				<div class="form-row float-right" *ngIf="selectedInstOption > 0">
+						<div class="col-lg-2" formArrayName="hiddenInputItems" *ngFor="let item of getControls(instSearchForm, 'hiddenInputItems'); let k = index;">
+								<div [formGroupName]="k">
+								<input type="hidden" class="form-control" [formControlName]="'inputName' + k">
+								</div>
+						 </div>
+					<button type="submit" class="btn btn-primary">Search</button>
 				</div>
 			</form>
+			<hr>
 		</div>
 		<div class="search-results-header">
 			<h5>Search Results</h5>
@@ -82,7 +87,42 @@
 		<button (click)="openEditModal('Institutional', claims)" class="btn btn-success">Edit Selection(s)</button>
       </div>
       <div id="tab2" class="tab-slider--body" *ngSwitchCase="'tab2'">
-		<h2>Search Results</h2>
+					<h2>Search Claims</h2>
+					<form [formGroup]="profSearchForm" novalidate (ngSubmit)="onSubmit('Professional', profSearchForm.value, profSearchForm.valid, $event)">
+						<div class="form-row">
+							<div class="col-lg-2" formArrayName="profSelectItems" *ngFor="let select-item of getControls(profSearchForm, 'profSelectItems'); let l = index;">
+								 <div [formGroupName]="l" class="input-group">
+									 <select class="form-control select-form-fixer" formControlName="category">
+										 <option [ngValue]="option" *ngFor="let option of options">{{option.name}}</option>
+									 </select>
+									 <span class="input-group-addon">
+										<button *ngIf="l > 0" type="button" class="btn btn-danger btn-sm close-button-fixer" (click)="removeObject(l, 'Professional')" ><span aria-hidden="true">&times;</span></button>
+									 </span>	
+								 </div>
+							</div>
+						</div>
+						<div *ngIf="selectedProfOption > 0" class="form-row">
+							<div class="col-lg-2" formArrayName="profInputItems" *ngFor="let item of getControls(profSearchForm, 'profInputItems'); let m = index;">
+								 <div [formGroupName]="m">
+								 <input type="text" class="form-control" [formControlName]="'inputName' + m">
+								 </div>
+							</div>
+						</div>
+						<div class="form-row" *ngIf="selectedProfOption > 0 && showProfButton">
+							<button type="button" class="btn btn-default" (click)="addSelectItems(profSearchForm, 'Professional')">Add Search Criteria</button>
+						</div>
+						<div class="form-row float-right" *ngIf="selectedProfOption > 0">
+								<div class="col-lg-2" formArrayName="hiddenInputItems" *ngFor="let item of getControls(profSearchForm, 'hiddenInputItems'); let n = index;">
+										<div [formGroupName]="n">
+										<input type="hidden" class="form-control" [formControlName]="'inputName' + n">
+										</div>
+								 </div>
+							<button type="submit" class="btn btn-primary">Search</button>
+						</div>
+					</form>		
+		<div class="search-results-header">
+				<h5>Search Results</h5>
+		</div>
 		<table id="table2" datatable [dtOptions]="dtOptions" class="row-border hover">
 		  <thead>
 		  <tr>
@@ -148,35 +188,6 @@
 		  </tbody>
 		</table>
       </div>
-      <!-- <div id="tab4" class="tab-slider--body" *ngSwitchCase="'tab4'">
-        <h2>Add Test Claims</h2>
-					<input placeholder="Institutional or Professional" [(ngModel)]="claimtype">
-					<input placeholder="service Id" [(ngModel)]="serviceId">
-					<input placeholder="receipt date" [(ngModel)]="receiptDate">
-					<input placeholder="from date" [(ngModel)]="fromDate">
-					<input placeholder="to date" [(ngModel)]="toDate">
-			<input placeholder="place of service" [(ngModel)]="placeOfService">
-			<input placeholder="provider id" [(ngModel)]="providerId">
-			<input placeholder="provider type" [(ngModel)]="providerType">
-			<input placeholder="provider specialty" [(ngModel)]="providerSpecialty">
-			<input placeholder="procedure code" [(ngModel)]="procedureCode">
-			<input placeholder="diagnosis code" [(ngModel)]="diagnosisCode">
-			<input placeholder="network indicator" [(ngModel)]="networkIndicator">
-			<input placeholder="subscriber Id" [(ngModel)]="subscriberId">
-			<input placeholder="patient Account Number" [(ngModel)]="patientAccountNumber">
-			<input placeholder="SCCF Number" [(ngModel)]="sccfNumber">
-			<input placeholder="revenue code" [(ngModel)]="revenueCode">
-			<input placeholder="bill type" [(ngModel)]="billType">
-			<input placeholder="modifier" [(ngModel)]="modifier">
-			<input placeholder="plan code" [(ngModel)]="planCode">
-			<input placeholder="SF Message Code" [(ngModel)]="sfMessageCode">
-			<input placeholder="pricing method" [(ngModel)]="pricingMethod">
-			<input placeholder="pricing rule" [(ngModel)]="pricingRule">
-			<input placeholder="delivery method" [(ngModel)]="deliveryMethod">
-			<input placeholder="input date" [(ngModel)]="inputDate">
-			<input placeholder="file name" [(ngModel)]="fileName">
-			<button class="btn btn-primary" (click)="addClaims()">Add</button>
-      </div> -->
     </div>
   </div>
 </body>

@@ -3,7 +3,6 @@ import { ClaimsService, Claims } from '../claims.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { EditModalComponent } from '../edit-modal/edit-modal.component';
 import { ErrorModalComponent } from '../error-modal/error-modal.component';
-//import { SearchComponent } from '../search/search.component';
 import { FormGroup, FormArray, FormBuilder, FormControl, Validators } from '@angular/forms';
 
 @Component({
@@ -15,10 +14,13 @@ export class ClaimsComponent implements OnInit {
 	
   viewMode = 'tab1';
   
-  searchForm: FormGroup;
-  //procedureCodeItems: FormArray;
-  inputItems: FormArray;
-  selectItems: FormArray;
+	instSearchForm: FormGroup; 
+	profSearchForm: FormGroup;
+  hiddenInputItems: FormArray;
+  instInputItems: FormArray;
+  instSelectItems: FormArray;
+  profInputItems: FormArray;
+  profSelectItems: FormArray;
   
   dtOptions: DataTables.Settings = {};
   
@@ -28,35 +30,7 @@ export class ClaimsComponent implements OnInit {
   
   selectedActiveInstitutionalClaimIds: Array<any> = [];
   selectedActiveProfessionalClaimIds: Array<any> = [];
-
-	// claimtype: string;
-	// serviceId: string;
-	// receiptDate: string;
-  // fromDate: string;
-  // toDate: string;
-  // placeOfService: string;
-  // providerId: string;
-  // providerType: string;
-  // providerSpecialty: string;
-  // procedureCode: string;
-  // diagnosisCode: string;
-  // networkIndicator: string;
-  // subscriberId: string;
-  // patientAccountNumber: string;
-  // sccfNumber: string;
-  // revenueCode: string;
-  // billType: string;
-  // modifier: string;
-  // planCode: string;
-  // sfMessageCode: string;
-  // pricingMethod: string;
-  // pricingRule: string;
-  // deliveryMethod: string;
-  // inputDate: string;
-  // fileName: string;
-  
-  //@ViewChild('parent', { read: ViewContainerRef }) container: ViewContainerRef;
-  
+ 
   options = [
     { name: "Make a selection", value: 0, type: "default" },
     { name: "Receipt Date", value: 1, type: "receiptDate" },
@@ -83,9 +57,11 @@ export class ClaimsComponent implements OnInit {
 		{ name: "Patient Account Number", value: 22, type: "patientAccountNumber" }
   ]
 
-  selectedOption: number;
+  selectedInstOption: number;
+  selectedProfOption: number;
 	selectedType: string;
-	showButton: boolean;
+	showInstButton: boolean;
+	showProfButton: boolean;
   
   constructor(
   private claimsService: ClaimsService, 
@@ -93,32 +69,50 @@ export class ClaimsComponent implements OnInit {
   private _cfr: ComponentFactoryResolver,
   private formBuilder: FormBuilder
 	) { 
-		this.createForm();
+		this.createInstForm();
+		this.createProfForm();
 	}
   
-  private createForm() {
-    this.searchForm = this.formBuilder.group({
-      //category: [this.options[0]],
-	  selectItems: this.formBuilder.array([ this.createSelectItems() ]),
-	  inputItems: this.formBuilder.array([ this.createInputItem(0, "default") ])
-	  //procedureCodeItems: this.formBuilder.array([ this.createProcedureCodeItem() ])
+  private createInstForm() {
+    this.instSearchForm = this.formBuilder.group({
+	  instSelectItems: this.formBuilder.array([ this.createSelectItems() ]),
+	  instInputItems: this.formBuilder.array([ this.createInputItem(0, "default") ]),
+	  hiddenInputItems: this.formBuilder.array([ this.createHiddenInputItem(0, "claimType", "11"), this.createHiddenInputItem(1, "claimType", "12") ])
     });
 	
-	console.log("Inside createForm()");
-	var arrayControl = this.searchForm.get('inputItems') as FormArray;
-	var item = arrayControl.at(0);
-	this.searchForm.get('selectItems').valueChanges.subscribe(data => {
-		this.selectedOption = data[0].category.value;
-		item.get("type").setValue(data[0].category.type);
-	})
-	//this.searchForm.get('selectItems').valueChanges.subscribe(changes => console.log('select value has changed:', changes));
+		console.log("Inside createInstForm()");
+		var arrayControl = this.instSearchForm.get('instInputItems') as FormArray;
+		var item = arrayControl.at(0);
+		this.instSearchForm.get('instSelectItems').valueChanges.subscribe(data => {
+			this.selectedInstOption = data[0].category.value;
+			item.get("type").setValue(data[0].category.type);
+		})
+  }
+  private createProfForm() {
+    this.profSearchForm = this.formBuilder.group({
+	  profSelectItems: this.formBuilder.array([ this.createSelectItems() ]),
+	  profInputItems: this.formBuilder.array([ this.createInputItem(0, "default") ]),
+	  hiddenInputItems: this.formBuilder.array([ this.createHiddenInputItem(0, "claimType", "20")])
+    });
+	
+		console.log("Inside createProfForm()");
+		var arrayControl = this.profSearchForm.get('profInputItems') as FormArray;
+		var item = arrayControl.at(0);
+		this.profSearchForm.get('profSelectItems').valueChanges.subscribe(data => {
+			this.selectedProfOption = data[0].category.value;
+			item.get("type").setValue(data[0].category.type);
+			console.log("select prof event registered...");
+		})
   }
   
-  // createProcedureCodeItem(): FormGroup {
-	  // return this.formBuilder.group({
-		// procedureCode: ''
-	  // });
-  // }
+  createHiddenInputItem(index:number, type:string, value:string): FormGroup {
+	  var inputName = "inputName" + index;
+	  console.log("hiddenInputName=", inputName);
+	  return this.formBuilder.group({
+		[inputName]: [value],
+		type: [type]
+	  });
+  }
   
   createInputItem(index:number, type:string): FormGroup {
 	  var inputName = "inputName" + index;
@@ -135,45 +129,64 @@ export class ClaimsComponent implements OnInit {
 	  });
   }
   
-  // addProcedureCodeItem(): void {
-	// this.procedureCodeItems = this.searchForm.get('procedureCodeItems') as FormArray;
-	// this.procedureCodeItems.push(this.createProcedureCodeItem());
-  // }
-  
-  addInputItem(index:number, type:string): void {
+  addInputItem(index:number, type:string, form:FormGroup, claimType:string): void {
 		console.log("addInputItem() index=", index);
-	this.inputItems = this.searchForm.get('inputItems') as FormArray;
-	this.inputItems.push(this.createInputItem(index, type));
+		if (claimType === 'Institutional') {
+			this.instInputItems = form.get('instInputItems') as FormArray;
+			this.instInputItems.push(this.createInputItem(index, type));
+		} else {
+			this.profInputItems = form.get('profInputItems') as FormArray;
+			this.profInputItems.push(this.createInputItem(index, type));
+		}
   }
   
-  addSelectItems(): void {
-		this.selectItems = this.searchForm.get('selectItems') as FormArray;
-		this.inputItems = this.searchForm.get('inputItems') as FormArray;
-			if (this.selectItems.length < 6) {
-				this.selectItems.push(this.createSelectItems());
-				this.inputItems = this.searchForm.get('inputItems') as FormArray;
-				this.addInputItem(this.inputItems.length, "default");
-				var arrayControl = this.getControls(this.searchForm, 'selectItems');
-				for(let val of arrayControl) {
-						val.get('category').valueChanges.subscribe(data => {
-							console.log("Change happened", arrayControl.indexOf(val)+': ', val.get('category').value.name);
-							console.log("Need to update items with new type");
-							console.log("type is", val.get('category').value.type);
-							console.log("select control index=", arrayControl.indexOf(val));
-							var inputArrayControl = this.searchForm.get('inputItems') as FormArray;
-							var item = inputArrayControl.at(arrayControl.indexOf(val));
-							item.get("type").setValue(val.get('category').value.type);
-					})
-				}
+  addSelectItems(form:FormGroup, claimType:string): void {
+		var arrayControl;
+		if (claimType === 'Institutional') {
+			this.instSelectItems = form.get('instSelectItems') as FormArray;
+			if (this.instSelectItems.length < 6) {
+				this.instSelectItems.push(this.createSelectItems());
+				this.instInputItems = form.get('instInputItems') as FormArray;
+				this.addInputItem(this.instInputItems.length, "default", form, "Institutional");
+				arrayControl = this.getControls(form, 'instSelectItems');
 			}
-			console.log("select items size=", this.selectItems.length);
-			if (this.selectItems.length === 6) {
-				this.showButton = false;
+		} else {
+			this.profSelectItems = form.get('profSelectItems') as FormArray;
+			if (this.profSelectItems.length < 6) {
+				this.profSelectItems.push(this.createSelectItems());
+				this.profInputItems = form.get('profInputItems') as FormArray;
+				this.addInputItem(this.profInputItems.length, "default", form, "Professional");
+				arrayControl = this.getControls(form, 'profSelectItems');
+			}
+		}
+	
+		for(let val of arrayControl) {
+			val.get('category').valueChanges.subscribe(data => {
+				console.log("Change happened", arrayControl.indexOf(val)+': ', val.get('category').value.name);
+				console.log("Need to update items with new type");
+				console.log("type is", val.get('category').value.type);
+				console.log("select control index=", arrayControl.indexOf(val));
+				var inputArrayControl;
+				if (claimType === 'Institutional') {
+					inputArrayControl = form.get('instInputItems') as FormArray;
+				} else {	
+					inputArrayControl = form.get('profInputItems') as FormArray;
+				}
+				var item = inputArrayControl.at(arrayControl.indexOf(val));
+				item.get("type").setValue(val.get('category').value.type);
+			})
+		}
+			//console.log("select items size=", this.instSelectItems.length);
+			if (this.instSelectItems != null && this.instSelectItems.length === 6) {
+				this.showInstButton = false;
+			}
+
+			if (this.profSelectItems != null && this.profSelectItems.length === 6) {
+				this.showProfButton = false;
 			}
   }
   
   clickTab(tab:string) {
-	  console.log("clicked " + tab);
 	  this.viewMode = tab;
 	  this.selectedActiveInstitutionalClaimIds = [];
 	  this.selectedActiveProfessionalClaimIds = [];
@@ -196,7 +209,6 @@ export class ClaimsComponent implements OnInit {
 		  
 		  modalRef.result.then((result) => {
 			window.location.reload();
-			//console.log(result);
 		  }).catch((error) => {
 			console.log(error);
 		  });
@@ -217,7 +229,8 @@ export class ClaimsComponent implements OnInit {
   }
 
   ngOnInit() {
-		this.showButton = true;
+		this.showInstButton = true;
+		this.showProfButton = true;
     this.dtOptions = {
 	  searching:false
     };
@@ -243,72 +256,12 @@ export class ClaimsComponent implements OnInit {
 			this.activeInstitutionalClaims = data.filter(claim => claim);
 		});
 	}
-  // addClaims() {
-  //   var newClaims : Claims = {
-	//   id: '',
-	// 		claimtype: this.claimtype,
-	// 		serviceId: this.serviceId,
-	// 		receiptDate: this.receiptDate,
-	//     fromDate: this.fromDate,
-  //     toDate: this.toDate,
-  //     placeOfService: this.placeOfService,
-  //     providerId: this.providerId,
-  //     providerType: this.providerType,
-  //     providerSpecialty: this.providerSpecialty,
-  //     procedureCode: this.procedureCode,
-  //     diagnosisCode: this.diagnosisCode,
-  //     networkIndicator: this.networkIndicator,
-  //     subscriberId: this.subscriberId,
-  //     patientAccountNumber: this.patientAccountNumber,
-  //     sccfNumber: this.sccfNumber,
-  //     revenueCode: this.revenueCode,
-  //     billType: this.billType,
-  //     modifier: this.modifier,
-  //     planCode: this.planCode,
-  //     sfMessageCode: this.sfMessageCode,
-  //     pricingMethod: this.pricingMethod,
-  //     pricingRule: this.pricingRule,
-  //     deliveryMethod: this.deliveryMethod,
-  //     inputDate: this.inputDate,
-  //     fileName: this.fileName
-  //   };
 
-  //   this.claimsService.addClaims(newClaims).subscribe(() => {
-  //   this.getAll();
-	// this.claimtype = '';
-	// this.serviceId = '';
-	// this.receiptDate = '';
-	// this.fromDate = '';
-	// this.toDate = '';
-	// this.placeOfService = '';
-	// this.providerId = '';
-	// this.providerType = '';
-	// this.providerSpecialty = '';
-	// this.procedureCode = '';
-	// this.diagnosisCode = '';
-	// this.networkIndicator = '';
-	// this.subscriberId = '';
-	// this.patientAccountNumber = '';
-	// this.sccfNumber = '';
-	// this.revenueCode = '';
-	// this.billType = '';
-	// this.modifier = '';
-	// this.planCode = '';
-	// this.sfMessageCode = '';
-	// this.pricingMethod = '';
-	// this.pricingRule = '';
-	// this.deliveryMethod = '';
-	// this.inputDate = '';
-	// this.fileName = '';
-  //   });
-  // }
-
-  // deleteClaims(claims: Claims) {
-  //   this.claimsService.deleteClaims(claims).subscribe(() => {
-  //     this.getAll();
-  //   })
-	// window.location.reload();
-  // }
+	searchActiveProfessionalClaims(strFormData) {
+		this.claimsService.getSearchResults(strFormData).subscribe((data: Claims[]) => {
+			this.activeProfessionalClaims = data.filter(claim => claim);
+		});
+	}
   
   toggleActiveInstitutionalClaims(id:string, isChecked: boolean){
 	console.log("Institutional id=" + id + "isChecked=" + isChecked);
@@ -353,44 +306,32 @@ export class ClaimsComponent implements OnInit {
   getControls(frmGrp: FormGroup, key: string) {
 	return (<FormArray>frmGrp.controls[key]).controls;
   }
-  // addComponent(){
-      // var comp = this._cfr.resolveComponentFactory(SearchComponent);
-      // var searchComponent = this.container.createComponent(comp);
-      // searchComponent.instance._ref = searchComponent;
-  // }
-  
-  removeObject(index) {
+  removeObject(index, claimType) {
 		console.log("removing index->", index);
-	  this.inputItems.removeAt(index);
-		this.selectItems.removeAt(index);
-		if (this.selectItems.length < 6) {
-			this.showButton = true;
+		if (claimType === "Institutional") {
+	  	this.instInputItems.removeAt(index);
+			this.instSelectItems.removeAt(index);
+			if (this.instSelectItems.length < 6) {
+				this.showInstButton = true;
+			}
+		} else {
+	  	this.profInputItems.removeAt(index);
+			this.profSelectItems.removeAt(index);
+			if (this.profSelectItems.length < 6) {
+				this.showProfButton = true;
+			}
 		}
   }
   
-  onSubmit(model: any, isValid: boolean, e: any) {
+  onSubmit(claimType:string, model: any, isValid: boolean, e: any) {
 	  e.preventDefault();
-			//alert('Form data are: '+JSON.stringify(model));
+			alert('Form data are: '+JSON.stringify(model));
 			let strFormData = JSON.stringify(model);
-			this.searchActiveInstitutionalClaims(strFormData);
-	//   let strFormData = JSON.stringify(model);
-	//   let jsonObj = JSON.parse(strFormData);
-	//   let items = jsonObj.inputItems;
-	//   let procedureCodes = [];
-	//   let diagnosisCodes = [];
-	  
-	//   for (let i = 0; i < items.length; i++) {
-		  
-	// 	  if (items[i].type === 'procedureCode') {
-	// 		  var values = Object.values(items[i]);
-	// 			console.log(values[0]);
-	// 			procedureCodes.push(values[0]);
-	// 	  } else if (items[i].type === 'diagnosisCode') {
-	// 		  	console.log(values[0]);
-	// 			diagnosisCodes.push(values[0]);
-	// 	  }
-	//   }
-	//   console.log("procedureCodes.length=" + procedureCodes.length);
-	//   console.log("diagnosisCodes.length=" + diagnosisCodes.length);
+			
+			if (claimType === 'Institutional') {
+				this.searchActiveInstitutionalClaims(strFormData);
+			} else {
+				this.searchActiveProfessionalClaims(strFormData);
+			}
    }
 }

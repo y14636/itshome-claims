@@ -118,7 +118,7 @@ func GetResults(search string) []Claims {
 			fmt.Println(k, "is float64", vv)
 		case []interface{}:
 			fmt.Println(k, "is an array:")
-			if k == "inputItems" {
+			if k == "instInputItems" || k == "profInputItems" || k == "hiddenInputItems" {
 				for i, u := range vv {
 					fmt.Println("Key:", i, "Value:", u)
 					str := fmt.Sprintf("%v", u)

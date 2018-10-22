@@ -14,7 +14,6 @@ import { ClaimsService } from './claims.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { EditModalComponent } from './edit-modal/edit-modal.component';
 import { ErrorModalComponent } from './error-modal/error-modal.component';
-import { SearchComponent } from './search/search.component';
 //import { TokenInterceptor } from './token.interceptor';
 
 @NgModule({
@@ -24,8 +23,7 @@ import { SearchComponent } from './search/search.component';
     CallbackComponent,
     ClaimsComponent,
     EditModalComponent,
-    ErrorModalComponent,
-    SearchComponent
+    ErrorModalComponent
   ],
   imports: [
     AppRoutingModule,
@@ -38,6 +36,6 @@ import { SearchComponent } from './search/search.component';
   ],
   providers: [AuthGuardService, ClaimsService],
   bootstrap: [AppComponent],
-  entryComponents: [EditModalComponent, ErrorModalComponent, SearchComponent]
+  entryComponents: [EditModalComponent, ErrorModalComponent]
 })
 export class AppModule { }
