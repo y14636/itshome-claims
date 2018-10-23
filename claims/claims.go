@@ -15,14 +15,40 @@ import (
 )
 
 var (
-	list                      []Claims
-	rList                     []Claims
-	qList                     []Results
-	mtx                       sync.RWMutex
-	once                      sync.Once
-	USER_SECURITY_QUESTION_ID int
-	QUESTION                  string
-	ANSWER                    string
+	list []Claims
+	//rList                     []Claims
+	qList []Results
+	mtx   sync.RWMutex
+	once  sync.Once
+	//USER_SECURITY_QUESTION_ID int
+	//QUESTION                  string
+	//ANSWER                    string
+	id                   int
+	claimType            string
+	serviceId            string
+	receiptDate          string
+	fromDate             string
+	toDate               string
+	placeOfService       string
+	providerId           string
+	providerType         string
+	providerSpecialty    string
+	procedureCode        string
+	diagnosisCode        string
+	networkIndicator     string
+	subscriberId         string
+	patientAccountNumber string
+	sccfNumber           string
+	revenueCode          string
+	billType             string
+	modifier             string
+	planCode             string
+	sfMessageCode        string
+	pricingMethod        string
+	pricingRule          string
+	deliveryMethod       string
+	inputDate            string
+	fileName             string
 )
 
 func init() {
@@ -32,29 +58,6 @@ func init() {
 func initializeList() {
 	list = []Claims{}
 	qList = []Results{}
-
-	condb, errdb := sql.Open("mssql", "server=SQLMODL29\\SQL_MODL29;user id=;password=;database=idb03q_qual")
-	if errdb != nil {
-		fmt.Println(" Error open db:", errdb.Error())
-	}
-	rows, err := condb.Query("SELECT USER_SECURITY_QUESTION_ID, QUESTION, ANSWER FROM dbo.USER_SECURITY_QUESTION WHERE REG_USER_ID = 'BR0000010402'	AND USER_SECURITY_QUESTION_ID = ?", 4123)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-	for rows.Next() {
-		err := rows.Scan(&USER_SECURITY_QUESTION_ID, &QUESTION, &ANSWER)
-		if err != nil {
-			log.Fatal(err)
-		}
-		t := strconv.Itoa(USER_SECURITY_QUESTION_ID)
-		AddToQlist(t, QUESTION, ANSWER)
-	}
-	err = rows.Err()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer condb.Close()
 
 	//dummy Institutional claims
 	Add("11", "N/A", "20180110", "20180101", "20180110", "NA", "000000001000", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098001", "99999999", "30120180400000000",
@@ -103,9 +106,25 @@ type Results struct {
 }
 
 func GetResults(search string) []Claims {
-	rList = []Claims{}
+	var rList = []Claims{}
 
 	//fmt.Println("search string=", search)
+	ParseSearchString(search)
+
+	condb, errdb := sql.Open("mssql", "server=SQLDEV34\\SQL_DEV34;user id=;password=;database=zdb63q_itshc_syst")
+	if errdb != nil {
+		fmt.Println(" Error open db:", errdb.Error())
+	}
+
+	rList = FetchClaims(condb)
+
+	defer condb.Close()
+
+	return rList
+	//return qList
+}
+
+func ParseSearchString(search string) {
 	b := []byte(search)
 	var f interface{}
 	json.Unmarshal(b, &f)
@@ -136,8 +155,8 @@ func GetResults(search string) []Claims {
 							log.Fatal(err)
 						}
 						fmt.Println("identified list item=", list[location])
-						rList = append(rList, list[location])
-						fmt.Println("1st rList=", rList)
+						//rList = append(rList, list[location])
+						//fmt.Println("1st rList=", rList)
 					}
 					fmt.Println("paramName", paramName[1])
 					fmt.Println("paramValue", paramValue[1])
@@ -147,22 +166,37 @@ func GetResults(search string) []Claims {
 			fmt.Println(k, "is of a type I don't know how to handle")
 		}
 	}
-	fmt.Println("size of array=", len(rList))
+	//fmt.Println("size of array=", len(rList))
+}
+
+func FetchClaims(condb *sql.DB) []Claims {
+	var rList = []Claims{}
+
+	rows, err := condb.Query("SELECT orig.Id, orig.ClaimType, orig.ServiceId, orig.ReceiptDate, orig.FromDate, orig.ToDate, orig.ProviderId, orig.ProviderType, orig.ProviderSpecialty, orig.DiagnosisCode, orig.NetworkIndicator, orig.SubscriberId, orig.PatientAccountNumber, orig.SCCFNumber, orig.BillType, orig.PlanCode, orig.SFMessageCode, orig.DeliveryMethod, orig.Claim, orig.InputDate, orig.FileName, orig.CREATE_DT, orig.CREATED_BY, pricing.SFMessageCode, pricing.PricingMethod, pricing.PricingRule, orig_proc.ProcedureCode, orig_proc.RevenueCode, orig_proc.Modifier, orig_proc.DateOfService, orig_proc.DateOfServiceTo, orig_proc.PlaceOfService FROM ITSHome.OriginalClaims orig, ITSHome.OriginalPricing pricing, ITSHome.OriginalProcedures orig_proc WHERE orig.Id = pricing.OriginalClaimID AND pricing.OriginalClaimID = orig_proc.OriginalClaimID")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(&id, &claimType, &serviceId, &receiptDate, &fromDate, &toDate, &placeOfService, &providerId, &providerType, &providerSpecialty, &procedureCode, &diagnosisCode, &networkIndicator, &subscriberId, &patientAccountNumber, &sccfNumber, &revenueCode, &billType, &modifier, &planCode, &sfMessageCode, &pricingMethod, &pricingRule, &deliveryMethod, &inputDate, &fileName)
+		if err != nil {
+			log.Fatal(err)
+		}
+		strId := strconv.Itoa(id)
+		t := newResult(strId, claimType, serviceId, receiptDate, fromDate, toDate, placeOfService, providerId, providerType, providerSpecialty, procedureCode, diagnosisCode, networkIndicator, subscriberId, patientAccountNumber, sccfNumber, revenueCode, billType, modifier, planCode, sfMessageCode, pricingMethod, pricingRule, deliveryMethod, inputDate, fileName)
+		rList = append(rList, t)
+	}
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return rList
-	//return qList
 }
 
 // Get retrieves all elements from the claims list
 func Get() []Claims {
 	return list
-}
-
-func AddToQlist(id string, question string, answer string) string {
-	t := newResult(id, question, answer)
-	mtx.Lock()
-	qList = append(qList, t)
-	mtx.Unlock()
-	return t.ID
 }
 
 // Add will add a new claim
@@ -192,13 +226,41 @@ func Delete(id string) error {
 	return nil
 }
 
-func newResult(id string, question string, answer string) Results {
-	return Results{
-		ID:       id,
-		Question: question,
-		Answer:   answer,
+func newResult(id string, claimType string, serviceId string, receiptDate string, fromDate string, toDate string, placeOfService string, providerId string,
+	providerType string, providerSpecialty string, procedureCode string, diagnosisCode string,
+	networkIndicator string, subscriberId string, patientAccountNumber string, sccfNumber string,
+	revenueCode string, billType string, modifier string, planCode string, sfMessageCode string,
+	pricingMethod string, pricingRule string, deliveryMethod string, inputDate string, fileName string) Claims {
+	return Claims{
+		ID:                   id,
+		ClaimType:            claimType,
+		ServiceId:            serviceId,
+		ReceiptDate:          receiptDate,
+		FromDate:             fromDate,
+		ToDate:               toDate,
+		PlaceOfService:       placeOfService,
+		ProviderId:           providerId,
+		ProviderType:         providerType,
+		ProviderSpecialty:    providerSpecialty,
+		ProcedureCode:        procedureCode,
+		DiagnosisCode:        diagnosisCode,
+		NetworkIndicator:     networkIndicator,
+		SubscriberId:         subscriberId,
+		PatientAccountNumber: patientAccountNumber,
+		SccfNumber:           sccfNumber,
+		RevenueCode:          revenueCode,
+		BillType:             billType,
+		Modifier:             modifier,
+		PlanCode:             planCode,
+		SfMessageCode:        sfMessageCode,
+		PricingMethod:        pricingMethod,
+		PricingRule:          pricingRule,
+		DeliveryMethod:       deliveryMethod,
+		InputDate:            inputDate,
+		FileName:             fileName,
 	}
 }
+
 func newClaim(claimType string, serviceId string, receiptDate string, fromDate string, toDate string, placeOfService string, providerId string,
 	providerType string, providerSpecialty string, procedureCode string, diagnosisCode string,
 	networkIndicator string, subscriberId string, patientAccountNumber string, sccfNumber string,

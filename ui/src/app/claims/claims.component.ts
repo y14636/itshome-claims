@@ -22,7 +22,7 @@ export class ClaimsComponent implements OnInit {
   profInputItems: FormArray;
   profSelectItems: FormArray;
   
-  dtOptions: DataTables.Settings = {};
+  dtOptions: DataTables.Settings[] = [];
   
   activeInstitutionalClaims: Claims[];
   activeProfessionalClaims: Claims[];
@@ -231,13 +231,19 @@ export class ClaimsComponent implements OnInit {
   ngOnInit() {
 		this.showInstButton = true;
 		this.showProfButton = true;
-    this.dtOptions = {
-	  searching:false
-    };
+    this.dtOptions[0] = this.buildDtOptions();
+    this.dtOptions[1] = this.buildDtOptions();
+    this.dtOptions[2] = this.buildDtOptions();
 		this.getAll();
 	  this.getModifiedClaims();
   }
 
+	private buildDtOptions(): DataTables.Settings {
+    return {
+      searching:false
+    };
+	}
+	
   getAll() {
     this.claimsService.getClaimsList().subscribe((data: Claims[]) => {
       this.activeInstitutionalClaims = data.filter(claim => claim.claimtype === '11');
