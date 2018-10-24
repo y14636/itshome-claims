@@ -33,28 +33,28 @@ export class ClaimsComponent implements OnInit {
  
   options = [
     { name: "Make a selection", value: 0, type: "default" },
-    { name: "Receipt Date", value: 1, type: "receiptDate" },
-    { name: "Claims Threshold", value: 2, type: "claimsThreshold" },
-		{ name: "Provider ID", value: 3, type: "providerId" },
-		{ name: "Provider Type", value: 4, type: "providerType" },
-		{ name: "Provider Specialty", value: 5, type: "providerSpecialty" },
-		{ name: "Procedure Code", value: 6, type: "procedureCode" },
-		{ name: "Diagnosis Code", value: 7, type: "diagnosisCode" },
-		{ name: "Subscriber ID", value: 8, type: "subscriberId" },
-		{ name: "Subscriber Prefix", value: 9, type: "subscriberPrefix" },
-		{ name: "Subscriber Suffix", value: 10, type: "subscriberSuffix" },
-		{ name: "SCCF Number", value: 11, type: "sccfNumber" },
-		{ name: "Revenue Code", value: 12, type: "revenueCode" },
-		{ name: "Bill Type", value: 13, type: "billType" },
-		{ name: "Modifier", value: 14, type: "modifier" },
-		{ name: "Plan Code", value: 15, type: "planCode" },
-		{ name: "SF Message Code", value: 16, type: "sfMessageCode" },
-		{ name: "Pricing Method", value: 17, type: "pricingMethod" },
-		{ name: "Pricing Rule", value: 18, type: "pricingRule" },
-		{ name: "Delivery Method", value: 19, type: "deliveryMethod" },
-		{ name: "From Date (DOS)", value: 20, type: "fromDate" },
-		{ name: "To Date (DOS)", value: 21, type: "toDate" },
-		{ name: "Patient Account Number", value: 22, type: "patientAccountNumber" }
+    { name: "Receipt Date", value: 1, type: "ReceiptDate" },
+    { name: "Claims Threshold", value: 2, type: "ClaimsThreshold" },
+		{ name: "Provider ID", value: 3, type: "ProviderId" },
+		{ name: "Provider Type", value: 4, type: "ProviderType" },
+		{ name: "Provider Specialty", value: 5, type: "ProviderSpecialty" },
+		{ name: "Procedure Code", value: 6, type: "ProcedureCode" },
+		{ name: "Diagnosis Code", value: 7, type: "DiagnosisCode" },
+		{ name: "Subscriber ID", value: 8, type: "SubscriberId" },
+		{ name: "Subscriber Prefix", value: 9, type: "SubscriberPrefix" },
+		{ name: "Subscriber Suffix", value: 10, type: "SubscriberSuffix" },
+		{ name: "SCCF Number", value: 11, type: "SCCFNumber" },
+		{ name: "Revenue Code", value: 12, type: "RevenueCode" },
+		{ name: "Bill Type", value: 13, type: "BillType" },
+		{ name: "Modifier", value: 14, type: "Modifier" },
+		{ name: "Plan Code", value: 15, type: "PlanCode" },
+		{ name: "SF Message Code", value: 16, type: "SFMessageCode" },
+		{ name: "Pricing Method", value: 17, type: "PricingMethod" },
+		{ name: "Pricing Rule", value: 18, type: "PricingRule" },
+		{ name: "Delivery Method", value: 19, type: "DeliveryMethod" },
+		{ name: "From Date (DOS)", value: 20, type: "FromDate" },
+		{ name: "To Date (DOS)", value: 21, type: "ToDate" },
+		{ name: "Patient Account Number", value: 22, type: "PatientAccountNumber" }
   ]
 
   selectedInstOption: number;
@@ -77,7 +77,7 @@ export class ClaimsComponent implements OnInit {
     this.instSearchForm = this.formBuilder.group({
 	  instSelectItems: this.formBuilder.array([ this.createSelectItems() ]),
 	  instInputItems: this.formBuilder.array([ this.createInputItem(0, "default") ]),
-	  hiddenInputItems: this.formBuilder.array([ this.createHiddenInputItem(0, "claimType", "11"), this.createHiddenInputItem(1, "claimType", "12") ])
+	  hiddenInputItems: this.formBuilder.array([ this.createHiddenInputItem(0, "ClaimType", "11"), this.createHiddenInputItem(1, "ClaimType", "12") ])
     });
 	
 		console.log("Inside createInstForm()");
@@ -92,7 +92,7 @@ export class ClaimsComponent implements OnInit {
     this.profSearchForm = this.formBuilder.group({
 	  profSelectItems: this.formBuilder.array([ this.createSelectItems() ]),
 	  profInputItems: this.formBuilder.array([ this.createInputItem(0, "default") ]),
-	  hiddenInputItems: this.formBuilder.array([ this.createHiddenInputItem(0, "claimType", "20")])
+	  hiddenInputItems: this.formBuilder.array([ this.createHiddenInputItem(0, "ClaimType", "20")])
     });
 	
 		console.log("Inside createProfForm()");

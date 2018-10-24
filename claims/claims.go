@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -13,6 +14,8 @@ import (
 	_ "github.com/denisenkom/go-mssqldb"
 	"github.com/rs/xid"
 )
+
+const SELECT_STATEMENT string = "SELECT orig.Id, orig.ClaimType, orig.ServiceId, orig.ReceiptDate, orig.FromDate, orig.ToDate, orig.ProviderId, orig.ProviderType, orig.ProviderSpecialty, orig.DiagnosisCode, orig.NetworkIndicator, orig.SubscriberId, orig.PatientAccountNumber, orig.SCCFNumber, orig.BillType, orig.PlanCode, orig.SFMessageCode, orig.DeliveryMethod, orig.Claim, orig.InputDate, orig.FileName, orig.CREATE_DT, orig.CREATED_BY, pricing.SFMessageCode, pricing.PricingMethod, pricing.PricingRule, orig_proc.ProcedureCode, orig_proc.RevenueCode, orig_proc.Modifier, orig_proc.DateOfService, orig_proc.DateOfServiceTo, orig_proc.PlaceOfService FROM ITSHome.OriginalClaims orig, ITSHome.OriginalPricing pricing, ITSHome.OriginalProcedures orig_proc WHERE orig.Id = pricing.OriginalClaimID AND pricing.OriginalClaimID = orig_proc.OriginalClaimID"
 
 var (
 	list []Claims
@@ -107,16 +110,15 @@ type Results struct {
 
 func GetResults(search string) []Claims {
 	var rList = []Claims{}
-
 	//fmt.Println("search string=", search)
-	ParseSearchString(search)
+	criteria := ParseSearchString(search)
 
 	condb, errdb := sql.Open("mssql", "server=SQLDEV34\\SQL_DEV34;user id=;password=;database=zdb63q_itshc_syst")
 	if errdb != nil {
 		fmt.Println(" Error open db:", errdb.Error())
 	}
 
-	rList = FetchClaims(condb)
+	rList = FetchClaims(condb, criteria)
 
 	defer condb.Close()
 
@@ -124,7 +126,9 @@ func GetResults(search string) []Claims {
 	//return qList
 }
 
-func ParseSearchString(search string) {
+func ParseSearchString(search string) string {
+	var criteria string
+
 	b := []byte(search)
 	var f interface{}
 	json.Unmarshal(b, &f)
@@ -142,22 +146,35 @@ func ParseSearchString(search string) {
 					fmt.Println("Key:", i, "Value:", u)
 					str := fmt.Sprintf("%v", u)
 					out := strings.TrimLeft(strings.TrimRight(str, "]"), "map[")
+					//fmt.Println("out=", out)
 					inputArray := strings.Fields(out)
-					//fmt.Println("param1", inputArray[0])
-					//param1 := inputArray[0]
-					//fmt.Println("param2", inputArray[1])
-					//param2 := inputArray[1]
-					paramValue := strings.SplitAfter(inputArray[0], ":")
-					paramName := strings.SplitAfter(inputArray[1], ":")
-					if paramName[1] == "subscriberId" {
-						location, err := findClaimsLocation(paramValue[1])
-						if err != nil {
-							log.Fatal(err)
-						}
-						fmt.Println("identified list item=", list[location])
-						//rList = append(rList, list[location])
-						//fmt.Println("1st rList=", rList)
+					fmt.Println("param1 before check", inputArray[0])
+					fmt.Println("param2 before check", inputArray[1])
+					startsWith := strings.HasPrefix(inputArray[0], "inputName")
+					var param1 string
+					var param2 string
+					if startsWith {
+						param1 = inputArray[0]
+						param2 = inputArray[1]
+					} else {
+						param1 = inputArray[1]
+						param2 = inputArray[0]
 					}
+					fmt.Println("param1 after check", inputArray[0])
+					fmt.Println("param2 after check", inputArray[1])
+
+					paramValue := strings.SplitAfter(param1, ":")
+					paramName := strings.SplitAfter(param2, ":")
+					criteria += paramName[1] + "=" + paramValue[1] + ";"
+					// if paramName[1] == "subscriberId" {
+					// 	location, err := findClaimsLocation(paramValue[1])
+					// 	if err != nil {
+					// 		log.Fatal(err)
+					// 	}
+					// 	fmt.Println("identified list item=", list[location])
+					// 	//rList = append(rList, list[location])
+					// 	//fmt.Println("1st rList=", rList)
+					// }
 					fmt.Println("paramName", paramName[1])
 					fmt.Println("paramValue", paramValue[1])
 				}
@@ -166,13 +183,81 @@ func ParseSearchString(search string) {
 			fmt.Println(k, "is of a type I don't know how to handle")
 		}
 	}
+	criteria = CleanSearchCriteria(criteria)
+	return criteria
 	//fmt.Println("size of array=", len(rList))
 }
 
-func FetchClaims(condb *sql.DB) []Claims {
-	var rList = []Claims{}
+func CleanSearchCriteria(strCriteria string) string {
+	var criteria string
+	searchFieldArray := []string{"ClaimType", "ServiceId", "ReceiptDate", "FromDate", "ToDate", "PlaceOfService", "ProviderId", "ProviderType", "ProviderSpecialty", "ProcedureCode", "DiagnosisCode", "NetworkIndicator", "SubscriberId", "PatientAccountNumber", "SCCFNumber", "RevenueCode", "BillType", "Modifier", "PlanCode", "SFMessageCode", "PricingMethod", "PricingRule", "DeliveryMethod", "InputDate"}
+	criteria = strCriteria
+	for i := 0; i < len(searchFieldArray); i++ {
+		fmt.Println(searchFieldArray[i])
+		searchField := regexp.MustCompile(searchFieldArray[i])
 
-	rows, err := condb.Query("SELECT orig.Id, orig.ClaimType, orig.ServiceId, orig.ReceiptDate, orig.FromDate, orig.ToDate, orig.ProviderId, orig.ProviderType, orig.ProviderSpecialty, orig.DiagnosisCode, orig.NetworkIndicator, orig.SubscriberId, orig.PatientAccountNumber, orig.SCCFNumber, orig.BillType, orig.PlanCode, orig.SFMessageCode, orig.DeliveryMethod, orig.Claim, orig.InputDate, orig.FileName, orig.CREATE_DT, orig.CREATED_BY, pricing.SFMessageCode, pricing.PricingMethod, pricing.PricingRule, orig_proc.ProcedureCode, orig_proc.RevenueCode, orig_proc.Modifier, orig_proc.DateOfService, orig_proc.DateOfServiceTo, orig_proc.PlaceOfService FROM ITSHome.OriginalClaims orig, ITSHome.OriginalPricing pricing, ITSHome.OriginalProcedures orig_proc WHERE orig.Id = pricing.OriginalClaimID AND pricing.OriginalClaimID = orig_proc.OriginalClaimID")
+		matches := searchField.FindAllStringIndex(strCriteria, -1)
+		fmt.Println("searchField="+searchFieldArray[i]+", occurrences=", len(matches))
+		if len(matches) > 1 {
+			var removedValues []string
+			var removeFieldName string
+
+			// Split on comma.
+			result := strings.Split(strCriteria, ";")
+
+			// Display all elements.
+			for j := range result {
+				fmt.Println("result", result[j])
+				field := result[j]
+				fieldName := strings.Split(field, "=")
+				fmt.Println("fieldName", fieldName[0])
+				if len(fieldName[0]) > 0 && fieldName[0] == searchFieldArray[i] {
+					removeFieldName = fieldName[0]
+					fmt.Println("removeField name", removeFieldName)
+					fmt.Println("removeField value", fieldName[1])
+					fmt.Println("string before removing", criteria)
+					fmt.Println("string to be removed", removeFieldName+"="+fieldName[1])
+					removedValues = append(removedValues, fieldName[1])
+					fmt.Println("removedValues", removedValues)
+					criteria = strings.Replace(criteria, removeFieldName+"="+fieldName[1]+";", "", -1)
+					fmt.Println("string after removing", criteria)
+				}
+			}
+			if len(removedValues) == len(matches) {
+				strInClause := removeFieldName + " IN ("
+				var strInClauseValues string
+				//add criteria back in
+				for k := 0; k < len(removedValues); k++ {
+					strInClauseValues += "'" + removedValues[k] + "'"
+					if len(removedValues)-k > 1 {
+						strInClauseValues += ","
+					}
+				}
+				fmt.Println("strInClause", strInClause+strInClauseValues+")")
+				criteria = criteria + strInClause + strInClauseValues + ");"
+			}
+		}
+
+	}
+	criteria = " AND " + strings.Replace(criteria, ";", " AND ", -1)
+	return TrimSuffix(criteria, " AND ")
+}
+
+func TrimSuffix(s, suffix string) string {
+	if strings.HasSuffix(s, suffix) {
+		s = s[:len(s)-len(suffix)]
+	}
+	return s
+}
+
+func FetchClaims(condb *sql.DB, criteria string) []Claims {
+	var rList = []Claims{}
+	strSelect := SELECT_STATEMENT
+	if len(criteria) > 0 {
+		strSelect += criteria
+	}
+	fmt.Println("select statement", strSelect)
+	rows, err := condb.Query(strSelect)
 	if err != nil {
 		log.Fatal(err)
 	}
