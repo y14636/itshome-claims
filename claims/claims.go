@@ -234,7 +234,9 @@ func ParseSearchString(search string) string {
 
 func CleanSearchCriteria(strCriteria string) string {
 	var criteria string
-	//searchFieldArray := []string{"ClaimType", "ServiceId", "ReceiptDate", "FromDate", "ToDate", "PlaceOfService", "ProviderId", "ProviderType", "ProviderSpecialty", "ProcedureCode", "DiagnosisCode", "NetworkIndicator", "SubscriberId", "PatientAccountNumber", "SCCFNumber", "RevenueCode", "BillType", "Modifier", "PlanCode", "SFMessageCode", "PricingMethod", "PricingRule", "DeliveryMethod", "InputDate"}
+	//adding hidden fields to array
+	option := Option{Name: "Claim Type", Value: 23, Type: "ClaimType"}
+	options.Options = append(options.Options, option)
 	criteria = strCriteria
 	for i := 0; i < len(options.Options); i++ {
 		fmt.Println(options.Options[i].Type)
