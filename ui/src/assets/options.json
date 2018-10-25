@@ -1,0 +1,95 @@
+{
+  "options": [
+    { 
+      "name": "Make a selection", 
+      "value": 0, 
+      "type": "default" 
+    },
+    { "name": "Receipt Date", 
+      "value": 1, 
+      "type": "ReceiptDate" 
+    },
+    { "name": "Claims Threshold", 
+      "value": 2, 
+      "type": "ClaimsThreshold" 
+    },
+    { "name": "Provider ID", 
+      "value": 3, 
+      "type": "ProviderId" 
+    },
+    { "name": "Provider Type", 
+      "value": 4, 
+      "type": "ProviderType" 
+    },
+    { "name": "Provider Specialty", 
+      "value": 5, 
+      "type": "ProviderSpecialty" 
+    },
+    { "name": "Procedure Code", 
+      "value": 6, 
+      "type": "ProcedureCode" 
+    },
+    { "name": "Diagnosis Code", 
+      "value": 7, 
+      "type": "DiagnosisCode" 
+    },
+    { "name": "Subscriber ID", 
+      "value": 8, 
+      "type": "SubscriberId" 
+    },
+    { "name": "Subscriber Prefix", 
+      "value": 9, 
+      "type": "SubscriberPrefix" 
+    },
+    { "name": "Subscriber Suffix", 
+      "value": 10, 
+      "type": "SubscriberSuffix" 
+    },
+    { "name": "SCCF Number", 
+      "value": 11, 
+      "type": "SCCFNumber" 
+    },
+    { "name": "Revenue Code", 
+      "value": 12, 
+      "type": "RevenueCode" 
+    },
+    { "name": "Bill Type", 
+      "value": 13, 
+      "type": "BillType" 
+    },
+    { "name": "Modifier", 
+      "value": 14, 
+      "type": "Modifier" 
+    },
+    { "name": "Plan Code", 
+      "value": 15, 
+      "type": "PlanCode" 
+    },
+    { "name": "SF Message Code", 
+      "value": 16, 
+      "type": "SFMessageCode" 
+    },
+    { "name": "Pricing Method", 
+      "value": 17, 
+      "type": "PricingMethod" 
+    },
+    { "name": "Pricing Rule", 
+      "value": 18, 
+      "type": "PricingRule" 
+    },
+    { "name": "Delivery Method", 
+      "value": 19, 
+      "type": "DeliveryMethod" 
+    },
+    { "name": "From Date (DOS)", 
+      "value": 20, 
+      "type": "FromDate" 
+    },
+    { "name": "To Date (DOS)", 
+      "value": 21, 
+      "type": "ToDate" 
+    },
+    { "name": "Patient Account Number", 
+      "value": 22, 
+      "type": "PatientAccountNumber" }
+  ]}

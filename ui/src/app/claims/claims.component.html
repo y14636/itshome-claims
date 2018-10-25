@@ -40,7 +40,7 @@
 					</div>
 				</div>
 				<div class="form-row" *ngIf="selectedInstOption > 0 && showInstButton">
-					<button type="button" class="btn btn-default" (click)="addSelectItems(instSearchForm, 'Institutional')">Add Search Criteria</button>
+					<button type="button" class="btn btn-default" (click)="addSelectItems(instSearchForm, 'Institutional', options[0])">Add Search Criteria</button>
 				</div>
 				<div class="form-row float-right" *ngIf="selectedInstOption > 0">
 						<div class="col-lg-2" formArrayName="hiddenInputItems" *ngFor="let item of getControls(instSearchForm, 'hiddenInputItems'); let k = index;">
@@ -109,7 +109,7 @@
 							</div>
 						</div>
 						<div class="form-row" *ngIf="selectedProfOption > 0 && showProfButton">
-							<button type="button" class="btn btn-default" (click)="addSelectItems(profSearchForm, 'Professional')">Add Search Criteria</button>
+							<button type="button" class="btn btn-default" (click)="addSelectItems(profSearchForm, 'Professional', options[0])">Add Search Criteria</button>
 						</div>
 						<div class="form-row float-right" *ngIf="selectedProfOption > 0">
 								<div class="col-lg-2" formArrayName="hiddenInputItems" *ngFor="let item of getControls(profSearchForm, 'hiddenInputItems'); let n = index;">

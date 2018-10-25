@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -20,9 +22,10 @@ const SELECT_STATEMENT string = "SELECT orig.Id, orig.ClaimType, orig.ServiceId,
 var (
 	list []Claims
 	//rList                     []Claims
-	qList []Results
-	mtx   sync.RWMutex
-	once  sync.Once
+	qList   []Results
+	options Options
+	mtx     sync.RWMutex
+	once    sync.Once
 	//USER_SECURITY_QUESTION_ID int
 	//QUESTION                  string
 	//ANSWER                    string
@@ -56,6 +59,7 @@ var (
 
 func init() {
 	once.Do(initializeList)
+	loadOptions()
 }
 
 func initializeList() {
@@ -70,6 +74,46 @@ func initializeList() {
 	//dummy Professional claims
 	Add("20", "600", "20180110", "20180105", "20180110", "30", "000000001001", "A4", "111N00000X  ", "99212", "M5134", "3", "PAY20089098001", "11111111", "30120180400000001",
 		"NA", "111", "50", "302", "P302", "40", "9", "A", "20180110", "testfile2.dat")
+}
+
+func loadOptions() {
+	// Open our jsonFile
+	jsonFile, err := os.Open("./ui/src/assets/options.json")
+	// if we os.Open returns an error then handle it
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("Successfully Opened options.json")
+	// defer the closing of our jsonFile so that we can parse it later on
+	defer jsonFile.Close()
+
+	// read our opened xmlFile as a byte array.
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+
+	// we unmarshal our byteArray which contains our
+	// jsonFile's content into 'users' which we defined above
+	json.Unmarshal(byteValue, &options)
+
+	// we iterate through every user within our users array and
+	// print out the user Type, their name, and their facebook url
+	// as just an example
+	for i := 0; i < len(options.Options); i++ {
+		fmt.Println("Option Name: " + options.Options[i].Name)
+		fmt.Println("Option Value: " + strconv.Itoa(options.Options[i].Value))
+		fmt.Println("Option Type: " + options.Options[i].Type)
+	}
+}
+
+// Options struct which contains
+// an array of options
+type Options struct {
+	Options []Option `json:"options"`
+}
+
+type Option struct {
+	Name  string `json:"name"`
+	Value int    `json:"value"`
+	Type  string `json:"type"`
 }
 
 // Claims data structure
@@ -190,14 +234,14 @@ func ParseSearchString(search string) string {
 
 func CleanSearchCriteria(strCriteria string) string {
 	var criteria string
-	searchFieldArray := []string{"ClaimType", "ServiceId", "ReceiptDate", "FromDate", "ToDate", "PlaceOfService", "ProviderId", "ProviderType", "ProviderSpecialty", "ProcedureCode", "DiagnosisCode", "NetworkIndicator", "SubscriberId", "PatientAccountNumber", "SCCFNumber", "RevenueCode", "BillType", "Modifier", "PlanCode", "SFMessageCode", "PricingMethod", "PricingRule", "DeliveryMethod", "InputDate"}
+	//searchFieldArray := []string{"ClaimType", "ServiceId", "ReceiptDate", "FromDate", "ToDate", "PlaceOfService", "ProviderId", "ProviderType", "ProviderSpecialty", "ProcedureCode", "DiagnosisCode", "NetworkIndicator", "SubscriberId", "PatientAccountNumber", "SCCFNumber", "RevenueCode", "BillType", "Modifier", "PlanCode", "SFMessageCode", "PricingMethod", "PricingRule", "DeliveryMethod", "InputDate"}
 	criteria = strCriteria
-	for i := 0; i < len(searchFieldArray); i++ {
-		fmt.Println(searchFieldArray[i])
-		searchField := regexp.MustCompile(searchFieldArray[i])
+	for i := 0; i < len(options.Options); i++ {
+		fmt.Println(options.Options[i].Type)
+		searchField := regexp.MustCompile(options.Options[i].Type)
 
 		matches := searchField.FindAllStringIndex(strCriteria, -1)
-		fmt.Println("searchField="+searchFieldArray[i]+", occurrences=", len(matches))
+		fmt.Println("searchField="+options.Options[i].Type+", occurrences=", len(matches))
 		if len(matches) > 1 {
 			var removedValues []string
 			var removeFieldName string
@@ -211,7 +255,7 @@ func CleanSearchCriteria(strCriteria string) string {
 				field := result[j]
 				fieldName := strings.Split(field, "=")
 				fmt.Println("fieldName", fieldName[0])
-				if len(fieldName[0]) > 0 && fieldName[0] == searchFieldArray[i] {
+				if len(fieldName[0]) > 0 && fieldName[0] == options.Options[i].Type {
 					removeFieldName = fieldName[0]
 					fmt.Println("removeField name", removeFieldName)
 					fmt.Println("removeField value", fieldName[1])

@@ -4,6 +4,8 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { EditModalComponent } from '../edit-modal/edit-modal.component';
 import { ErrorModalComponent } from '../error-modal/error-modal.component';
 import { FormGroup, FormArray, FormBuilder, FormControl, Validators } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-claims',
@@ -29,34 +31,8 @@ export class ClaimsComponent implements OnInit {
   modifiedClaims: Claims[];
   
   selectedActiveInstitutionalClaimIds: Array<any> = [];
-  selectedActiveProfessionalClaimIds: Array<any> = [];
- 
-  options = [
-    { name: "Make a selection", value: 0, type: "default" },
-    { name: "Receipt Date", value: 1, type: "ReceiptDate" },
-    { name: "Claims Threshold", value: 2, type: "ClaimsThreshold" },
-		{ name: "Provider ID", value: 3, type: "ProviderId" },
-		{ name: "Provider Type", value: 4, type: "ProviderType" },
-		{ name: "Provider Specialty", value: 5, type: "ProviderSpecialty" },
-		{ name: "Procedure Code", value: 6, type: "ProcedureCode" },
-		{ name: "Diagnosis Code", value: 7, type: "DiagnosisCode" },
-		{ name: "Subscriber ID", value: 8, type: "SubscriberId" },
-		{ name: "Subscriber Prefix", value: 9, type: "SubscriberPrefix" },
-		{ name: "Subscriber Suffix", value: 10, type: "SubscriberSuffix" },
-		{ name: "SCCF Number", value: 11, type: "SCCFNumber" },
-		{ name: "Revenue Code", value: 12, type: "RevenueCode" },
-		{ name: "Bill Type", value: 13, type: "BillType" },
-		{ name: "Modifier", value: 14, type: "Modifier" },
-		{ name: "Plan Code", value: 15, type: "PlanCode" },
-		{ name: "SF Message Code", value: 16, type: "SFMessageCode" },
-		{ name: "Pricing Method", value: 17, type: "PricingMethod" },
-		{ name: "Pricing Rule", value: 18, type: "PricingRule" },
-		{ name: "Delivery Method", value: 19, type: "DeliveryMethod" },
-		{ name: "From Date (DOS)", value: 20, type: "FromDate" },
-		{ name: "To Date (DOS)", value: 21, type: "ToDate" },
-		{ name: "Patient Account Number", value: 22, type: "PatientAccountNumber" }
-  ]
-
+	selectedActiveProfessionalClaimIds: Array<any> = [];
+	options: string [];
   selectedInstOption: number;
   selectedProfOption: number;
 	selectedType: string;
@@ -66,16 +42,38 @@ export class ClaimsComponent implements OnInit {
   constructor(
   private claimsService: ClaimsService, 
   private modalService: NgbModal, 
-  private _cfr: ComponentFactoryResolver,
+	private _cfr: ComponentFactoryResolver,
+	private httpService: HttpClient,
   private formBuilder: FormBuilder
 	) { 
-		this.createInstForm();
-		this.createProfForm();
+		this.createInstForm("");
+		this.createProfForm("");						
 	}
-  
-  private createInstForm() {
+	
+	ngOnInit() {		
+		this.httpService.get('../assets/options.json').subscribe(
+      data => {
+        this.options = data["options"];	 // FILL THE ARRAY WITH DATA.
+					this.createInstForm(this.options[0]);
+					this.createProfForm(this.options[0]);						
+      },
+      (err: HttpErrorResponse) => {
+        console.log (err.message);
+      }
+		);
+
+		this.showInstButton = true;
+		this.showProfButton = true;
+    this.dtOptions[0] = this.buildDtOptions();
+    this.dtOptions[1] = this.buildDtOptions();
+    this.dtOptions[2] = this.buildDtOptions();
+		this.getAll();
+	  this.getModifiedClaims();
+	}
+	
+  private createInstForm(option:string) {
     this.instSearchForm = this.formBuilder.group({
-	  instSelectItems: this.formBuilder.array([ this.createSelectItems() ]),
+	  instSelectItems: this.formBuilder.array([ this.createSelectItems(option) ]),
 	  instInputItems: this.formBuilder.array([ this.createInputItem(0, "default") ]),
 	  hiddenInputItems: this.formBuilder.array([ this.createHiddenInputItem(0, "ClaimType", "11"), this.createHiddenInputItem(1, "ClaimType", "12") ])
     });
@@ -88,9 +86,9 @@ export class ClaimsComponent implements OnInit {
 			item.get("type").setValue(data[0].category.type);
 		})
   }
-  private createProfForm() {
+  private createProfForm(option:string) {
     this.profSearchForm = this.formBuilder.group({
-	  profSelectItems: this.formBuilder.array([ this.createSelectItems() ]),
+	  profSelectItems: this.formBuilder.array([ this.createSelectItems(option) ]),
 	  profInputItems: this.formBuilder.array([ this.createInputItem(0, "default") ]),
 	  hiddenInputItems: this.formBuilder.array([ this.createHiddenInputItem(0, "ClaimType", "20")])
     });
@@ -123,9 +121,9 @@ export class ClaimsComponent implements OnInit {
 	  });
   }
   
-  createSelectItems(): FormGroup {
+  createSelectItems(option:string): FormGroup {
 	  return this.formBuilder.group({
-		category: [this.options[0]]
+			category: [option]
 	  });
   }
   
@@ -140,12 +138,12 @@ export class ClaimsComponent implements OnInit {
 		}
   }
   
-  addSelectItems(form:FormGroup, claimType:string): void {
+  addSelectItems(form:FormGroup, claimType:string, option:string): void {
 		var arrayControl;
 		if (claimType === 'Institutional') {
 			this.instSelectItems = form.get('instSelectItems') as FormArray;
 			if (this.instSelectItems.length < 6) {
-				this.instSelectItems.push(this.createSelectItems());
+				this.instSelectItems.push(this.createSelectItems(option));
 				this.instInputItems = form.get('instInputItems') as FormArray;
 				this.addInputItem(this.instInputItems.length, "default", form, "Institutional");
 				arrayControl = this.getControls(form, 'instSelectItems');
@@ -153,7 +151,7 @@ export class ClaimsComponent implements OnInit {
 		} else {
 			this.profSelectItems = form.get('profSelectItems') as FormArray;
 			if (this.profSelectItems.length < 6) {
-				this.profSelectItems.push(this.createSelectItems());
+				this.profSelectItems.push(this.createSelectItems(option));
 				this.profInputItems = form.get('profInputItems') as FormArray;
 				this.addInputItem(this.profInputItems.length, "default", form, "Professional");
 				arrayControl = this.getControls(form, 'profSelectItems');
@@ -176,7 +174,6 @@ export class ClaimsComponent implements OnInit {
 				item.get("type").setValue(val.get('category').value.type);
 			})
 		}
-			//console.log("select items size=", this.instSelectItems.length);
 			if (this.instSelectItems != null && this.instSelectItems.length === 6) {
 				this.showInstButton = false;
 			}
@@ -226,16 +223,6 @@ export class ClaimsComponent implements OnInit {
 	  }).catch((error) => {
 			console.log(error);
 	  });
-  }
-
-  ngOnInit() {
-		this.showInstButton = true;
-		this.showProfButton = true;
-    this.dtOptions[0] = this.buildDtOptions();
-    this.dtOptions[1] = this.buildDtOptions();
-    this.dtOptions[2] = this.buildDtOptions();
-		this.getAll();
-	  this.getModifiedClaims();
   }
 
 	private buildDtOptions(): DataTables.Settings {
