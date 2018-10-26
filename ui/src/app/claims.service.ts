@@ -33,6 +33,10 @@ export class ClaimsService {
     return this.httpClient.post(environment.gateway + '/modifiedclaims', claims);
   }
 
+  addMultipleClaims(claims: string) {
+    return this.httpClient.get(environment.gateway + '/modifiedclaims/' + claims);
+  }
+
   deleteClaims(claims: Claims) {
     return this.httpClient.delete(environment.gateway + '/modifiedclaims/' + claims.id);
   }

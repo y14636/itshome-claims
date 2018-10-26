@@ -233,7 +233,7 @@ export class ClaimsComponent implements OnInit {
 	
   getAll() {
     this.claimsService.getClaimsList().subscribe((data: Claims[]) => {
-      this.activeInstitutionalClaims = data.filter(claim => claim.claimtype === '11');
+      this.activeInstitutionalClaims = data.filter(claim => claim.claimtype === '11' || claim.claimtype === '12');
 	  this.activeProfessionalClaims = data.filter(claim => claim.claimtype === '20');
     });
   }
@@ -317,7 +317,7 @@ export class ClaimsComponent implements OnInit {
   }
   
   onSubmit(claimType:string, model: any, isValid: boolean, e: any) {
-	  e.preventDefault();
+	    e.preventDefault();
 			alert('Form data are: '+JSON.stringify(model));
 			let strFormData = JSON.stringify(model);
 			

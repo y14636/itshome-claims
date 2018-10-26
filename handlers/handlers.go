@@ -27,6 +27,15 @@ func GetClaimsResultsHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, claims.GetResults(searchString))
 }
 
+func AddMultipleClaimsHandler(c *gin.Context) {
+	claimsDataString := c.Param("claimsData")
+	if err := modifiedclaims.AddMultipleClaims(claimsDataString); err != nil {
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, "")
+}
+
 // GetClaimsListHandler returns all current claim items
 func GetClaimsListHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, claims.Get())

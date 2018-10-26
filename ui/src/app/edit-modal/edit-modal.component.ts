@@ -35,7 +35,8 @@ export class EditModalComponent implements OnInit {
   deliveryMethod:								string;
   claimsForm: 									FormGroup;
   selectedActiveInstitutionalClaims: 			Claims[];
-  selectedActiveProfessionalClaims: 			Claims[];
+	selectedActiveProfessionalClaims: 			Claims[];
+	isMultiple: 									boolean;
   
   constructor(
 	public activeModal: NgbActiveModal,
@@ -46,6 +47,7 @@ export class EditModalComponent implements OnInit {
 	}
 
   ngOnInit() {
+		this.isMultiple = true;
 	  console.log("selected Institutional Id is " + this.selectedActiveInstitutionalClaimIds);
 	  console.log("selected Professional Id is " + this.selectedActiveProfessionalClaimIds);
 	  this.getClaimsListByIds();
@@ -53,14 +55,16 @@ export class EditModalComponent implements OnInit {
 
   getClaimsListByIds() {
     this.claimsService.getClaimsList().subscribe((data: Claims[]) => {
-		if (this.selectedActiveInstitutionalClaimIds !== undefined && this.selectedActiveInstitutionalClaimIds.length > 0) {
+		if (this.selectedActiveInstitutionalClaimIds !== undefined && this.selectedActiveInstitutionalClaimIds.length === 1) {
+			this.isMultiple = false;
 			this.selectedActiveInstitutionalClaims = data.filter(claim => claim.id === this.selectedActiveInstitutionalClaimIds[0]);
 			this.populateForm(this.selectedActiveInstitutionalClaims);
-		} else if (this.selectedActiveProfessionalClaimIds !== undefined && this.selectedActiveProfessionalClaimIds) {
+		} else if (this.selectedActiveProfessionalClaimIds !== undefined && this.selectedActiveProfessionalClaimIds.length === 1) {
+			this.isMultiple = false;
 			this.selectedActiveProfessionalClaims = data.filter(claim => claim.id === this.selectedActiveProfessionalClaimIds[0]);
 			this.populateForm(this.selectedActiveProfessionalClaims);
 		}
-	  this.updateClaimForm();
+		this.updateClaimForm();
     });
   }
   
@@ -94,7 +98,9 @@ export class EditModalComponent implements OnInit {
 	  sfMessageCode: [{value: '', disabled: true}],
 	  pricingMethod: [{value: '', disabled: true}],
 	  pricingRule: [{value: '', disabled: true}],
-	  deliveryMethod: [{value: '', disabled: true}]
+		deliveryMethod: [{value: '', disabled: true}],
+		selectedActiveInstitutionalClaimIds: '',
+		selectedActiveProfessionalClaimIds: ''
 
     });
   }
@@ -130,67 +136,73 @@ export class EditModalComponent implements OnInit {
   }
 
   onSubmit(form) {
-	  var newClaims : Claims = {
-		  id: '',
-		  claimtype: form.getRawValue().claimtype,
-		  serviceId: form.getRawValue().serviceId,
-		  receiptDate: form.getRawValue().receiptDate,
-		  fromDate: form.getRawValue().fromDate,
-		  toDate: form.getRawValue().toDate,
-		  placeOfService: 'na',
-		  providerId: form.getRawValue().providerId,
-		  providerType: form.getRawValue().providerType,
-		  providerSpecialty: form.getRawValue().providerSpecialty,
-		  procedureCode: form.getRawValue().procedureCode,
-		  diagnosisCode: form.getRawValue().diagnosisCode,
-		  networkIndicator: 'na',
-		  subscriberId: form.getRawValue().prefix + form.getRawValue().subscriberId + form.getRawValue().suffix,
-		  patientAccountNumber: form.getRawValue().patientAccountNumber,
-		  sccfNumber: form.getRawValue().sccfNumber,
-		  revenueCode: 'na',
-		  billType: 'na',
-		  modifier: form.getRawValue().modifier,
-		  planCode: form.getRawValue().planCode,
-		  sfMessageCode: form.getRawValue().sfMessageCode,
-		  pricingMethod: form.getRawValue().pricingMethod,
-		  pricingRule: form.getRawValue().pricingRule,
-		  deliveryMethod: form.getRawValue().deliveryMethod,
-		  inputDate: '',
-		  fileName: 'fromgui'
-		};
+		if (!this.isMultiple) {
+				var newClaims : Claims = {
+					id: '',
+					claimtype: form.getRawValue().claimtype,
+					serviceId: form.getRawValue().serviceId,
+					receiptDate: form.getRawValue().receiptDate,
+					fromDate: form.getRawValue().fromDate,
+					toDate: form.getRawValue().toDate,
+					placeOfService: 'na',
+					providerId: form.getRawValue().providerId,
+					providerType: form.getRawValue().providerType,
+					providerSpecialty: form.getRawValue().providerSpecialty,
+					procedureCode: form.getRawValue().procedureCode,
+					diagnosisCode: form.getRawValue().diagnosisCode,
+					networkIndicator: 'na',
+					subscriberId: form.getRawValue().prefix + form.getRawValue().subscriberId + form.getRawValue().suffix,
+					patientAccountNumber: form.getRawValue().patientAccountNumber,
+					sccfNumber: form.getRawValue().sccfNumber,
+					revenueCode: 'na',
+					billType: 'na',
+					modifier: form.getRawValue().modifier,
+					planCode: form.getRawValue().planCode,
+					sfMessageCode: form.getRawValue().sfMessageCode,
+					pricingMethod: form.getRawValue().pricingMethod,
+					pricingRule: form.getRawValue().pricingRule,
+					deliveryMethod: form.getRawValue().deliveryMethod,
+					inputDate: '',
+					fileName: 'fromgui'
+				};
 
-    this.claimsService.addModifiedClaims(newClaims).subscribe(() => {
-		//this.getAll();
-		this.claimtype = '';
-		//this.serviceId = '';
-		//this.receiptDate = '';
-		this.fromDate = '';
-		this.toDate = '';
-		//this.placeOfService = '';
-		this.providerId = '';
-		this.providerType = '';
-		this.providerSpecialty = '';
-		this.procedureCode = '';
-		this.diagnosisCode = '';
-		//this.networkIndicator = '';
-		this.subscriberId = '';
-		this.prefix = '';
-		this.suffix = '';
-		this.patientAccountNumber = '';
-		this.sccfNumber = '';
-		//this.revenueCode = '';
-		//this.billType = '';
-		this.modifier = '';
-		this.planCode = '';
-		this.sfMessageCode = '';
-		this.pricingMethod = '';
-		this.pricingRule = '';
-		this.deliveryMethod = '';
-		//this.inputDate = '';
-		//this.fileName = '';
-    });
-	
-    this.activeModal.close(this.claimsForm.value);
+				this.claimsService.addModifiedClaims(newClaims).subscribe(() => {
+				//this.getAll();
+				this.claimtype = '';
+				//this.serviceId = '';
+				//this.receiptDate = '';
+				this.fromDate = '';
+				this.toDate = '';
+				//this.placeOfService = '';
+				this.providerId = '';
+				this.providerType = '';
+				this.providerSpecialty = '';
+				this.procedureCode = '';
+				this.diagnosisCode = '';
+				//this.networkIndicator = '';
+				this.subscriberId = '';
+				this.prefix = '';
+				this.suffix = '';
+				this.patientAccountNumber = '';
+				this.sccfNumber = '';
+				//this.revenueCode = '';
+				//this.billType = '';
+				this.modifier = '';
+				this.planCode = '';
+				this.sfMessageCode = '';
+				this.pricingMethod = '';
+				this.pricingRule = '';
+				this.deliveryMethod = '';
+				//this.inputDate = '';
+				//this.fileName = '';
+				});
+		} else {
+				//alert('Form data are: '+JSON.stringify(this.claimsForm.value));
+				let strFormData = JSON.stringify(this.claimsForm.value);
+				this.claimsService.addMultipleClaims(strFormData).subscribe(() => {});
+		}
+
+		this.activeModal.close(this.claimsForm.value);
   }
   
   closeModal() {
@@ -219,8 +231,9 @@ export class EditModalComponent implements OnInit {
 		  sfMessageCode: this.sfMessageCode,
 		  pricingMethod: this.pricingMethod,
 		  pricingRule: this.pricingRule,
-		  deliveryMethod: this.deliveryMethod
-		  
+			deliveryMethod: this.deliveryMethod,
+			selectedActiveInstitutionalClaimIds: this.selectedActiveInstitutionalClaimIds,
+			selectedActiveProfessionalClaimIds: this.selectedActiveProfessionalClaimIds
 	  });
   }
 
