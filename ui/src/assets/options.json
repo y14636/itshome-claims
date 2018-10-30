@@ -91,5 +91,10 @@
     },
     { "name": "Patient Account Number", 
       "value": 22, 
-      "type": "PatientAccountNumber" }
+      "type": "PatientAccountNumber" 
+    },
+    { "name": "Claim Type", 
+      "value": 23, 
+      "type": "ClaimType" 
+    }
   ]}

@@ -64,7 +64,8 @@ export class ClaimsComponent implements OnInit {
 
 		this.httpService.get('../assets/options.json').subscribe(
       data => {
-        this.options = data["options"];	 // FILL THE ARRAY WITH DATA.
+				this.options = data["options"];	 // FILL THE ARRAY WITH DATA.
+					this.findAndRemove(this.options, 'type', 'ClaimType');// remove hidden fields from dropdown
 					this.createInstForm(this.options[0]);
 					this.createProfForm(this.options[0]);						
       },
@@ -80,25 +81,52 @@ export class ClaimsComponent implements OnInit {
 	  this.getModifiedClaims();
 	}
 	
+	private findAndRemove(array, property, value) {
+		array.forEach(function(result, index) {
+			if(result[property] === value) {
+				//Remove from array
+				array.splice(index, 1);
+			}    
+		});
+	}
 	private initDatatable1(): void {
     let table1: any = $('#table1');
     this.table1 = table1.DataTable({
-      searching: false
+			searching: false,
+			"pagingType": "full_numbers"
     });
 	}
 	
 	private initDatatable2(): void {
 		let table2: any = $('#table2');
 		this.table2 = table2.DataTable({
-			searching: false
+			searching: false,
+			"pagingType": "full_numbers"
 		});
 	}
 	
 	private initDatatable3(): void {
 		let table3: any = $('#table3');
 		this.table3 = table3.DataTable({
-			searching: false
+			searching: false,
+			"pagingType": "full_numbers"
 		});
+	}
+	
+	private reInitDatatable1(): void {
+    if (this.table1) {
+      this.table1.destroy()
+      this.table1=null
+    }
+    setTimeout(() => this.initDatatable1(),0)
+	}
+	
+	private reInitDatatable2(): void {
+    if (this.table2) {
+      this.table2.destroy()
+      this.table2=null
+    }
+    setTimeout(() => this.initDatatable2(),0)
 	}
 	
 	private reInitDatatable3(): void {
@@ -107,7 +135,8 @@ export class ClaimsComponent implements OnInit {
       this.table3=null
     }
     setTimeout(() => this.initDatatable3(),0)
-  }
+	}
+	
   private createInstForm(option:string) {
     this.instSearchForm = this.formBuilder.group({
 	  instSelectItems: this.formBuilder.array([ this.createSelectItems(option) ]),
@@ -290,12 +319,14 @@ export class ClaimsComponent implements OnInit {
 	searchActiveInstitutionalClaims(strFormData) {
 		this.claimsService.getSearchResults(strFormData).subscribe((data: Claims[]) => {
 			this.activeInstitutionalClaims = data.filter(claim => claim);
+			this.reInitDatatable1();
 		});
 	}
 
 	searchActiveProfessionalClaims(strFormData) {
 		this.claimsService.getSearchResults(strFormData).subscribe((data: Claims[]) => {
 			this.activeProfessionalClaims = data.filter(claim => claim);
+			this.reInitDatatable2();
 		});
 	}
   
@@ -359,17 +390,33 @@ export class ClaimsComponent implements OnInit {
 		}
   }
 	
+	removeAllObjects(type: string) {
+		if (type === "Institutional") {
+			for (var i = this.instInputItems.length; i--; ) {
+
+				this.instInputItems.removeAt(i);
+				if (i > 0) {
+					this.instSelectItems.removeAt(i);
+				}
+			}
+			this.showInstButton = false;
+		} else {
+	  	this.profInputItems.reset();
+			this.profSelectItems.reset();
+			this.showProfButton = false;
+		}
+	}
+
 	deleteClaims(claims: Claims) {
     this.claimsService.deleteClaims(claims).subscribe(() => {
 			this.getModifiedClaims();
 			this.reInitDatatable3();
-			//window.location.reload();
     })
 	}
 	
   onSubmit(claimType:string, model: any, isValid: boolean, e: any) {
 	    e.preventDefault();
-			alert('Form data are: '+JSON.stringify(model));
+			//alert('Form data are: '+JSON.stringify(model));
 			let strFormData = JSON.stringify(model);
 			
 			if (claimType === 'Institutional') {
@@ -377,5 +424,14 @@ export class ClaimsComponent implements OnInit {
 			} else {
 				this.searchActiveProfessionalClaims(strFormData);
 			}
-   }
+	 }
+	 
+	 clearForm(type:string) {
+		 this.removeAllObjects(type);
+		//  if (type === "Institutional") {
+		//  	this.instSearchForm.reset();
+		//  } else {
+		// 	this.profSearchForm.reset();
+		//  }
+	 }
 }

@@ -110,11 +110,7 @@ func ParseParameters(parameters string) string {
 }
 
 func CleanParameters(parameters string) string {
-	var criteria string
-	//adding hidden fields to array
-	option := Option{Name: "Claim Type", Value: 23, Type: "ClaimType"}
-	options.Options = append(options.Options, option)
-	criteria = parameters
+	criteria := parameters
 	for i := 0; i < len(options.Options); i++ {
 		fmt.Println(options.Options[i].Type)
 		parameter := regexp.MustCompile(options.Options[i].Type)
@@ -145,9 +141,9 @@ func CleanParameters(parameters string) string {
 					fmt.Println("string after removing", criteria)
 				}
 			}
-			// criteria = strings.Replace(criteria, ";", "';", -1)
-			// criteria = strings.Replace(criteria, "=", "='", -1)
-			// fmt.Println("string after adding single quotes", criteria)
+			//criteria = strings.Replace(criteria, ";", "';", -1)
+			//criteria = strings.Replace(criteria, "=", "='", -1)
+			//fmt.Println("string after adding single quotes", criteria)
 
 			if len(removedValues) == len(matches) {
 				strInClause := removeFieldName + " IN ("
@@ -159,12 +155,16 @@ func CleanParameters(parameters string) string {
 						strInClauseValues += ","
 					}
 				}
-				fmt.Println("strInClause", strInClause+strInClauseValues+")")
 				criteria = criteria + strInClause + strInClauseValues + ");"
 			}
 		}
 
 	}
+	// out := regexp.MustCompile(`=(.*?);`)
+	// res := out.FindStringSubmatch(criteria)
+	// fmt.Println("after regex", res[1])
+	// criteria = strings.Replace(criteria, res[1], "'"+res[1]+"'", -1)
+	// fmt.Println("criteria after adding single quotes", criteria)
 	criteria = " AND " + strings.Replace(criteria, ";", " AND ", -1)
 	return TrimSuffix(criteria, " AND ")
 }

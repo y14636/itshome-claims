@@ -49,6 +49,7 @@
 								</div>
 						 </div>
 					<button type="submit" class="btn btn-primary">Search</button>
+					<button type="button" class="btn btn-warning" (click)="clearForm('Institutional')">Clear All</button>
 				</div>
 			</form>
 			<hr>
@@ -56,12 +57,13 @@
 		<div class="search-results-header">
 			<h5>Search Results</h5>
 		</div>
-		<table id="table1" class="table row-border hover">
+		<table id="table1" class="table table-striped row-border hover">
 		  <thead>
 		  <tr>
 			<th></th>
 			<th>Subscriber ID</th>
 			<th>Claim Type</th>
+			<th>SCCF Number</th>
 			<th>Procedure Code</th>
 			<th>Diagnosis Code</th>
 			<th>Modifier</th>
@@ -75,6 +77,7 @@
 			<td><input type="checkbox" name="{{claims.id}}" id="{{claims.id}}" (change)="toggleActiveInstitutionalClaims(claims.id, $event.target.checked)"></td>
 			<td>{{claims.subscriberId}}</td>
 			<td>{{claims.claimtype}}</td>
+			<td>{{claims.sccfNumber}}</td>
 			<td>{{claims.procedureCode}}</td>
 			<td>{{claims.diagnosisCode}}</td>
 			<td>{{claims.modifier}}</td>
@@ -117,18 +120,19 @@
 										<input type="hidden" class="form-control" [formControlName]="'inputName' + n">
 										</div>
 								 </div>
-							<button type="submit" class="btn btn-primary">Search</button>
-						</div>
+								 <button type="submit" class="btn btn-primary">Search</button>
+								</div>
 					</form>		
 		<div class="search-results-header">
 				<h5>Search Results</h5>
 		</div>
-		<table id="table2" class="table row-border hover">
+		<table id="table2" class="table table-striped row-border hover">
 		  <thead>
 		  <tr>
 			<th></th>
 			<th>Subscriber ID</th>
 			<th>Claim Type</th>
+			<th>SCCF Number</th>
 			<th>Procedure Code</th>
 			<th>Diagnosis Code</th>
 			<th>Modifier</th>
@@ -142,6 +146,7 @@
 			<td><input type="checkbox" name="{{claims.id}}" id="{{claims.id}}" (change)="toggleActiveProfessionalClaims(claims.id, $event.target.checked)"></td>
 			<td>{{claims.subscriberId}}</td>
 			<td>{{claims.claimtype}}</td>
+			<td>{{claims.sccfNumber}}</td>
 			<td>{{claims.procedureCode}}</td>
 			<td>{{claims.diagnosisCode}}</td>
 			<td>{{claims.modifier}}</td>
@@ -155,11 +160,12 @@
       </div>
 	  <div id="tab3" class="tab-slider--body" *ngSwitchCase="'tab3'">
 		<h2>Modified Claims</h2>
-		<table id="table3" class="table row-border hover">
+		<table id="table3" class="table table-striped row-border hover">
 		  <thead>
 		  <tr>
 			<th>Subscriber ID</th>
 			<th>Claim Type</th>
+			<th>SCCF Number</th>
 			<th>Procedure Code</th>
 			<th>Diagnosis Code</th>
 			<th>Modifier</th>
@@ -173,6 +179,7 @@
 		  <tr *ngFor="let claims of modifiedClaims">
 			<td>{{claims.subscriberId}}</td>
 			<td>{{claims.claimtype}}</td>
+			<td>{{claims.sccfNumber}}</td>
 			<td>{{claims.procedureCode}}</td>
 			<td>{{claims.diagnosisCode}}</td>
 			<td>{{claims.modifier}}</td>
