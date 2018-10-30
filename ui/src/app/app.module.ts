@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AppRoutingModule } from './app-routing.module';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { DataTablesModule } from 'angular-datatables';
+//import { DataTablesModule } from 'angular-datatables';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { AuthGuardService } from './auth-guard.service';
@@ -31,8 +31,8 @@ import { ErrorModalComponent } from './error-modal/error-modal.component';
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
-	DataTablesModule,
-	NgbModule.forRoot()
+//	  DataTablesModule,
+	  NgbModule.forRoot()
   ],
   providers: [AuthGuardService, ClaimsService],
   bootstrap: [AppComponent],

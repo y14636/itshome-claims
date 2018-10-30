@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ComponentFactoryResolver, ViewContainerRef } from '@angular/core';
+import { Component, OnInit, ViewContainerRef } from '@angular/core';
 import { ClaimsService, Claims } from '../claims.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { EditModalComponent } from '../edit-modal/edit-modal.component';
@@ -6,6 +6,11 @@ import { ErrorModalComponent } from '../error-modal/error-modal.component';
 import { FormGroup, FormArray, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { HttpErrorResponse } from '@angular/common/http';
+// import { Subject } from 'rxjs';
+// import { DataTableDirective } from 'angular-datatables';
+import * as $ from 'jquery';
+import 'datatables.net';
+import 'datatables.net-bs4';
 
 @Component({
   selector: 'app-claims',
@@ -23,9 +28,7 @@ export class ClaimsComponent implements OnInit {
   instSelectItems: FormArray;
   profInputItems: FormArray;
   profSelectItems: FormArray;
-  
-  dtOptions: DataTables.Settings[] = [];
-  
+	
   activeInstitutionalClaims: Claims[];
   activeProfessionalClaims: Claims[];
   modifiedClaims: Claims[];
@@ -38,19 +41,27 @@ export class ClaimsComponent implements OnInit {
 	selectedType: string;
 	showInstButton: boolean;
 	showProfButton: boolean;
-  
+	dataTable: any;
+	public table1: any;
+	public table2: any;
+	public table3: any;
+
   constructor(
   private claimsService: ClaimsService, 
   private modalService: NgbModal, 
-	private _cfr: ComponentFactoryResolver,
 	private httpService: HttpClient,
-  private formBuilder: FormBuilder
+	private formBuilder: FormBuilder
 	) { 
 		this.createInstForm("");
 		this.createProfForm("");						
 	}
 	
+	ngAfterViewInit() {
+    
+	}
+	
 	ngOnInit() {		
+
 		this.httpService.get('../assets/options.json').subscribe(
       data => {
         this.options = data["options"];	 // FILL THE ARRAY WITH DATA.
@@ -64,13 +75,39 @@ export class ClaimsComponent implements OnInit {
 
 		this.showInstButton = true;
 		this.showProfButton = true;
-    this.dtOptions[0] = this.buildDtOptions();
-    this.dtOptions[1] = this.buildDtOptions();
-    this.dtOptions[2] = this.buildDtOptions();
+
 		this.getAll();
 	  this.getModifiedClaims();
 	}
 	
+	private initDatatable1(): void {
+    let table1: any = $('#table1');
+    this.table1 = table1.DataTable({
+      searching: false
+    });
+	}
+	
+	private initDatatable2(): void {
+		let table2: any = $('#table2');
+		this.table2 = table2.DataTable({
+			searching: false
+		});
+	}
+	
+	private initDatatable3(): void {
+		let table3: any = $('#table3');
+		this.table3 = table3.DataTable({
+			searching: false
+		});
+	}
+	
+	private reInitDatatable3(): void {
+    if (this.table3) {
+      this.table3.destroy()
+      this.table3=null
+    }
+    setTimeout(() => this.initDatatable3(),0)
+  }
   private createInstForm(option:string) {
     this.instSearchForm = this.formBuilder.group({
 	  instSelectItems: this.formBuilder.array([ this.createSelectItems(option) ]),
@@ -186,7 +223,10 @@ export class ClaimsComponent implements OnInit {
   clickTab(tab:string) {
 	  this.viewMode = tab;
 	  this.selectedActiveInstitutionalClaimIds = [];
-	  this.selectedActiveProfessionalClaimIds = [];
+		this.selectedActiveProfessionalClaimIds = [];
+		setTimeout(() => this.initDatatable1(),0);
+		setTimeout(() => this.initDatatable2(),0);
+		setTimeout(() => this.initDatatable3(),0);
   }
   
   openEditModal(claimType:string, claims: Claims) {
@@ -234,14 +274,17 @@ export class ClaimsComponent implements OnInit {
   getAll() {
     this.claimsService.getClaimsList().subscribe((data: Claims[]) => {
       this.activeInstitutionalClaims = data.filter(claim => claim.claimtype === '11' || claim.claimtype === '12');
-	  this.activeProfessionalClaims = data.filter(claim => claim.claimtype === '20');
+		this.activeProfessionalClaims = data.filter(claim => claim.claimtype === '20');
+		setTimeout(() => this.initDatatable1(),0);
+		setTimeout(() => this.initDatatable2(),0);
     });
   }
 
   getModifiedClaims() {
 	  this.claimsService.getModifiedClaimsList().subscribe((data: Claims[]) => {
-		  this.modifiedClaims = data.filter(claim => claim);
-	  });	
+			this.modifiedClaims = data.filter(claim => claim);
+			//setTimeout(() => this.initDatatable3(),0);
+		  });	
   }
 	
 	searchActiveInstitutionalClaims(strFormData) {
@@ -315,7 +358,15 @@ export class ClaimsComponent implements OnInit {
 			}
 		}
   }
-  
+	
+	deleteClaims(claims: Claims) {
+    this.claimsService.deleteClaims(claims).subscribe(() => {
+			this.getModifiedClaims();
+			this.reInitDatatable3();
+			//window.location.reload();
+    })
+	}
+	
   onSubmit(claimType:string, model: any, isValid: boolean, e: any) {
 	    e.preventDefault();
 			alert('Form data are: '+JSON.stringify(model));

@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/rs/xid"
+	"github.com/y14636/itshome-claims/utilities"
 )
 
 var (
@@ -72,8 +73,10 @@ func AddModifiedClaim(claimType string, fromDate string, toDate string, placeOfS
 	return t.ID
 }
 
-func AddMultipleClaims(claims string) error{
-	fmt.Println(claims)
+func AddMultipleClaims(claims string) error {
+	//fmt.Println(claims)
+	criteria := utilities.ParseParameters(claims)
+	fmt.Println("Add Multiple Claims", criteria)
 	return nil
 }
 
