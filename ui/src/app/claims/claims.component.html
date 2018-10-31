@@ -19,7 +19,7 @@
       <div id="tab1" class="tab-slider--body" *ngSwitchCase="'tab1'">
 			<div>
 			<h2>Search Claims</h2>
-			<form [formGroup]="instSearchForm" novalidate (ngSubmit)="onSubmit('Institutional', instSearchForm.value, instSearchForm.valid, $event)">
+			<form [formGroup]="instSearchForm" (ngSubmit)="onSubmit('Institutional', instSearchForm.value, $event)">
 				<div class="form-row">
 					<div class="col-lg-2" formArrayName="instSelectItems" *ngFor="let select-item of getControls(instSearchForm, 'instSelectItems'); let j = index;">
 					   <div [formGroupName]="j" class="input-group">
@@ -35,13 +35,16 @@
 				<div *ngIf="selectedInstOption > 0" class="form-row">
 					<div class="col-lg-2" formArrayName="instInputItems" *ngFor="let item of getControls(instSearchForm, 'instInputItems'); let i = index;">
 					   <div [formGroupName]="i">
-						 <input type="text" class="form-control" [formControlName]="'inputName' + i">
-					   </div>
+						 		<input type="text" minlength="1" class="form-control" [formControlName]="'inputName' + i">
+						 </div>
 					</div>
 				</div>
 				<div class="form-row" *ngIf="selectedInstOption > 0 && showInstButton">
 					<button type="button" class="btn btn-default" (click)="addSelectItems(instSearchForm, 'Institutional', options[0])">Add Search Criteria</button>
 				</div>
+				<div class="form-row alert alert-danger"  *ngIf="submittedInstForm && instSearchForm.status === 'INVALID'">
+						You cannot leave search fields empty.
+					</div>
 				<div class="form-row float-right" *ngIf="selectedInstOption > 0">
 						<div class="col-lg-2" formArrayName="hiddenInputItems" *ngFor="let item of getControls(instSearchForm, 'hiddenInputItems'); let k = index;">
 								<div [formGroupName]="k">
@@ -50,7 +53,7 @@
 						</div>
 						<div class="btn-group">
 							  <button type="submit" class="btn btn-primary">Search</button>
-								<button type="button" class="btn btn-warning" (click)="clearForm('Institutional')">Clear All</button>
+								<button type="button" class="btn btn-warning" (click)="clearForm('Institutional')">Reset</button>
 						</div>
 				</div>
 			</form>

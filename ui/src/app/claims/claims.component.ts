@@ -45,6 +45,8 @@ export class ClaimsComponent implements OnInit {
 	public table1: any;
 	public table2: any;
 	public table3: any;
+	submittedInstForm = false;
+	submittedProfForm = false;
 
   constructor(
   private claimsService: ClaimsService, 
@@ -182,7 +184,7 @@ export class ClaimsComponent implements OnInit {
 	  var inputName = "inputName" + index;
 	  console.log("inputName=", inputName);
 	  return this.formBuilder.group({
-		[inputName]: [''],
+		[inputName]: ['', [Validators.required, Validators.minLength(1)]],
 		type: [type]
 	  });
   }
@@ -303,9 +305,17 @@ export class ClaimsComponent implements OnInit {
   getAll() {
     this.claimsService.getClaimsList().subscribe((data: Claims[]) => {
       this.activeInstitutionalClaims = data.filter(claim => claim.claimtype === '11' || claim.claimtype === '12');
-		this.activeProfessionalClaims = data.filter(claim => claim.claimtype === '20');
-		setTimeout(() => this.initDatatable1(),0);
-		setTimeout(() => this.initDatatable2(),0);
+			this.activeProfessionalClaims = data.filter(claim => claim.claimtype === '20');
+			if (this.table1) {
+				this.reInitDatatable1();
+			} else {
+				setTimeout(() => this.initDatatable1(),0);
+			}
+			if (this.table2) {
+				this.reInitDatatable2();
+			} else {
+				setTimeout(() => this.initDatatable2(),0);
+			}
     });
   }
 
@@ -397,27 +407,39 @@ export class ClaimsComponent implements OnInit {
     })
 	}
 	
-  onSubmit(claimType:string, model: any, isValid: boolean, e: any) {
-	    e.preventDefault();
+  onSubmit(claimType:string, model: any, e: any) {
+	    //e.preventDefault();
 			//alert('Form data are: '+JSON.stringify(model));
+
 			let strFormData = JSON.stringify(model);
 			
 			if (claimType === 'Institutional') {
-				this.searchActiveInstitutionalClaims(strFormData);
+				this.submittedInstForm = true;
+				if (this.instSearchForm.invalid) {
+					return;
+				} else {
+					this.searchActiveInstitutionalClaims(strFormData);
+				}
 			} else {
-				this.searchActiveProfessionalClaims(strFormData);
+				this.submittedProfForm = true;
+				if (this.profSearchForm.invalid) {
+					return;
+				} else {
+					this.searchActiveProfessionalClaims(strFormData);
+				}
 			}
 	 }
 	 
 	 clearForm(type:string) {
 		 if (type === "Institutional") {
-			 this.instSearchForm.reset();
 			 this.createInstForm(this.options[0]);
 			 this.selectedInstOption = 0;
+			 this.submittedInstForm = false;
 		 } else {
-			 this.profSearchForm.reset();
 			 this.createProfForm(this.options[0]);
 			 this.selectedProfOption = 0;
+			 this.submittedProfForm = false;
 		 }
+		 this.getAll();
 	 }
 }

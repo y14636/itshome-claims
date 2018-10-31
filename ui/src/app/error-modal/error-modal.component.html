@@ -1,4 +1,4 @@
-<div class="modal-header">
+<div class="modal-header alert alert-danger">
   <h4 class="modal-title">{{title}}</h4>
   <button type="button" class="close" aria-label="Close"
    (click)="activeModal.dismiss('Cross click')"><span aria-hidden="true">&times;</span>
@@ -8,7 +8,7 @@
   <p>{{message}}</p>
 </div>
 <div class="modal-footer">
-  <button class="btn btn-success" (click)="activeModal.dismiss('Close clicked')">
+  <button class="btn btn-info" (click)="activeModal.dismiss('Close clicked')">
     OK
   </button>
 </div>

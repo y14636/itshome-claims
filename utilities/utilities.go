@@ -110,6 +110,7 @@ func ParseParameters(parameters string) string {
 }
 
 func CleanParameters(parameters string) string {
+	fmt.Println("entering CleanParameters()...")
 	criteria := parameters
 	for i := 0; i < len(options.Options); i++ {
 		fmt.Println(options.Options[i].Type)
@@ -117,14 +118,16 @@ func CleanParameters(parameters string) string {
 
 		matches := parameter.FindAllStringIndex(parameters, -1)
 		fmt.Println("parameter="+options.Options[i].Type+", occurrences=", len(matches))
+		fmt.Println("matches=", matches)
 		if len(matches) > 1 {
 			var removedValues []string
 			var removeFieldName string
 
 			// Split on comma.
 			result := strings.Split(parameters, ";")
-
+			fmt.Println("counter is at ", i)
 			for j := range result {
+				fmt.Println("second counter is at ", j)
 				fmt.Println("result", result[j])
 				field := result[j]
 				fieldName := strings.Split(field, "=")
@@ -141,9 +144,6 @@ func CleanParameters(parameters string) string {
 					fmt.Println("string after removing", criteria)
 				}
 			}
-			//criteria = strings.Replace(criteria, ";", "';", -1)
-			//criteria = strings.Replace(criteria, "=", "='", -1)
-			//fmt.Println("string after adding single quotes", criteria)
 
 			if len(removedValues) == len(matches) {
 				strInClause := removeFieldName + " IN ("
@@ -160,12 +160,13 @@ func CleanParameters(parameters string) string {
 		}
 
 	}
-	// out := regexp.MustCompile(`=(.*?);`)
-	// res := out.FindStringSubmatch(criteria)
-	// fmt.Println("after regex", res[1])
-	// criteria = strings.Replace(criteria, res[1], "'"+res[1]+"'", -1)
-	// fmt.Println("criteria after adding single quotes", criteria)
-	criteria = " AND " + strings.Replace(criteria, ";", " AND ", -1)
+	criteria2 := strings.Replace(criteria, ";", "';", -1)
+	criteria2 = strings.Replace(criteria2, "=", "='", -1)
+	criteria2 = strings.Replace(criteria2, ")'", ")", -1)
+	//TrimSuffix(criteria2, "';")
+	fmt.Println("string after adding single quotes", criteria2)
+	fmt.Println("original criteria", criteria)
+	criteria = " AND " + strings.Replace(criteria2, ";", " AND ", -1)
 	return TrimSuffix(criteria, " AND ")
 }
 
