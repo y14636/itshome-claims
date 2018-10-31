@@ -390,23 +390,6 @@ export class ClaimsComponent implements OnInit {
 		}
   }
 	
-	removeAllObjects(type: string) {
-		if (type === "Institutional") {
-			for (var i = this.instInputItems.length; i--; ) {
-
-				this.instInputItems.removeAt(i);
-				if (i > 0) {
-					this.instSelectItems.removeAt(i);
-				}
-			}
-			this.showInstButton = false;
-		} else {
-	  	this.profInputItems.reset();
-			this.profSelectItems.reset();
-			this.showProfButton = false;
-		}
-	}
-
 	deleteClaims(claims: Claims) {
     this.claimsService.deleteClaims(claims).subscribe(() => {
 			this.getModifiedClaims();
@@ -427,11 +410,14 @@ export class ClaimsComponent implements OnInit {
 	 }
 	 
 	 clearForm(type:string) {
-		 this.removeAllObjects(type);
-		//  if (type === "Institutional") {
-		//  	this.instSearchForm.reset();
-		//  } else {
-		// 	this.profSearchForm.reset();
-		//  }
+		 if (type === "Institutional") {
+			 this.instSearchForm.reset();
+			 this.createInstForm(this.options[0]);
+			 this.selectedInstOption = 0;
+		 } else {
+			 this.profSearchForm.reset();
+			 this.createProfForm(this.options[0]);
+			 this.selectedProfOption = 0;
+		 }
 	 }
 }
