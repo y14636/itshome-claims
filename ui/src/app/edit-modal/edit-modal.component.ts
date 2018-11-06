@@ -166,41 +166,42 @@ export class EditModalComponent implements OnInit {
 					fileName: 'fromgui'
 				};
 
-				this.claimsService.addModifiedClaims(newClaims).subscribe(() => {
-				//this.getAll();
-				this.claimtype = '';
-				//this.serviceId = '';
-				//this.receiptDate = '';
-				this.fromDate = '';
-				this.toDate = '';
-				//this.placeOfService = '';
-				this.providerId = '';
-				this.providerType = '';
-				this.providerSpecialty = '';
-				this.procedureCode = '';
-				this.diagnosisCode = '';
-				//this.networkIndicator = '';
-				this.subscriberId = '';
-				this.prefix = '';
-				this.suffix = '';
-				this.patientAccountNumber = '';
-				this.sccfNumber = '';
-				//this.revenueCode = '';
-				//this.billType = '';
-				this.modifier = '';
-				this.planCode = '';
-				this.sfMessageCode = '';
-				this.pricingMethod = '';
-				this.pricingRule = '';
-				this.deliveryMethod = '';
-				//this.inputDate = '';
-				//this.fileName = '';
-				});
-		} else {
+				// this.claimsService.addModifiedClaims(newClaims).subscribe(() => {
+				// //this.getAll();
+				// this.claimtype = '';
+				// //this.serviceId = '';
+				// //this.receiptDate = '';
+				// this.fromDate = '';
+				// this.toDate = '';
+				// //this.placeOfService = '';
+				// this.providerId = '';
+				// this.providerType = '';
+				// this.providerSpecialty = '';
+				// this.procedureCode = '';
+				// this.diagnosisCode = '';
+				// //this.networkIndicator = '';
+				// this.subscriberId = '';
+				// this.prefix = '';
+				// this.suffix = '';
+				// this.patientAccountNumber = '';
+				// this.sccfNumber = '';
+				// //this.revenueCode = '';
+				// //this.billType = '';
+				// this.modifier = '';
+				// this.planCode = '';
+				// this.sfMessageCode = '';
+				// this.pricingMethod = '';
+				// this.pricingRule = '';
+				// this.deliveryMethod = '';
+				// //this.inputDate = '';
+				// //this.fileName = '';
+				// });
+		} 
+		//else {
 				//alert('Form data are: '+JSON.stringify(this.claimsForm.value));
 				let strFormData = JSON.stringify(this.claimsForm.value);
 				this.claimsService.addMultipleClaims(strFormData).subscribe(() => {});
-		}
+		//}
 
 		this.activeModal.close(this.claimsForm.value);
   }

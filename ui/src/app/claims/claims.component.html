@@ -45,7 +45,7 @@
 				<div class="form-row alert alert-danger"  *ngIf="submittedInstForm && instSearchForm.status === 'INVALID'">
 						You cannot leave search fields empty.
 					</div>
-				<div class="form-row float-right" *ngIf="selectedInstOption > 0">
+				<div class="form-row d-flex justify-content-end" *ngIf="selectedInstOption > 0">
 						<div class="col-lg-2" formArrayName="hiddenInputItems" *ngFor="let item of getControls(instSearchForm, 'hiddenInputItems'); let k = index;">
 								<div [formGroupName]="k">
 								<input type="hidden" class="form-control" [formControlName]="'inputName' + k">
@@ -53,11 +53,11 @@
 						</div>
 						<div class="btn-group">
 							  <button type="submit" class="btn btn-primary">Search</button>
-								<button type="button" class="btn btn-warning" (click)="clearForm('Institutional')">Reset</button>
+								<button type="button" class="btn btn-light" (click)="clearForm('Institutional')">Reset</button>
 						</div>
 				</div>
+				<hr/>
 			</form>
-			<hr>
 		</div>
 		<div class="search-results-header">
 			<h5>Search Results</h5>
@@ -92,7 +92,7 @@
 		  </tr>
 		  </tbody>
 		</table>
-		<button (click)="openEditModal('Institutional', claims)" class="btn btn-success">Edit Selection(s)</button>
+		<button (click)="openEditModal('Institutional', claims)" class="btn btn-primary">Edit Selection(s)</button>
       </div>
       <div id="tab2" class="tab-slider--body" *ngSwitchCase="'tab2'">
 					<h2>Search Claims</h2>
@@ -119,7 +119,7 @@
 						<div class="form-row" *ngIf="selectedProfOption > 0 && showProfButton">
 							<button type="button" class="btn btn-default" (click)="addSelectItems(profSearchForm, 'Professional', options[0])">Add Search Criteria</button>
 						</div>
-						<div class="form-row float-right" *ngIf="selectedProfOption > 0">
+						<div class="form-row d-flex justify-content-end" *ngIf="selectedProfOption > 0">
 								<div class="col-lg-2" formArrayName="hiddenInputItems" *ngFor="let item of getControls(profSearchForm, 'hiddenInputItems'); let n = index;">
 										<div [formGroupName]="n">
 										<input type="hidden" class="form-control" [formControlName]="'inputName' + n">
@@ -127,9 +127,10 @@
 								 </div>
 								 <div class="btn-group">
 									<button type="submit" class="btn btn-primary">Search</button>
-									<button type="button" class="btn btn-warning" (click)="clearForm('Professional')">Clear All</button>
+									<button type="button" class="btn btn-light" (click)="clearForm('Professional')">Reset</button>
 							</div>
 							</div>
+							<hr/>
 					</form>		
 		<div class="search-results-header">
 				<h5>Search Results</h5>
@@ -164,7 +165,7 @@
 		  </tr>
 		  </tbody>
 		</table>
-		<button (click)="openEditModal('Professional')" class="btn btn-success">Edit Selection(s)</button>
+		<button (click)="openEditModal('Professional')" class="btn btn-primary">Edit Selection(s)</button>
       </div>
 	  <div id="tab3" class="tab-slider--body" *ngSwitchCase="'tab3'">
 		<h2>Modified Claims</h2>

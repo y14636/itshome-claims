@@ -1,18 +1,27 @@
 package modifiedclaims
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
+	"log"
+	"strconv"
+	"strings"
 	"sync"
+	"time"
 
+	_ "github.com/denisenkom/go-mssqldb"
 	"github.com/rs/xid"
 	"github.com/y14636/itshome-claims/utilities"
 )
+
+const READY_STATUS = "Ready"
 
 var (
 	mList []ModifiedClaims
 	mtx   sync.RWMutex
 	once  sync.Once
+	condb *sql.DB
 )
 
 func init() {
@@ -73,11 +82,171 @@ func AddModifiedClaim(claimType string, fromDate string, toDate string, placeOfS
 	return t.ID
 }
 
-func AddMultipleClaims(claims string) error {
-	//fmt.Println(claims)
-	criteria := utilities.ParseParameters(claims)
+func AddMultipleClaims(claimsData string) error {
+	fmt.Println("Add Multiple Claims", claimsData)
+
+	criteria := utilities.ParseParameters(claimsData)
 	fmt.Println("Add Multiple Claims", criteria)
+	// Split on comma.
+	result := strings.Split(criteria, "&")
+	var errdb error
+	condb, errdb = utilities.GetSqlConnection()
+	if errdb != nil {
+		log.Fatal("Open connection failed:", errdb.Error())
+	}
+	fmt.Printf("Connected!\n")
+	defer condb.Close()
+
+	fmt.Println("insert criteria", result[1])
+
+	claimIds := strings.Split(result[1], ",")
+	fmt.Println("length of claimIds", len(claimIds))
+	if len(claimIds) == 1 {
+		claimIds[0] = utilities.TrimSuffix(claimIds[0], ";")
+	}
+	currentTime := time.Now()
+	currentDateTime := currentTime.Format("2006-01-02 15:04:05")
+	modifiedBy := "mprue"
+	//data := "15,16,17"
+	//claimIds := strings.Split(data, ",")
+
+	// Display all elements.
+	for i := range claimIds {
+		fmt.Println("Claim Ids", claimIds[i])
+		// Create claims
+		createID, err := CreateModifiedClaims(condb, claimIds[i], modifiedBy, currentDateTime)
+		if err != nil {
+			log.Fatal("Creating Modified Claims failed: ", err.Error())
+		}
+		fmt.Printf("Inserted ID: %d successfully.\n", createID)
+		id := int(createID)
+		t := strconv.Itoa(id)
+
+		newCriteria := UpdateSubscriberId(result[0])
+		updateID, err := UpdateModifiedClaims(condb, newCriteria, t)
+		if err != nil {
+			log.Fatal("Updating Modified Claims failed: ", err.Error())
+		}
+		fmt.Printf("Updated ID: %d successfully.\n", updateID)
+
+		// Create modified procedures
+		createProceduresID, err := CreateModifiedProcedures(condb, claimIds[i], modifiedBy, currentDateTime)
+		if err != nil {
+			log.Fatal("Creating Modified Procedures failed: ", err.Error())
+		}
+		fmt.Printf("Inserted ID: %d successfully.\n", createProceduresID)
+		procId := int(createProceduresID)
+		pid := strconv.Itoa(procId)
+
+		updateProceduresID, err := UpdateModifiedProcedures(condb, newCriteria, pid)
+		if err != nil {
+			log.Fatal("Updating Modified Procedures failed: ", err.Error())
+		}
+		fmt.Printf("Updated Procedures ID: %d successfully.\n", updateProceduresID)
+	}
+
+	fmt.Println("update criteria", result[0])
 	return nil
+}
+
+func UpdateSubscriberId(criteria string) string {
+	strCriteria := strings.Split(criteria, ";")
+	var newCriteria string
+	var subIdHolder string
+	var suffixHolder string
+	for i := range strCriteria {
+		fmt.Println("strCriteria", strCriteria[i])
+		parameter := strings.Split(strCriteria[i], "=")
+		fmt.Println(len(parameter[0]))
+		if len(parameter[0]) > 0 {
+			if len(parameter[1]) > 0 && parameter[0] == "subscriberId" {
+				subIdHolder = trimQuote(parameter[1])
+			} else if len(parameter[1]) > 0 && parameter[0] == "suffix" {
+				suffixHolder = trimQuote(parameter[1])
+			} else {
+				newCriteria += parameter[0] + "=" + parameter[1] + ";"
+				fmt.Println("new criteria", newCriteria)
+			}
+		}
+	}
+
+	newCriteria = newCriteria + "subscriberId='" + subIdHolder + suffixHolder + "';"
+	fmt.Println("newCriteria end", newCriteria)
+	return newCriteria
+}
+
+func trimQuote(s string) string {
+	s = s[1 : len(s)-1]
+	return s
+}
+
+func CreateModifiedClaims(db *sql.DB, claimId string, userId string, currentDateTime string) (int64, error) {
+	tsql := fmt.Sprintf("INSERT INTO ITSHome.ModifiedClaims ( OriginalClaimID, FromDate, ToDate, DiagnosisCode, NetworkIndicator, SubscriberId, PatientAccountNumber, SCCFNumber, Claim, ModifiedDate, ModifiedBy, Status, CreatedDate, CREATE_DT, CREATED_BY 	) SELECT Id AS OriginalClaimID, FromDate, ToDate, DiagnosisCode, NetworkIndicator, SubscriberId, PatientAccountNumber, SCCFNumber,	Claim, '%s' AS ModifiedDate, '%s' AS ModifiedBy, '%s' AS Status, '%s' AS CreatedDate, '%s' as CREATE_DT, '%s' as CREATED_BY FROM ITSHome.OriginalClaims WHERE Id = '%s'",
+		currentDateTime, userId, READY_STATUS, currentDateTime, currentDateTime, currentDateTime, claimId)
+	result, err := db.Exec(tsql)
+	if err != nil {
+		fmt.Println("Error inserting new row: " + err.Error())
+		return -1, err
+	}
+	return result.LastInsertId()
+}
+
+func UpdateModifiedClaims(db *sql.DB, criteria string, modifiedClaimId string) (int64, error) {
+	fmt.Println("Inside UpdateModifiedClaims", criteria)
+	fmt.Println("Inside UpdateModifiedClaims", modifiedClaimId)
+	updateCriteria := strings.Split(criteria, ";")
+	fmt.Println(len(updateCriteria))
+	for i := range updateCriteria {
+		fmt.Println("update criteria", updateCriteria[i])
+		parameter := strings.Split(updateCriteria[i], "=")
+		fmt.Println(len(parameter[0]))
+		if len(parameter[0]) > 0 && parameter[0] != "modifier" && parameter[0] != "procedureCode" {
+			tsql := fmt.Sprintf("UPDATE ITSHome.ModifiedClaims SET %s = %s WHERE Id = '%s'",
+				strings.Title(parameter[0]), parameter[1], modifiedClaimId)
+			result, err := db.Exec(tsql)
+			if err != nil {
+				fmt.Println("Error updating row: " + err.Error())
+				return -1, err
+			}
+			fmt.Printf("Updated ID: %d successfully.\n", result)
+		}
+	}
+	return 0, nil
+}
+
+func CreateModifiedProcedures(db *sql.DB, claimId string, userId string, currentDateTime string) (int64, error) {
+	tsql := fmt.Sprintf("INSERT INTO ITSHome.ModifiedProcedures ( ModifiedClaimID, LineIndex, ProcedureCode, RevenueCode, Modifier, DateOfService, DateOfServiceTo, CREATE_DT, CREATED_BY ) SELECT OriginalClaimID, LineIndex, ProcedureCode, RevenueCode, Modifier, DateOfService, DateOfServiceTo, '%s' AS CREATE_DT, '%s' AS CREATED_BY FROM ITSHome.OriginalProcedures WHERE OriginalClaimID = '%s'",
+		currentDateTime, userId, claimId)
+	result, err := db.Exec(tsql)
+	if err != nil {
+		fmt.Println("Error inserting new row: " + err.Error())
+		return -1, err
+	}
+	return result.LastInsertId()
+}
+
+func UpdateModifiedProcedures(db *sql.DB, criteria string, modifiedClaimId string) (int64, error) {
+	fmt.Println("Inside UpdateModifiedProcedures", criteria)
+	fmt.Println("Inside UpdateModifiedProcedures", modifiedClaimId)
+	updateCriteria := strings.Split(criteria, ";")
+	fmt.Println(len(updateCriteria))
+	for i := range updateCriteria {
+		fmt.Println("update criteria", updateCriteria[i])
+		parameter := strings.Split(updateCriteria[i], "=")
+		fmt.Println(len(parameter[0]))
+		if len(parameter[0]) > 0 && (parameter[0] == "modifier" || parameter[0] == "procedureCode") {
+			tsql := fmt.Sprintf("UPDATE ITSHome.ModifiedProcedures SET %s = %s WHERE Id = '%s'",
+				strings.Title(parameter[0]), parameter[1], modifiedClaimId)
+			result, err := db.Exec(tsql)
+			if err != nil {
+				fmt.Println("Error updating row: " + err.Error())
+				return -1, err
+			}
+			fmt.Printf("Updated ID: %d successfully.\n", result)
+		}
+	}
+	// return result.LastInsertId()
+	return 0, nil
 }
 
 // Delete will remove a claim from the Claims list

@@ -28,7 +28,7 @@ func main() {
 	r.GET("/claims/:search", handlers.GetClaimsResultsHandler)
 	r.POST("/claims", handlers.AddClaimsHandler)
 	r.POST("/modifiedclaims", handlers.AddModifiedClaimsHandler)
-	r.POST("/modifiedclaims/:claimsData", handlers.AddMultipleClaimsHandler)
+	r.GET("/modifiedclaims/:claimsData", handlers.AddMultipleClaimsHandler)
 	r.DELETE("/modifiedclaims/:id", handlers.DeleteClaimsHandler)
 
 	err := r.Run(":3000")

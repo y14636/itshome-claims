@@ -8,15 +8,15 @@ import (
 	"strconv"
 	"sync"
 
-	_ "github.com/denisenkom/go-mssqldb"
 	"github.com/rs/xid"
 	"github.com/y14636/itshome-claims/utilities"
 )
 
 const SELECT_STATEMENT string = "SELECT orig.Id, orig.ClaimType, orig.ServiceId, orig.ReceiptDate, orig.FromDate, orig.ToDate, orig.ProviderId, orig.ProviderType, orig.ProviderSpecialty, orig.DiagnosisCode, orig.NetworkIndicator, orig.SubscriberId, orig.PatientAccountNumber, orig.SCCFNumber, orig.BillType, orig.PlanCode, orig.SFMessageCode, orig.DeliveryMethod, orig.Claim, orig.InputDate, orig.FileName, orig.CREATE_DT, orig.CREATED_BY, pricing.SFMessageCode, pricing.PricingMethod, pricing.PricingRule, orig_proc.ProcedureCode, orig_proc.RevenueCode, orig_proc.Modifier, orig_proc.DateOfService, orig_proc.DateOfServiceTo, orig_proc.PlaceOfService FROM ITSHome.OriginalClaims orig, ITSHome.OriginalPricing pricing, ITSHome.OriginalProcedures orig_proc WHERE orig.Id = pricing.OriginalClaimID AND pricing.OriginalClaimID = orig_proc.OriginalClaimID"
+const SELECT_STATEMENT_ALL string = "SELECT orig.Id, orig.ClaimType, COALESCE(orig.ServiceId, 'N/A') AS ServiceId, orig.ReceiptDate, orig.FromDate, orig.ToDate, orig.ProviderId, orig.ProviderType, orig.ProviderSpecialty, orig.DiagnosisCode, orig.NetworkIndicator, orig.SubscriberId, orig.PatientAccountNumber, orig.SCCFNumber, orig.BillType, orig.PlanCode, orig.SFMessageCode, orig.DeliveryMethod, orig.InputDate, orig.FileName FROM ITSHome.OriginalClaims orig"
 
 var (
-	list                 []Claims
+	list                 = []Claims{}
 	mtx                  sync.RWMutex
 	once                 sync.Once
 	id                   int
@@ -55,31 +55,31 @@ func initializeList() {
 	list = []Claims{}
 
 	//dummy Institutional claims
-	Add("11", "N/A", "20180110", "20180101", "20180110", "NA", "000000001000", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098001", "99999999", "30120180400000000",
-		"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile1.dat")
-	Add("12", "N/A", "20180710", "20180701", "20180710", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "22222222", "30120180400000000",
-		"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
-	Add("11", "N/A", "20180210", "20180201", "20180210", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "33333333", "30120180400000000",
-		"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
-	Add("11", "N/A", "20180310", "20180301", "20180310", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "44444444", "30120180400000000",
-		"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
-	Add("11", "N/A", "20180410", "20180401", "20180410", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "55555555", "30120180400000000",
-		"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
-	Add("12", "N/A", "20180510", "20180501", "20180510", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "66666666", "30120180400000000",
-		"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
-	Add("12", "N/A", "20180610", "20180601", "20180610", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "77777777", "30120180400000000",
-		"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
-	Add("11", "N/A", "20180810", "20180801", "20180810", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "88888888", "30120180400000000",
-		"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
-	Add("11", "N/A", "20180910", "20180901", "20180910", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "99999991", "30120180400000000",
-		"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
-	Add("11", "N/A", "20181010", "20181001", "20181010", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "99999992", "30120180400000000",
-		"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
-	Add("12", "N/A", "20180107", "20180111", "20180112", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098004", "99999993", "30120180400000000",
-		"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
-	//dummy Professional claims
-	Add("20", "600", "20180110", "20180105", "20180110", "30", "000000001001", "A4", "111N00000X  ", "99212", "M5134", "3", "PAY20089098001", "11111111", "30120180400000001",
-		"NA", "111", "50", "302", "P302", "40", "9", "A", "20180110", "testfile2.dat")
+	// Add("11", "N/A", "20180110", "20180101", "20180110", "NA", "000000001000", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098001", "99999999", "30120180400000000",
+	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile1.dat")
+	// Add("12", "N/A", "20180710", "20180701", "20180710", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "22222222", "30120180400000000",
+	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
+	// Add("11", "N/A", "20180210", "20180201", "20180210", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "33333333", "30120180400000000",
+	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
+	// Add("11", "N/A", "20180310", "20180301", "20180310", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "44444444", "30120180400000000",
+	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
+	// Add("11", "N/A", "20180410", "20180401", "20180410", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "55555555", "30120180400000000",
+	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
+	// Add("12", "N/A", "20180510", "20180501", "20180510", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "66666666", "30120180400000000",
+	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
+	// Add("12", "N/A", "20180610", "20180601", "20180610", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "77777777", "30120180400000000",
+	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
+	// Add("11", "N/A", "20180810", "20180801", "20180810", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "88888888", "30120180400000000",
+	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
+	// Add("11", "N/A", "20180910", "20180901", "20180910", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "99999991", "30120180400000000",
+	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
+	// Add("11", "N/A", "20181010", "20181001", "20181010", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "99999992", "30120180400000000",
+	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
+	// Add("12", "N/A", "20180107", "20180111", "20180112", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098004", "99999993", "30120180400000000",
+	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
+	// //dummy Professional claims
+	// Add("20", "600", "20180110", "20180105", "20180110", "30", "000000001001", "A4", "111N00000X  ", "99212", "M5134", "3", "PAY20089098001", "11111111", "30120180400000001",
+	// 	"NA", "111", "50", "302", "P302", "40", "9", "A", "20180110", "testfile2.dat")
 }
 
 // Claims data structure
@@ -116,8 +116,9 @@ func GetResults(search string) []Claims {
 	var rList = []Claims{}
 	//fmt.Println("search string=", search)
 	criteria := utilities.ParseParameters(search)
+	criteria = utilities.CleanParameters(criteria)
 
-	condb, errdb := sql.Open("mssql", "server=SQLDEV34\\SQL_DEV34;user id=;password=;database=zdb63q_itshc_syst")
+	condb, errdb := utilities.GetSqlConnection()
 	if errdb != nil {
 		fmt.Println(" Error open db:", errdb.Error())
 	}
@@ -160,6 +161,32 @@ func FetchClaims(condb *sql.DB, criteria string) []Claims {
 
 // Get retrieves all elements from the claims list
 func Get() []Claims {
+	var list []Claims
+
+	condb, errdb := utilities.GetSqlConnection()
+	if errdb != nil {
+		fmt.Println(" Error open db:", errdb.Error())
+	}
+
+	rows, err := condb.Query(SELECT_STATEMENT_ALL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(&id, &claimType, &serviceId, &receiptDate, &fromDate, &toDate, &providerId, &providerType, &providerSpecialty, &diagnosisCode, &networkIndicator, &subscriberId, &patientAccountNumber, &sccfNumber, &billType, &planCode, &sfMessageCode, &deliveryMethod, &inputDate, &fileName)
+		if err != nil {
+			log.Fatal(err)
+		}
+		strId := strconv.Itoa(id)
+		t := newResultAll(strId, claimType, serviceId, receiptDate, fromDate, toDate, providerId, providerType, providerSpecialty, diagnosisCode, networkIndicator, subscriberId, patientAccountNumber, sccfNumber, billType, planCode, sfMessageCode, deliveryMethod, inputDate, fileName)
+		list = append(list, t)
+	}
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return list
 }
 
@@ -195,6 +222,41 @@ func newResult(id string, claimType string, serviceId string, receiptDate string
 	networkIndicator string, subscriberId string, patientAccountNumber string, sccfNumber string,
 	revenueCode string, billType string, modifier string, planCode string, sfMessageCode string,
 	pricingMethod string, pricingRule string, deliveryMethod string, inputDate string, fileName string) Claims {
+	return Claims{
+		ID:                   id,
+		ClaimType:            claimType,
+		ServiceId:            serviceId,
+		ReceiptDate:          receiptDate,
+		FromDate:             fromDate,
+		ToDate:               toDate,
+		PlaceOfService:       placeOfService,
+		ProviderId:           providerId,
+		ProviderType:         providerType,
+		ProviderSpecialty:    providerSpecialty,
+		ProcedureCode:        procedureCode,
+		DiagnosisCode:        diagnosisCode,
+		NetworkIndicator:     networkIndicator,
+		SubscriberId:         subscriberId,
+		PatientAccountNumber: patientAccountNumber,
+		SccfNumber:           sccfNumber,
+		RevenueCode:          revenueCode,
+		BillType:             billType,
+		Modifier:             modifier,
+		PlanCode:             planCode,
+		SfMessageCode:        sfMessageCode,
+		PricingMethod:        pricingMethod,
+		PricingRule:          pricingRule,
+		DeliveryMethod:       deliveryMethod,
+		InputDate:            inputDate,
+		FileName:             fileName,
+	}
+}
+
+func newResultAll(id string, claimType string, serviceId string, receiptDate string, fromDate string, toDate string, providerId string,
+	providerType string, providerSpecialty string, diagnosisCode string,
+	networkIndicator string, subscriberId string, patientAccountNumber string, sccfNumber string,
+	billType string, planCode string, sfMessageCode string,
+	deliveryMethod string, inputDate string, fileName string) Claims {
 	return Claims{
 		ID:                   id,
 		ClaimType:            claimType,
