@@ -191,7 +191,7 @@ func CleanParameters(parameters string) string {
 	//TrimSuffix(criteria2, "';")
 	fmt.Println("string after adding single quotes", criteria2)
 	fmt.Println("original criteria", criteria)
-	criteria = " AND " + strings.Replace(criteria2, ";", " AND ", -1)
+	criteria = " WHERE " + strings.Replace(criteria2, ";", " AND ", -1)
 	return TrimSuffix(criteria, " AND ")
 }
 

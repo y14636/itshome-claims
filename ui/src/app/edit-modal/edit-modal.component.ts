@@ -54,16 +54,28 @@ export class EditModalComponent implements OnInit {
   }
 
   getClaimsListByIds() {
-    this.claimsService.getClaimsList().subscribe((data: Claims[]) => {
+		var selectedId;
 		if (this.selectedActiveInstitutionalClaimIds !== undefined && this.selectedActiveInstitutionalClaimIds.length === 1) {
-			this.isMultiple = false;
-			this.selectedActiveInstitutionalClaims = data.filter(claim => claim.id === this.selectedActiveInstitutionalClaimIds[0]);
-			this.populateForm(this.selectedActiveInstitutionalClaims);
+			//this.isMultiple = false;
+			selectedId = this.selectedActiveInstitutionalClaimIds[0];
+			//this.selectedActiveInstitutionalClaims = data.filter(claim => claim.id === this.selectedActiveInstitutionalClaimIds[0]);
+			//this.populateForm(this.selectedActiveInstitutionalClaims);
 		} else if (this.selectedActiveProfessionalClaimIds !== undefined && this.selectedActiveProfessionalClaimIds.length === 1) {
-			this.isMultiple = false;
-			this.selectedActiveProfessionalClaims = data.filter(claim => claim.id === this.selectedActiveProfessionalClaimIds[0]);
-			this.populateForm(this.selectedActiveProfessionalClaims);
+			//this.isMultiple = false;
+			selectedId = this.selectedActiveProfessionalClaimIds[0];
+			//this.selectedActiveProfessionalClaims = data.filter(claim => claim.id === this.selectedActiveProfessionalClaimIds[0]);
+			//this.populateForm(this.selectedActiveProfessionalClaims);
 		}
+    this.claimsService.getClaimsListByIds(selectedId).subscribe((data: Claims[]) => {
+		// if (this.selectedActiveInstitutionalClaimIds !== undefined && this.selectedActiveInstitutionalClaimIds.length === 1) {
+		 	this.isMultiple = false;
+		// 	this.selectedActiveInstitutionalClaims = data.filter(claim => claim.id === this.selectedActiveInstitutionalClaimIds[0]);
+		 	this.populateForm(data.filter(claim =>claim));
+		// } else if (this.selectedActiveProfessionalClaimIds !== undefined && this.selectedActiveProfessionalClaimIds.length === 1) {
+		// 	this.isMultiple = false;
+		// 	this.selectedActiveProfessionalClaims = data.filter(claim => claim.id === this.selectedActiveProfessionalClaimIds[0]);
+		// 	this.populateForm(this.selectedActiveProfessionalClaims);
+		// }
 		this.updateClaimForm();
     });
   }
@@ -144,26 +156,32 @@ export class EditModalComponent implements OnInit {
 					receiptDate: form.getRawValue().receiptDate,
 					fromDate: form.getRawValue().fromDate,
 					toDate: form.getRawValue().toDate,
-					placeOfService: 'na',
 					providerId: form.getRawValue().providerId,
 					providerType: form.getRawValue().providerType,
 					providerSpecialty: form.getRawValue().providerSpecialty,
-					procedureCode: form.getRawValue().procedureCode,
 					diagnosisCode: form.getRawValue().diagnosisCode,
 					networkIndicator: 'na',
 					subscriberId: form.getRawValue().prefix + form.getRawValue().subscriberId + form.getRawValue().suffix,
 					patientAccountNumber: form.getRawValue().patientAccountNumber,
 					sccfNumber: form.getRawValue().sccfNumber,
-					revenueCode: 'na',
 					billType: 'na',
-					modifier: form.getRawValue().modifier,
 					planCode: form.getRawValue().planCode,
 					sfMessageCode: form.getRawValue().sfMessageCode,
-					pricingMethod: form.getRawValue().pricingMethod,
-					pricingRule: form.getRawValue().pricingRule,
 					deliveryMethod: form.getRawValue().deliveryMethod,
 					inputDate: '',
-					fileName: 'fromgui'
+					fileName: '',
+					createDate: '',
+					createdBy: '',
+					pSfMessageCode: '',
+					pricingMethod: form.getRawValue().pricingMethod,
+					pricingRule: form.getRawValue().pricingRule,
+					procedureCode: form.getRawValue().procedureCode,
+					revenueCode: 'na',
+					modifier: form.getRawValue().modifier,
+					dosFrom: '',
+					dosTo: '',
+					placeOfService: 'na'
+
 				};
 
 				// this.claimsService.addModifiedClaims(newClaims).subscribe(() => {

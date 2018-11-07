@@ -9,22 +9,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/y14636/itshome-claims/claims"
 	"github.com/y14636/itshome-claims/modifiedclaims"
+	"github.com/y14636/itshome-claims/searchclaims"
 )
-
-// //GetClaimsResultsHandler returns claim items from search
-// func GetClaimsResultsHandler(c *gin.Context) {
-// 	searchString := c.Param("search")
-// 	if err := searchclaims.GetResults(searchString); err != nil {
-// 		c.JSON(http.StatusInternalServerError, err)
-// 		return
-// 	}
-// 	c.JSON(http.StatusOK, "")
-// }
 
 //GetClaimsResultsHandler returns claim items from search
 func GetClaimsResultsHandler(c *gin.Context) {
 	searchString := c.Param("search")
-	c.JSON(http.StatusOK, claims.GetResults(searchString))
+	c.JSON(http.StatusOK, searchclaims.GetResults(searchString))
 }
 
 func AddMultipleClaimsHandler(c *gin.Context) {
@@ -39,6 +30,12 @@ func AddMultipleClaimsHandler(c *gin.Context) {
 // GetClaimsListHandler returns all current claim items
 func GetClaimsListHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, claims.Get())
+}
+
+// GetClaimsListHandler returns all current claim items
+func GetClaimsListByIdHandler(c *gin.Context) {
+	idString := c.Param("claimsId")
+	c.JSON(http.StatusOK, claims.GetListById(idString))
 }
 
 // GetModifiedClaimsListHandler returns all current claim items
@@ -61,28 +58,28 @@ func AddClaimsHandler(c *gin.Context) {
 }
 
 // AddModifiedClaimsHandler adds a new claim to the modified claims list
-func AddModifiedClaimsHandler(c *gin.Context) {
-	claimsItem, statusCode, err := convertHTTPBodyToClaims(c.Request.Body)
-	if err != nil {
-		c.JSON(statusCode, err)
-		return
-	}
-	c.JSON(statusCode, gin.H{"id": modifiedclaims.AddModifiedClaim(claimsItem.ClaimType, claimsItem.FromDate, claimsItem.ToDate, claimsItem.PlaceOfService, claimsItem.ProviderId,
-		claimsItem.ProviderType, claimsItem.ProviderSpecialty, claimsItem.ProcedureCode, claimsItem.DiagnosisCode,
-		claimsItem.NetworkIndicator, claimsItem.SubscriberId, claimsItem.PatientAccountNumber, claimsItem.SccfNumber,
-		claimsItem.RevenueCode, claimsItem.BillType, claimsItem.Modifier, claimsItem.PlanCode, claimsItem.SfMessageCode,
-		claimsItem.PricingMethod, claimsItem.PricingRule, claimsItem.DeliveryMethod, claimsItem.InputDate, claimsItem.FileName)})
-}
+// func AddModifiedClaimsHandler(c *gin.Context) {
+// 	claimsItem, statusCode, err := convertHTTPBodyToClaims(c.Request.Body)
+// 	if err != nil {
+// 		c.JSON(statusCode, err)
+// 		return
+// 	}
+// 	c.JSON(statusCode, gin.H{"id": modifiedclaims.AddModifiedClaim(claimsItem.ClaimType, claimsItem.FromDate, claimsItem.ToDate, claimsItem.PlaceOfService, claimsItem.ProviderId,
+// 		claimsItem.ProviderType, claimsItem.ProviderSpecialty, claimsItem.ProcedureCode, claimsItem.DiagnosisCode,
+// 		claimsItem.NetworkIndicator, claimsItem.SubscriberId, claimsItem.PatientAccountNumber, claimsItem.SccfNumber,
+// 		claimsItem.RevenueCode, claimsItem.BillType, claimsItem.Modifier, claimsItem.PlanCode, claimsItem.SfMessageCode,
+// 		claimsItem.PricingMethod, claimsItem.PricingRule, claimsItem.DeliveryMethod, claimsItem.InputDate, claimsItem.FileName)})
+// }
 
 // DeleteClaimsHandler will delete a specified claim based on user http input
-func DeleteClaimsHandler(c *gin.Context) {
-	claimsID := c.Param("id")
-	if err := modifiedclaims.Delete(claimsID); err != nil {
-		c.JSON(http.StatusInternalServerError, err)
-		return
-	}
-	c.JSON(http.StatusOK, "")
-}
+// func DeleteClaimsHandler(c *gin.Context) {
+// 	claimsID := c.Param("id")
+// 	if err := modifiedclaims.Delete(claimsID); err != nil {
+// 		c.JSON(http.StatusInternalServerError, err)
+// 		return
+// 	}
+// 	c.JSON(http.StatusOK, "")
+// }
 
 func convertHTTPBodyToClaims(httpBody io.ReadCloser) (claims.Claims, int, error) {
 	body, err := ioutil.ReadAll(httpBody)

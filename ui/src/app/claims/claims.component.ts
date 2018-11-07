@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewContainerRef } from '@angular/core';
-import { ClaimsService, Claims } from '../claims.service';
+import { ClaimsService, Claims, ModifiedClaims } from '../claims.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { EditModalComponent } from '../edit-modal/edit-modal.component';
 import { ErrorModalComponent } from '../error-modal/error-modal.component';
@@ -31,7 +31,7 @@ export class ClaimsComponent implements OnInit {
 	
   activeInstitutionalClaims: Claims[];
   activeProfessionalClaims: Claims[];
-  modifiedClaims: Claims[];
+  modifiedClaims: ModifiedClaims[];
   
   selectedActiveInstitutionalClaimIds: Array<any> = [];
 	selectedActiveProfessionalClaimIds: Array<any> = [];
@@ -320,7 +320,7 @@ export class ClaimsComponent implements OnInit {
   }
 
   getModifiedClaims() {
-	  this.claimsService.getModifiedClaimsList().subscribe((data: Claims[]) => {
+	  this.claimsService.getModifiedClaimsList().subscribe((data: ModifiedClaims[]) => {
 			this.modifiedClaims = data.filter(claim => claim);
 			//setTimeout(() => this.initDatatable3(),0);
 		  });	

@@ -42,6 +42,10 @@
 				<div class="form-row" *ngIf="selectedInstOption > 0 && showInstButton">
 					<button type="button" class="btn btn-default" (click)="addSelectItems(instSearchForm, 'Institutional', options[0])">Add Search Criteria</button>
 				</div>
+				<div class="form-row py-4" *ngIf="selectedInstOption > 0 && showInstButton">
+							<label class="col-lg-2 col-form-label" for="claimsThreshold">Claim Result Limit</label>
+							<input type="text" class="form-control col-lg-2" name="claimsThreshold" [formControlName]="claimsThreshold">
+				</div>
 				<div class="form-row alert alert-danger"  *ngIf="submittedInstForm && instSearchForm.status === 'INVALID'">
 						You cannot leave search fields empty.
 					</div>
@@ -173,21 +177,23 @@
 		  <thead>
 		  <tr>
 			<th>Subscriber ID</th>
-			<th>Claim Type</th>
+			<th>Original Claim ID</th>
 			<th>SCCF Number</th>
 			<th>Procedure Code</th>
 			<th>Diagnosis Code</th>
 			<th>Modifier</th>
 			<th>Patient Account Number</th>
-			<th>DOS From Date</th>
-			<th>DOS To Date</th>
+			<th>From Date</th>
+			<th>To Date</th>
+			<th>Create Date</th>
+			<th>Created By</th>
 			<th></th>
 		  </tr>
 		  </thead>
 		  <tbody>
 		  <tr *ngFor="let claims of modifiedClaims">
 			<td>{{claims.subscriberId}}</td>
-			<td>{{claims.claimtype}}</td>
+			<td>{{claims.originalClaimID}}</td>
 			<td>{{claims.sccfNumber}}</td>
 			<td>{{claims.procedureCode}}</td>
 			<td>{{claims.diagnosisCode}}</td>
@@ -195,6 +201,8 @@
 			<td>{{claims.patientAccountNumber}}</td>
 			<td>{{claims.fromDate}}</td>
 			<td>{{claims.toDate}}</td>
+			<td>{{claims.createDate}}</td>
+			<td>{{claims.createdBy}}</td>
 			<td>
 			  <button class="btn btn-danger" (click)="deleteClaims(claims)">
 				<i class="fa fa-trash"></i>

@@ -1,7 +1,6 @@
 package claims
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"log"
@@ -12,7 +11,7 @@ import (
 	"github.com/y14636/itshome-claims/utilities"
 )
 
-const SELECT_STATEMENT string = "SELECT orig.Id, orig.ClaimType, orig.ServiceId, orig.ReceiptDate, orig.FromDate, orig.ToDate, orig.ProviderId, orig.ProviderType, orig.ProviderSpecialty, orig.DiagnosisCode, orig.NetworkIndicator, orig.SubscriberId, orig.PatientAccountNumber, orig.SCCFNumber, orig.BillType, orig.PlanCode, orig.SFMessageCode, orig.DeliveryMethod, orig.Claim, orig.InputDate, orig.FileName, orig.CREATE_DT, orig.CREATED_BY, pricing.SFMessageCode, pricing.PricingMethod, pricing.PricingRule, orig_proc.ProcedureCode, orig_proc.RevenueCode, orig_proc.Modifier, orig_proc.DateOfService, orig_proc.DateOfServiceTo, orig_proc.PlaceOfService FROM ITSHome.OriginalClaims orig, ITSHome.OriginalPricing pricing, ITSHome.OriginalProcedures orig_proc WHERE orig.Id = pricing.OriginalClaimID AND pricing.OriginalClaimID = orig_proc.OriginalClaimID"
+const SELECT_STATEMENT string = "SELECT orig.Id, orig.ClaimType, orig.ServiceId, orig.ReceiptDate, orig.FromDate, orig.ToDate, orig.ProviderId, orig.ProviderType, orig.ProviderSpecialty, orig.DiagnosisCode, orig.NetworkIndicator, orig.SubscriberId, orig.PatientAccountNumber, orig.SCCFNumber, orig.BillType, orig.PlanCode, orig.SFMessageCode, orig.DeliveryMethod, orig.Claim, orig.InputDate, orig.FileName, orig.CREATE_DT, orig.CREATED_BY, pricing.SFMessageCode, pricing.PricingMethod, pricing.PricingRule, orig_proc.ProcedureCode, orig_proc.RevenueCode, orig_proc.Modifier, orig_proc.DateOfService, orig_proc.DateOfServiceTo, orig_proc.PlaceOfService FROM ITSHome.OriginalClaims orig LEFT OUTER JOIN ITSHome.OriginalPricing pricing ON orig.Id = pricing.OriginalClaimID LEFT OUTER JOIN ITSHome.OriginalProcedures orig_proc ON pricing.OriginalClaimID = orig_proc.OriginalClaimID"
 const SELECT_STATEMENT_ALL string = "SELECT orig.Id, orig.ClaimType, COALESCE(orig.ServiceId, 'N/A') AS ServiceId, orig.ReceiptDate, orig.FromDate, orig.ToDate, orig.ProviderId, orig.ProviderType, orig.ProviderSpecialty, orig.DiagnosisCode, orig.NetworkIndicator, orig.SubscriberId, orig.PatientAccountNumber, orig.SCCFNumber, orig.BillType, orig.PlanCode, orig.SFMessageCode, orig.DeliveryMethod, orig.InputDate, orig.FileName FROM ITSHome.OriginalClaims orig"
 
 var (
@@ -112,53 +111,6 @@ type Claims struct {
 	FileName             string `json:"fileName"`
 }
 
-func GetResults(search string) []Claims {
-	var rList = []Claims{}
-	//fmt.Println("search string=", search)
-	criteria := utilities.ParseParameters(search)
-	criteria = utilities.CleanParameters(criteria)
-
-	condb, errdb := utilities.GetSqlConnection()
-	if errdb != nil {
-		fmt.Println(" Error open db:", errdb.Error())
-	}
-
-	rList = FetchClaims(condb, criteria)
-
-	defer condb.Close()
-
-	return rList
-}
-
-func FetchClaims(condb *sql.DB, criteria string) []Claims {
-	var rList = []Claims{}
-	strSelect := SELECT_STATEMENT
-	if len(criteria) > 0 {
-		strSelect += criteria
-	}
-	fmt.Println("select statement", strSelect)
-	rows, err := condb.Query(strSelect)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-	for rows.Next() {
-		err := rows.Scan(&id, &claimType, &serviceId, &receiptDate, &fromDate, &toDate, &placeOfService, &providerId, &providerType, &providerSpecialty, &procedureCode, &diagnosisCode, &networkIndicator, &subscriberId, &patientAccountNumber, &sccfNumber, &revenueCode, &billType, &modifier, &planCode, &sfMessageCode, &pricingMethod, &pricingRule, &deliveryMethod, &inputDate, &fileName)
-		if err != nil {
-			log.Fatal(err)
-		}
-		strId := strconv.Itoa(id)
-		t := newResult(strId, claimType, serviceId, receiptDate, fromDate, toDate, placeOfService, providerId, providerType, providerSpecialty, procedureCode, diagnosisCode, networkIndicator, subscriberId, patientAccountNumber, sccfNumber, revenueCode, billType, modifier, planCode, sfMessageCode, pricingMethod, pricingRule, deliveryMethod, inputDate, fileName)
-		rList = append(rList, t)
-	}
-	err = rows.Err()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return rList
-}
-
 // Get retrieves all elements from the claims list
 func Get() []Claims {
 	var list []Claims
@@ -188,6 +140,38 @@ func Get() []Claims {
 	}
 
 	return list
+}
+
+func GetListById(claimId string) []Claims {
+	fmt.Println("inside GetListById", claimId)
+	var list []Claims
+
+	condb, errdb := utilities.GetSqlConnection()
+	if errdb != nil {
+		fmt.Println(" Error open db:", errdb.Error())
+	}
+
+	rows, err := condb.Query(SELECT_STATEMENT_ALL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(&id, &claimType, &serviceId, &receiptDate, &fromDate, &toDate, &providerId, &providerType, &providerSpecialty, &diagnosisCode, &networkIndicator, &subscriberId, &patientAccountNumber, &sccfNumber, &billType, &planCode, &sfMessageCode, &deliveryMethod, &inputDate, &fileName)
+		if err != nil {
+			log.Fatal(err)
+		}
+		strId := strconv.Itoa(id)
+		t := newResultAll(strId, claimType, serviceId, receiptDate, fromDate, toDate, providerId, providerType, providerSpecialty, diagnosisCode, networkIndicator, subscriberId, patientAccountNumber, sccfNumber, billType, planCode, sfMessageCode, deliveryMethod, inputDate, fileName)
+		list = append(list, t)
+	}
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return list
+
 }
 
 // Add will add a new claim

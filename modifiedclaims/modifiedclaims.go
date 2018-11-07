@@ -2,7 +2,6 @@ package modifiedclaims
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 	"strconv"
@@ -11,17 +10,32 @@ import (
 	"time"
 
 	_ "github.com/denisenkom/go-mssqldb"
-	"github.com/rs/xid"
 	"github.com/y14636/itshome-claims/utilities"
 )
 
 const READY_STATUS = "Ready"
+const SELECT_STATEMENT = "SELECT DISTINCT mc.SubscriberId, mc.OriginalClaimID, mc.SCCFNumber, mp.ProcedureCode, mc.DiagnosisCode, mp.Modifier, mc.PatientAccountNumber, COALESCE(mc.NetworkIndicator, 'N/A'), COALESCE(mc.FromDate, ''), COALESCE(mc.ToDate, ''), mc.Status, mp.DateOfService, mp.DateOfServiceTo, mc.CREATE_DT, COALESCE(mc.CREATED_BY, '') FROM ITSHome.ModifiedClaims mc, ITSHome.ModifiedProcedures mp WHERE mc.Id = mp.ModifiedClaimID AND mc.Status = 'Ready' ORDER BY CREATE_DT DESC"
 
 var (
-	mList []ModifiedClaims
 	mtx   sync.RWMutex
 	once  sync.Once
 	condb *sql.DB
+
+	subscriberId         string
+	originalClaimID      int
+	sccfNumber           string
+	procedureCode        string
+	diagnosisCode        string
+	modifier             string
+	patientAccountNumber string
+	networkIndicator     string
+	fromDate             string
+	toDate               string
+	status               string
+	dosFrom              string
+	dosTo                string
+	createDate           string
+	createdBy            string
 )
 
 func init() {
@@ -29,58 +43,78 @@ func init() {
 }
 
 func initializeList() {
-	mList = []ModifiedClaims{}
+	//mList = []ModifiedClaims{}
 }
 
 // Modified Claims data structure
 type ModifiedClaims struct {
-	ID                   string `json:"id"`
-	ClaimType            string `json:"claimtype"`
-	FromDate             string `json:"fromDate"`
-	ToDate               string `json:"toDate"`
-	PlaceOfService       string `json:"placeOfService"`
-	ProviderId           string `json:"providerId"`
-	ProviderType         string `json:"providerType"`
-	ProviderSpecialty    string `json:"providerSpecialty"`
+	SubscriberId         string `json:"subscriberId"`
+	OriginalClaimID      string `json:"originalClaimID"`
+	SccfNumber           string `json:"sccfNumber"`
 	ProcedureCode        string `json:"procedureCode"`
 	DiagnosisCode        string `json:"diagnosisCode"`
-	NetworkIndicator     string `json:"networkIndicator"`
-	SubscriberId         string `json:"subscriberId"`
-	PatientAccountNumber string `json:"patientAccountNumber"`
-	SccfNumber           string `json:"sccfNumber"`
-	RevenueCode          string `json:"revenueCode"`
-	BillType             string `json:"billType"`
 	Modifier             string `json:"modifier"`
-	PlanCode             string `json:"planCode"`
-	SfMessageCode        string `json:"sfMessageCode"`
-	PricingMethod        string `json:"pricingMethod"`
-	PricingRule          string `json:"pricingRule"`
-	DeliveryMethod       string `json:"deliveryMethod"`
-	InputDate            string `json:"inputDate"`
-	FileName             string `json:"fileName"`
+	PatientAccountNumber string `json:"patientAccountNumber"`
+	NetworkIndicator     string `json:"networkIndicator"`
+	FromDate             string `json:"fromDate"`
+	ToDate               string `json:"toDate"`
+	Status               string `json:"status"`
+	DosFrom              string `json:"dosFrom"`
+	DosTo                string `json:"dosTo"`
+	CreateDate           string `json:"createDate"`
+	CreatedBy            string `json:"createdBy"`
 }
 
 // Get retrieves all elements from the claims list
 func GetModifiedClaims() []ModifiedClaims {
+	var mList []ModifiedClaims
+
+	var errdb error
+	condb, errdb = utilities.GetSqlConnection()
+	if errdb != nil {
+		log.Fatal("Open connection failed:", errdb.Error())
+	}
+	fmt.Printf("Connected!\n")
+	defer condb.Close()
+
+	rows, err := condb.Query(SELECT_STATEMENT)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(&subscriberId, &originalClaimID, &sccfNumber, &procedureCode, &diagnosisCode, &modifier, &patientAccountNumber, &networkIndicator, &fromDate, &toDate, &status, &dosFrom, &dosTo, &createDate, &createdBy)
+		if err != nil {
+			log.Fatal(err)
+		}
+		strClaimId := strconv.Itoa(originalClaimID)
+		t := newResultAll(subscriberId, strClaimId, sccfNumber, procedureCode, diagnosisCode, modifier, patientAccountNumber, networkIndicator, fromDate, toDate, status, dosFrom, dosTo, createDate, createdBy)
+		mList = append(mList, t)
+	}
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return mList
 }
 
 // Add will add a new modified claim
-func AddModifiedClaim(claimType string, fromDate string, toDate string, placeOfService string, providerId string,
-	providerType string, providerSpecialty string, procedureCode string, diagnosisCode string,
-	networkIndicator string, subscriberId string, patientAccountNumber string, sccfNumber string,
-	revenueCode string, billType string, modifier string, planCode string, sfMessageCode string,
-	pricingMethod string, pricingRule string, deliveryMethod string, inputDate string, fileName string) string {
-	t := newModifiedClaim(claimType, fromDate, toDate, placeOfService, providerId,
-		providerType, providerSpecialty, procedureCode, diagnosisCode,
-		networkIndicator, subscriberId, patientAccountNumber, sccfNumber,
-		revenueCode, billType, modifier, planCode, sfMessageCode,
-		pricingMethod, pricingRule, deliveryMethod, inputDate, fileName)
-	mtx.Lock()
-	mList = append(mList, t)
-	mtx.Unlock()
-	return t.ID
-}
+// func AddModifiedClaim(claimType string, fromDate string, toDate string, placeOfService string, providerId string,
+// 	providerType string, providerSpecialty string, procedureCode string, diagnosisCode string,
+// 	networkIndicator string, subscriberId string, patientAccountNumber string, sccfNumber string,
+// 	revenueCode string, billType string, modifier string, planCode string, sfMessageCode string,
+// 	pricingMethod string, pricingRule string, deliveryMethod string, inputDate string, fileName string) string {
+// 	t := newModifiedClaim(claimType, fromDate, toDate, placeOfService, providerId,
+// 		providerType, providerSpecialty, procedureCode, diagnosisCode,
+// 		networkIndicator, subscriberId, patientAccountNumber, sccfNumber,
+// 		revenueCode, billType, modifier, planCode, sfMessageCode,
+// 		pricingMethod, pricingRule, deliveryMethod, inputDate, fileName)
+// 	mtx.Lock()
+// 	mList = append(mList, t)
+// 	mtx.Unlock()
+// 	return t.ID
+// }
 
 func AddMultipleClaims(claimsData string) error {
 	fmt.Println("Add Multiple Claims", claimsData)
@@ -250,65 +284,87 @@ func UpdateModifiedProcedures(db *sql.DB, criteria string, modifiedClaimId strin
 }
 
 // Delete will remove a claim from the Claims list
-func Delete(id string) error {
-	location, err := findClaimsLocation(id)
-	if err != nil {
-		return err
-	}
-	removeElementByLocation(location)
-	return nil
-}
+// func Delete(id string) error {
+// 	location, err := findClaimsLocation(id)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	removeElementByLocation(location)
+// 	return nil
+// }
 
-func newModifiedClaim(claimType string, fromDate string, toDate string, placeOfService string, providerId string,
-	providerType string, providerSpecialty string, procedureCode string, diagnosisCode string,
-	networkIndicator string, subscriberId string, patientAccountNumber string, sccfNumber string,
-	revenueCode string, billType string, modifier string, planCode string, sfMessageCode string,
-	pricingMethod string, pricingRule string, deliveryMethod string, inputDate string, fileName string) ModifiedClaims {
-	return ModifiedClaims{
-		ID:                   xid.New().String(),
-		ClaimType:            claimType,
-		FromDate:             fromDate,
-		ToDate:               toDate,
-		PlaceOfService:       placeOfService,
-		ProviderId:           providerId,
-		ProviderType:         providerType,
-		ProviderSpecialty:    providerSpecialty,
-		ProcedureCode:        procedureCode,
-		DiagnosisCode:        diagnosisCode,
-		NetworkIndicator:     networkIndicator,
-		SubscriberId:         subscriberId,
-		PatientAccountNumber: patientAccountNumber,
-		SccfNumber:           sccfNumber,
-		RevenueCode:          revenueCode,
-		BillType:             billType,
-		Modifier:             modifier,
-		PlanCode:             planCode,
-		SfMessageCode:        sfMessageCode,
-		PricingMethod:        pricingMethod,
-		PricingRule:          pricingRule,
-		DeliveryMethod:       deliveryMethod,
-		InputDate:            inputDate,
-		FileName:             fileName,
-	}
-}
+// func newModifiedClaim(claimType string, fromDate string, toDate string, placeOfService string, providerId string,
+// 	providerType string, providerSpecialty string, procedureCode string, diagnosisCode string,
+// 	networkIndicator string, subscriberId string, patientAccountNumber string, sccfNumber string,
+// 	revenueCode string, billType string, modifier string, planCode string, sfMessageCode string,
+// 	pricingMethod string, pricingRule string, deliveryMethod string, inputDate string, fileName string) ModifiedClaims {
+// 	return ModifiedClaims{
+// 		ID:                   xid.New().String(),
+// 		ClaimType:            claimType,
+// 		FromDate:             fromDate,
+// 		ToDate:               toDate,
+// 		PlaceOfService:       placeOfService,
+// 		ProviderId:           providerId,
+// 		ProviderType:         providerType,
+// 		ProviderSpecialty:    providerSpecialty,
+// 		ProcedureCode:        procedureCode,
+// 		DiagnosisCode:        diagnosisCode,
+// 		NetworkIndicator:     networkIndicator,
+// 		SubscriberId:         subscriberId,
+// 		PatientAccountNumber: patientAccountNumber,
+// 		SccfNumber:           sccfNumber,
+// 		RevenueCode:          revenueCode,
+// 		BillType:             billType,
+// 		Modifier:             modifier,
+// 		PlanCode:             planCode,
+// 		SfMessageCode:        sfMessageCode,
+// 		PricingMethod:        pricingMethod,
+// 		PricingRule:          pricingRule,
+// 		DeliveryMethod:       deliveryMethod,
+// 		InputDate:            inputDate,
+// 		FileName:             fileName,
+// 	}
+// }
 
-func findClaimsLocation(id string) (int, error) {
-	mtx.RLock()
-	defer mtx.RUnlock()
-	for i, t := range mList {
-		if isMatchingID(t.ID, id) {
-			return i, nil
-		}
-	}
-	return 0, errors.New("could not find claims based on id")
-}
+// func findClaimsLocation(id string) (int, error) {
+// 	mtx.RLock()
+// 	defer mtx.RUnlock()
+// 	for i, t := range mList {
+// 		if isMatchingID(t.ID, id) {
+// 			return i, nil
+// 		}
+// 	}
+// 	return 0, errors.New("could not find claims based on id")
+// }
 
-func removeElementByLocation(i int) {
-	mtx.Lock()
-	mList = append(mList[:i], mList[i+1:]...)
-	mtx.Unlock()
-}
+// func removeElementByLocation(i int) {
+// 	mtx.Lock()
+// 	mList = append(mList[:i], mList[i+1:]...)
+// 	mtx.Unlock()
+// }
 
 func isMatchingID(a string, b string) bool {
 	return a == b
+}
+
+func newResultAll(subscriberId string, originalClaimID string, sccfNumber string, procedureCode string, diagnosisCode string,
+	modifier string, patientAccountNumber string, networkIndicator string, fromDate string, toDate string, status string,
+	dosFrom string, dosTo string, createDate string, createdBy string) ModifiedClaims {
+	return ModifiedClaims{
+		SubscriberId:         subscriberId,
+		OriginalClaimID:      originalClaimID,
+		SccfNumber:           sccfNumber,
+		ProcedureCode:        procedureCode,
+		DiagnosisCode:        diagnosisCode,
+		Modifier:             modifier,
+		PatientAccountNumber: patientAccountNumber,
+		NetworkIndicator:     networkIndicator,
+		FromDate:             fromDate,
+		ToDate:               toDate,
+		Status:               status,
+		DosFrom:              dosFrom,
+		DosTo:                dosTo,
+		CreateDate:           createDate,
+		CreatedBy:            createdBy,
+	}
 }

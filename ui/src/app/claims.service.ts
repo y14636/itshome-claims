@@ -17,8 +17,12 @@ export class ClaimsService {
   //   return this.httpClient.get(environment.gateway + '/searchclaims/' + search);
   // }
 
+  getClaimsListByIds(claimsId: string) {
+    return this.httpClient.get(environment.gateway + '/claims/' + claimsId);
+  }
+
   getSearchResults(search: string) {
-    return this.httpClient.get(environment.gateway + '/claims/' + search);
+    return this.httpClient.get(environment.gateway + '/searchclaims/' + search);
   }
 
   getModifiedClaimsList() {
@@ -49,24 +53,47 @@ export class Claims {
   receiptDate: string;
   fromDate: string;
   toDate: string;
-  placeOfService: string;
   providerId: string;
   providerType: string;
   providerSpecialty: string;
-  procedureCode: string;
   diagnosisCode: string;
   networkIndicator: string;
   subscriberId: string;
   patientAccountNumber: string;
   sccfNumber: string;
-  revenueCode: string;
   billType: string;
-  modifier: string;
   planCode: string;
   sfMessageCode: string;
-  pricingMethod: string;
-  pricingRule: string;
   deliveryMethod: string;
   inputDate: string;
   fileName: string;
+  createDate: string;
+  createdBy: string;
+  pSfMessageCode: string;
+  pricingMethod: string;
+  pricingRule: string;
+  procedureCode: string;
+  revenueCode: string;
+  modifier: string;
+  dosFrom: string;
+  dosTo: string;
+  placeOfService: string;
+}
+
+export class ModifiedClaims {
+  subscriberId: string;
+	originalClaimID: string;
+	sccfNumber: string;
+	procedureCode: string;
+	diagnosisCode: string;
+	modifier: string;
+	patientAccountNumber: string;
+	networkIndicator: string;
+	fromDate: string;
+	toDate: string;
+	status: string;
+	dosFrom: string;
+	dosTo: string;
+	createDate: string;
+	createdBy: string;
 }
