@@ -142,7 +142,8 @@ export class ClaimsComponent implements OnInit {
   private createInstForm(option:string) {
     this.instSearchForm = this.formBuilder.group({
 	  instSelectItems: this.formBuilder.array([ this.createSelectItems(option) ]),
-	  instInputItems: this.formBuilder.array([ this.createInputItem(0, "default") ]),
+		instInputItems: this.formBuilder.array([ this.createInputItem(0, "default") ]),
+		claimsThreshold: 100,
 	  hiddenInputItems: this.formBuilder.array([ this.createHiddenInputItem(0, "ClaimType", "11"), this.createHiddenInputItem(1, "ClaimType", "12") ])
     });
 	
@@ -157,7 +158,8 @@ export class ClaimsComponent implements OnInit {
   private createProfForm(option:string) {
     this.profSearchForm = this.formBuilder.group({
 	  profSelectItems: this.formBuilder.array([ this.createSelectItems(option) ]),
-	  profInputItems: this.formBuilder.array([ this.createInputItem(0, "default") ]),
+		profInputItems: this.formBuilder.array([ this.createInputItem(0, "default") ]),
+		claimsThreshold: 100,
 	  hiddenInputItems: this.formBuilder.array([ this.createHiddenInputItem(0, "ClaimType", "20")])
     });
 	

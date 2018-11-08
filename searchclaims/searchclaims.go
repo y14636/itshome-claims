@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/y14636/itshome-claims/utilities"
 )
 
-const SELECT_STATEMENT string = "SELECT orig.Id, orig.ClaimType, COALESCE(orig.ServiceId, ''), orig.ReceiptDate, orig.FromDate, orig.ToDate, orig.ProviderId, orig.ProviderType, orig.ProviderSpecialty, orig.DiagnosisCode, orig.NetworkIndicator, orig.SubscriberId, orig.PatientAccountNumber, orig.SCCFNumber, orig.BillType, orig.PlanCode, orig.SFMessageCode, orig.DeliveryMethod, orig.InputDate, orig.FileName, orig.CREATE_DT, orig.CREATED_BY, COALESCE(pricing.SFMessageCode, '') AS PsfMessageCode, COALESCE(pricing.PricingMethod, ''), COALESCE(pricing.PricingRule, ''), COALESCE(orig_proc.ProcedureCode, ''), COALESCE(orig_proc.RevenueCode, ''), COALESCE(orig_proc.Modifier, ''), COALESCE(orig_proc.DateOfService, ''), COALESCE(orig_proc.DateOfServiceTo, ''), COALESCE(orig_proc.PlaceOfService, '') FROM ITSHome.OriginalClaims orig LEFT OUTER JOIN ITSHome.OriginalPricing pricing ON orig.Id = pricing.OriginalClaimID LEFT OUTER JOIN ITSHome.OriginalProcedures orig_proc ON pricing.OriginalClaimID = orig_proc.OriginalClaimID"
+const SELECT_STATEMENT string = "SELECT TOP (?) orig.Id, orig.ClaimType, COALESCE(orig.ServiceId, ''), orig.ReceiptDate, orig.FromDate, orig.ToDate, orig.ProviderId, orig.ProviderType, orig.ProviderSpecialty, orig.DiagnosisCode, orig.NetworkIndicator, orig.SubscriberId, orig.PatientAccountNumber, orig.SCCFNumber, orig.BillType, orig.PlanCode, orig.SFMessageCode, orig.DeliveryMethod, orig.InputDate, orig.FileName, orig.CREATE_DT, orig.CREATED_BY, COALESCE(pricing.SFMessageCode, '') AS PsfMessageCode, COALESCE(pricing.PricingMethod, ''), COALESCE(pricing.PricingRule, ''), COALESCE(orig_proc.ProcedureCode, ''), COALESCE(orig_proc.RevenueCode, ''), COALESCE(orig_proc.Modifier, ''), COALESCE(orig_proc.DateOfService, ''), COALESCE(orig_proc.DateOfServiceTo, ''), COALESCE(orig_proc.PlaceOfService, '') FROM ITSHome.OriginalClaims orig LEFT OUTER JOIN ITSHome.OriginalPricing pricing ON orig.Id = pricing.OriginalClaimID LEFT OUTER JOIN ITSHome.OriginalProcedures orig_proc ON pricing.OriginalClaimID = orig_proc.OriginalClaimID"
 const SELECT_STATEMENT_ALL string = "SELECT orig.Id, orig.ClaimType, COALESCE(orig.ServiceId, 'N/A') AS ServiceId, orig.ReceiptDate, orig.FromDate, orig.ToDate, orig.ProviderId, orig.ProviderType, orig.ProviderSpecialty, orig.DiagnosisCode, orig.NetworkIndicator, orig.SubscriberId, orig.PatientAccountNumber, orig.SCCFNumber, orig.BillType, orig.PlanCode, orig.SFMessageCode, orig.DeliveryMethod, orig.InputDate, orig.FileName FROM ITSHome.OriginalClaims orig"
 
 var (
@@ -96,28 +97,67 @@ type Claims struct {
 func GetResults(search string) []Claims {
 	var rList = []Claims{}
 	criteria := utilities.ParseParameters(search)
-	criteria = utilities.CleanParameters(criteria)
+	fmt.Println("Inside GetResults(), before CleanParameters()", criteria)
+	criteria = GetClaimsThreshold(criteria)
+	fmt.Println("Inside GetResults(), after GetClaimsThreshold()", criteria)
+	newCriteria := strings.Split(criteria, "|")
+	claimsThreshold := newCriteria[1]
+	claimsThresholdValue := strings.SplitAfter(claimsThreshold, "=")
+	thresholdLimit := utilities.TrimQuote(claimsThresholdValue[1])
+	fmt.Println("thresholdLimit", thresholdLimit)
+	criteria = utilities.CleanParameters(newCriteria[0])
+	fmt.Println("Inside GetResults(), after CleanParameters()", criteria)
 
 	condb, errdb := utilities.GetSqlConnection()
 	if errdb != nil {
 		fmt.Println(" Error open db:", errdb.Error())
 	}
 
-	rList = FetchClaims(condb, criteria)
+	rList = FetchClaims(condb, criteria, thresholdLimit)
 
 	defer condb.Close()
 
 	return rList
 }
 
-func FetchClaims(condb *sql.DB, criteria string) []Claims {
+func GetClaimsThreshold(criteria string) string {
+	fmt.Println("Inside GetClaimsThreshold")
+	newCriteria := criteria
+	var paramName string
+	var paramValue string
+	result := strings.Split(newCriteria, ";")
+	for j := range result {
+		fmt.Println("result", result[j])
+		field := result[j]
+		fieldName := strings.Split(field, "=")
+		fmt.Println("fieldName", fieldName[0])
+		if len(fieldName[0]) > 0 && fieldName[0] == "claimsThreshold" {
+			paramName = fieldName[0]
+			fmt.Println("name", paramName)
+			fmt.Println("value", fieldName[1])
+			fmt.Println("string before removing", newCriteria)
+			fmt.Println("string to be removed", paramName+"="+fieldName[1])
+			paramValue = fieldName[1]
+			fmt.Println("paramValue", paramValue)
+			newCriteria = strings.Replace(newCriteria, paramName+"="+paramValue+";", "", -1)
+			//fmt.Println("string after removing", criteria)
+		}
+	}
+	return newCriteria + "|" + paramName + "=" + paramValue
+}
+
+func FetchClaims(condb *sql.DB, criteria string, thresholdLimit string) []Claims {
 	var rList = []Claims{}
 	strSelect := SELECT_STATEMENT
 	if len(criteria) > 0 {
 		strSelect += criteria
 	}
 	fmt.Println("select statement", strSelect)
-	rows, err := condb.Query(strSelect)
+	i, err := strconv.Atoi(thresholdLimit)
+	if err != nil {
+		log.Fatal(err)
+	}
+	rows, err := condb.Query(strSelect, i)
 	if err != nil {
 		log.Fatal(err)
 	}

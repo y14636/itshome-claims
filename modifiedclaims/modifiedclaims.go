@@ -194,9 +194,9 @@ func UpdateSubscriberId(criteria string) string {
 		fmt.Println(len(parameter[0]))
 		if len(parameter[0]) > 0 {
 			if len(parameter[1]) > 0 && parameter[0] == "subscriberId" {
-				subIdHolder = trimQuote(parameter[1])
+				subIdHolder = utilities.TrimQuote(parameter[1])
 			} else if len(parameter[1]) > 0 && parameter[0] == "suffix" {
-				suffixHolder = trimQuote(parameter[1])
+				suffixHolder = utilities.TrimQuote(parameter[1])
 			} else {
 				newCriteria += parameter[0] + "=" + parameter[1] + ";"
 				fmt.Println("new criteria", newCriteria)
@@ -207,11 +207,6 @@ func UpdateSubscriberId(criteria string) string {
 	newCriteria = newCriteria + "subscriberId='" + subIdHolder + suffixHolder + "';"
 	fmt.Println("newCriteria end", newCriteria)
 	return newCriteria
-}
-
-func trimQuote(s string) string {
-	s = s[1 : len(s)-1]
-	return s
 }
 
 func CreateModifiedClaims(db *sql.DB, claimId string, userId string, currentDateTime string) (int64, error) {

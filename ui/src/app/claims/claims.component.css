@@ -27,3 +27,12 @@ td {
 	margin-left: .05em;
 	margin-top: 0em;
 }
+
+.input-threshold {
+	max-width: 85px;
+}
+
+.input-threshold-label {
+	text-align: right;
+	font-weight: bold;
+}

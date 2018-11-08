@@ -43,8 +43,8 @@
 					<button type="button" class="btn btn-default" (click)="addSelectItems(instSearchForm, 'Institutional', options[0])">Add Search Criteria</button>
 				</div>
 				<div class="form-row py-4" *ngIf="selectedInstOption > 0 && showInstButton">
-							<label class="col-lg-2 col-form-label" for="claimsThreshold">Claim Result Limit</label>
-							<input type="text" class="form-control col-lg-2" name="claimsThreshold" [formControlName]="claimsThreshold">
+							<label class="col-form-label input-threshold-label" for="claimsThreshold">Claims Threshold:</label>
+							<input type="number" class="form-control input-threshold" formControlName="claimsThreshold">
 				</div>
 				<div class="form-row alert alert-danger"  *ngIf="submittedInstForm && instSearchForm.status === 'INVALID'">
 						You cannot leave search fields empty.
@@ -123,6 +123,10 @@
 						<div class="form-row" *ngIf="selectedProfOption > 0 && showProfButton">
 							<button type="button" class="btn btn-default" (click)="addSelectItems(profSearchForm, 'Professional', options[0])">Add Search Criteria</button>
 						</div>
+						<div class="form-row py-4" *ngIf="selectedProfOption > 0 && showProfButton">
+							<label class="col-form-label input-threshold-label" for="claimsThreshold">Claims Threshold:</label>
+							<input type="number" class="form-control input-threshold" formControlName="claimsThreshold">
+					  </div>
 						<div class="form-row d-flex justify-content-end" *ngIf="selectedProfOption > 0">
 								<div class="col-lg-2" formArrayName="hiddenInputItems" *ngFor="let item of getControls(profSearchForm, 'hiddenInputItems'); let n = index;">
 										<div [formGroupName]="n">

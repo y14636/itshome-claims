@@ -84,6 +84,7 @@ func ParseParameters(parameters string) string {
 			criteria += k + "='" + vv + "';"
 		case float64:
 			fmt.Println(k, "is float64", vv)
+			criteria += k + "='" + strconv.FormatFloat(vv, 'f', -1, 64) + "';"
 		case []interface{}:
 			fmt.Println(k, "is an array:")
 			if k == "instInputItems" || k == "profInputItems" || k == "hiddenInputItems" || k == "selectedActiveInstitutionalClaimIds" {
@@ -199,5 +200,10 @@ func TrimSuffix(s, suffix string) string {
 	if strings.HasSuffix(s, suffix) {
 		s = s[:len(s)-len(suffix)]
 	}
+	return s
+}
+
+func TrimQuote(s string) string {
+	s = s[1 : len(s)-1]
 	return s
 }
