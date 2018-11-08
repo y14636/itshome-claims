@@ -211,7 +211,7 @@ func UpdateSubscriberId(criteria string) string {
 
 func CreateModifiedClaims(db *sql.DB, claimId string, userId string, currentDateTime string) (int64, error) {
 	tsql := fmt.Sprintf("INSERT INTO ITSHome.ModifiedClaims ( OriginalClaimID, FromDate, ToDate, DiagnosisCode, NetworkIndicator, SubscriberId, PatientAccountNumber, SCCFNumber, Claim, ModifiedDate, ModifiedBy, Status, CreatedDate, CREATE_DT, CREATED_BY 	) SELECT Id AS OriginalClaimID, FromDate, ToDate, DiagnosisCode, NetworkIndicator, SubscriberId, PatientAccountNumber, SCCFNumber,	Claim, '%s' AS ModifiedDate, '%s' AS ModifiedBy, '%s' AS Status, '%s' AS CreatedDate, '%s' as CREATE_DT, '%s' as CREATED_BY FROM ITSHome.OriginalClaims WHERE Id = '%s'",
-		currentDateTime, userId, READY_STATUS, currentDateTime, currentDateTime, currentDateTime, claimId)
+		currentDateTime, userId, READY_STATUS, currentDateTime, currentDateTime, userId, claimId)
 	result, err := db.Exec(tsql)
 	if err != nil {
 		fmt.Println("Error inserting new row: " + err.Error())

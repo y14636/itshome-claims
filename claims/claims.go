@@ -11,7 +11,7 @@ import (
 	"github.com/y14636/itshome-claims/utilities"
 )
 
-const SELECT_STATEMENT string = "SELECT orig.Id, orig.ClaimType, orig.ServiceId, orig.ReceiptDate, orig.FromDate, orig.ToDate, orig.ProviderId, orig.ProviderType, orig.ProviderSpecialty, orig.DiagnosisCode, orig.NetworkIndicator, orig.SubscriberId, orig.PatientAccountNumber, orig.SCCFNumber, orig.BillType, orig.PlanCode, orig.SFMessageCode, orig.DeliveryMethod, orig.Claim, orig.InputDate, orig.FileName, orig.CREATE_DT, orig.CREATED_BY, pricing.SFMessageCode, pricing.PricingMethod, pricing.PricingRule, orig_proc.ProcedureCode, orig_proc.RevenueCode, orig_proc.Modifier, orig_proc.DateOfService, orig_proc.DateOfServiceTo, orig_proc.PlaceOfService FROM ITSHome.OriginalClaims orig LEFT OUTER JOIN ITSHome.OriginalPricing pricing ON orig.Id = pricing.OriginalClaimID LEFT OUTER JOIN ITSHome.OriginalProcedures orig_proc ON pricing.OriginalClaimID = orig_proc.OriginalClaimID"
+const SELECT_STATEMENT string = "SELECT orig.Id, orig.ClaimType, COALESCE(orig.ServiceId, ''), orig.ReceiptDate, orig.FromDate, orig.ToDate, orig.ProviderId, orig.ProviderType, orig.ProviderSpecialty, orig.DiagnosisCode, orig.NetworkIndicator, orig.SubscriberId, orig.PatientAccountNumber, orig.SCCFNumber, orig.BillType, orig.PlanCode, orig.SFMessageCode, orig.DeliveryMethod, orig.InputDate, orig.FileName, orig.CREATE_DT, orig.CREATED_BY, COALESCE(pricing.SFMessageCode, '') AS PsfMessageCode, COALESCE(pricing.PricingMethod, ''), COALESCE(pricing.PricingRule, ''), COALESCE(orig_proc.ProcedureCode, ''), COALESCE(orig_proc.RevenueCode, ''), COALESCE(orig_proc.Modifier, ''), COALESCE(orig_proc.DateOfService, ''), COALESCE(orig_proc.DateOfServiceTo, ''), COALESCE(orig_proc.PlaceOfService, '') FROM ITSHome.OriginalClaims orig LEFT OUTER JOIN ITSHome.OriginalPricing pricing ON orig.Id = pricing.OriginalClaimID LEFT OUTER JOIN ITSHome.OriginalProcedures orig_proc ON pricing.OriginalClaimID = orig_proc.OriginalClaimID"
 const SELECT_STATEMENT_ALL string = "SELECT orig.Id, orig.ClaimType, COALESCE(orig.ServiceId, 'N/A') AS ServiceId, orig.ReceiptDate, orig.FromDate, orig.ToDate, orig.ProviderId, orig.ProviderType, orig.ProviderSpecialty, orig.DiagnosisCode, orig.NetworkIndicator, orig.SubscriberId, orig.PatientAccountNumber, orig.SCCFNumber, orig.BillType, orig.PlanCode, orig.SFMessageCode, orig.DeliveryMethod, orig.InputDate, orig.FileName FROM ITSHome.OriginalClaims orig"
 
 var (
@@ -24,26 +24,31 @@ var (
 	receiptDate          string
 	fromDate             string
 	toDate               string
-	placeOfService       string
 	providerId           string
 	providerType         string
 	providerSpecialty    string
-	procedureCode        string
 	diagnosisCode        string
 	networkIndicator     string
 	subscriberId         string
 	patientAccountNumber string
 	sccfNumber           string
-	revenueCode          string
 	billType             string
-	modifier             string
 	planCode             string
 	sfMessageCode        string
-	pricingMethod        string
-	pricingRule          string
 	deliveryMethod       string
 	inputDate            string
 	fileName             string
+	createDate           string
+	createdBy            string
+	pSfMessageCode       string
+	pricingMethod        string
+	pricingRule          string
+	procedureCode        string
+	revenueCode          string
+	modifier             string
+	dosFrom              string
+	dosTo                string
+	placeOfService       string
 )
 
 func init() {
@@ -89,26 +94,31 @@ type Claims struct {
 	ReceiptDate          string `json:"receiptDate"`
 	FromDate             string `json:"fromDate"`
 	ToDate               string `json:"toDate"`
-	PlaceOfService       string `json:"placeOfService"`
 	ProviderId           string `json:"providerId"`
 	ProviderType         string `json:"providerType"`
 	ProviderSpecialty    string `json:"providerSpecialty"`
-	ProcedureCode        string `json:"procedureCode"`
 	DiagnosisCode        string `json:"diagnosisCode"`
 	NetworkIndicator     string `json:"networkIndicator"`
 	SubscriberId         string `json:"subscriberId"`
 	PatientAccountNumber string `json:"patientAccountNumber"`
 	SccfNumber           string `json:"sccfNumber"`
-	RevenueCode          string `json:"revenueCode"`
 	BillType             string `json:"billType"`
-	Modifier             string `json:"modifier"`
 	PlanCode             string `json:"planCode"`
 	SfMessageCode        string `json:"sfMessageCode"`
-	PricingMethod        string `json:"pricingMethod"`
-	PricingRule          string `json:"pricingRule"`
 	DeliveryMethod       string `json:"deliveryMethod"`
 	InputDate            string `json:"inputDate"`
 	FileName             string `json:"fileName"`
+	CreateDate           string `json:"createDate"`
+	CreatedBy            string `json:"createdBy"`
+	PsfMessageCode       string `json:"pSfMessageCode"`
+	PricingMethod        string `json:"pricingMethod"`
+	PricingRule          string `json:"pricingRule"`
+	ProcedureCode        string `json:"procedureCode"`
+	RevenueCode          string `json:"revenueCode"`
+	Modifier             string `json:"modifier"`
+	DosFrom              string `json:"dosFrom"`
+	DosTo                string `json:"dosTo"`
+	PlaceOfService       string `json:"placeOfService"`
 }
 
 // Get retrieves all elements from the claims list
@@ -120,18 +130,26 @@ func Get() []Claims {
 		fmt.Println(" Error open db:", errdb.Error())
 	}
 
-	rows, err := condb.Query(SELECT_STATEMENT_ALL)
+	rows, err := condb.Query(SELECT_STATEMENT)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
-		err := rows.Scan(&id, &claimType, &serviceId, &receiptDate, &fromDate, &toDate, &providerId, &providerType, &providerSpecialty, &diagnosisCode, &networkIndicator, &subscriberId, &patientAccountNumber, &sccfNumber, &billType, &planCode, &sfMessageCode, &deliveryMethod, &inputDate, &fileName)
+		err := rows.Scan(&id, &claimType, &serviceId, &receiptDate, &fromDate, &toDate, &providerId,
+			&providerType, &providerSpecialty, &diagnosisCode, &networkIndicator, &subscriberId,
+			&patientAccountNumber, &sccfNumber, &billType, &planCode, &sfMessageCode, &deliveryMethod,
+			&inputDate, &fileName, &createDate, &createdBy, &pSfMessageCode, &pricingMethod, &pricingRule,
+			&procedureCode, &revenueCode, &modifier, &dosFrom, &dosTo, &placeOfService)
 		if err != nil {
 			log.Fatal(err)
 		}
 		strId := strconv.Itoa(id)
-		t := newResultAll(strId, claimType, serviceId, receiptDate, fromDate, toDate, providerId, providerType, providerSpecialty, diagnosisCode, networkIndicator, subscriberId, patientAccountNumber, sccfNumber, billType, planCode, sfMessageCode, deliveryMethod, inputDate, fileName)
+		t := newResult(strId, claimType, serviceId, receiptDate, fromDate, toDate, providerId,
+			providerType, providerSpecialty, diagnosisCode, networkIndicator, subscriberId,
+			patientAccountNumber, sccfNumber, billType, planCode, sfMessageCode, deliveryMethod,
+			inputDate, fileName, createDate, createdBy, pSfMessageCode, pricingMethod, pricingRule,
+			procedureCode, revenueCode, modifier, dosFrom, dosTo, placeOfService)
 		list = append(list, t)
 	}
 	err = rows.Err()
@@ -151,18 +169,26 @@ func GetListById(claimId string) []Claims {
 		fmt.Println(" Error open db:", errdb.Error())
 	}
 
-	rows, err := condb.Query(SELECT_STATEMENT_ALL)
+	rows, err := condb.Query(SELECT_STATEMENT + " WHERE orig.Id=" + claimId)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
-		err := rows.Scan(&id, &claimType, &serviceId, &receiptDate, &fromDate, &toDate, &providerId, &providerType, &providerSpecialty, &diagnosisCode, &networkIndicator, &subscriberId, &patientAccountNumber, &sccfNumber, &billType, &planCode, &sfMessageCode, &deliveryMethod, &inputDate, &fileName)
+		err := rows.Scan(&id, &claimType, &serviceId, &receiptDate, &fromDate, &toDate, &providerId,
+			&providerType, &providerSpecialty, &diagnosisCode, &networkIndicator, &subscriberId,
+			&patientAccountNumber, &sccfNumber, &billType, &planCode, &sfMessageCode, &deliveryMethod,
+			&inputDate, &fileName, &createDate, &createdBy, &pSfMessageCode, &pricingMethod, &pricingRule,
+			&procedureCode, &revenueCode, &modifier, &dosFrom, &dosTo, &placeOfService)
 		if err != nil {
 			log.Fatal(err)
 		}
 		strId := strconv.Itoa(id)
-		t := newResultAll(strId, claimType, serviceId, receiptDate, fromDate, toDate, providerId, providerType, providerSpecialty, diagnosisCode, networkIndicator, subscriberId, patientAccountNumber, sccfNumber, billType, planCode, sfMessageCode, deliveryMethod, inputDate, fileName)
+		t := newResult(strId, claimType, serviceId, receiptDate, fromDate, toDate, providerId,
+			providerType, providerSpecialty, diagnosisCode, networkIndicator, subscriberId,
+			patientAccountNumber, sccfNumber, billType, planCode, sfMessageCode, deliveryMethod,
+			inputDate, fileName, createDate, createdBy, pSfMessageCode, pricingMethod, pricingRule,
+			procedureCode, revenueCode, modifier, dosFrom, dosTo, placeOfService)
 		list = append(list, t)
 	}
 	err = rows.Err()
@@ -201,11 +227,11 @@ func Delete(id string) error {
 	return nil
 }
 
-func newResult(id string, claimType string, serviceId string, receiptDate string, fromDate string, toDate string, placeOfService string, providerId string,
-	providerType string, providerSpecialty string, procedureCode string, diagnosisCode string,
-	networkIndicator string, subscriberId string, patientAccountNumber string, sccfNumber string,
-	revenueCode string, billType string, modifier string, planCode string, sfMessageCode string,
-	pricingMethod string, pricingRule string, deliveryMethod string, inputDate string, fileName string) Claims {
+func newResult(id string, claimType string, serviceId string, receiptDate string, fromDate string, toDate string, providerId string,
+	providerType string, providerSpecialty string, diagnosisCode string, networkIndicator string, subscriberId string, patientAccountNumber string,
+	sccfNumber string, billType string, planCode string, sfMessageCode string, deliveryMethod string, inputDate string, fileName string,
+	createDate string, createdBy string, pSfMessageCode string, pricingMethod string, pricingRule string, procedureCode string, revenueCode string,
+	modifier string, dosFrom string, dosTo string, placeOfService string) Claims {
 	return Claims{
 		ID:                   id,
 		ClaimType:            claimType,
@@ -213,61 +239,31 @@ func newResult(id string, claimType string, serviceId string, receiptDate string
 		ReceiptDate:          receiptDate,
 		FromDate:             fromDate,
 		ToDate:               toDate,
-		PlaceOfService:       placeOfService,
 		ProviderId:           providerId,
 		ProviderType:         providerType,
 		ProviderSpecialty:    providerSpecialty,
-		ProcedureCode:        procedureCode,
 		DiagnosisCode:        diagnosisCode,
 		NetworkIndicator:     networkIndicator,
 		SubscriberId:         subscriberId,
 		PatientAccountNumber: patientAccountNumber,
 		SccfNumber:           sccfNumber,
-		RevenueCode:          revenueCode,
 		BillType:             billType,
-		Modifier:             modifier,
 		PlanCode:             planCode,
 		SfMessageCode:        sfMessageCode,
-		PricingMethod:        pricingMethod,
-		PricingRule:          pricingRule,
 		DeliveryMethod:       deliveryMethod,
 		InputDate:            inputDate,
 		FileName:             fileName,
-	}
-}
-
-func newResultAll(id string, claimType string, serviceId string, receiptDate string, fromDate string, toDate string, providerId string,
-	providerType string, providerSpecialty string, diagnosisCode string,
-	networkIndicator string, subscriberId string, patientAccountNumber string, sccfNumber string,
-	billType string, planCode string, sfMessageCode string,
-	deliveryMethod string, inputDate string, fileName string) Claims {
-	return Claims{
-		ID:                   id,
-		ClaimType:            claimType,
-		ServiceId:            serviceId,
-		ReceiptDate:          receiptDate,
-		FromDate:             fromDate,
-		ToDate:               toDate,
-		PlaceOfService:       placeOfService,
-		ProviderId:           providerId,
-		ProviderType:         providerType,
-		ProviderSpecialty:    providerSpecialty,
+		CreateDate:           createDate,
+		CreatedBy:            createdBy,
+		PsfMessageCode:       pSfMessageCode,
+		PricingMethod:        pricingMethod,
+		PricingRule:          pricingRule,
 		ProcedureCode:        procedureCode,
-		DiagnosisCode:        diagnosisCode,
-		NetworkIndicator:     networkIndicator,
-		SubscriberId:         subscriberId,
-		PatientAccountNumber: patientAccountNumber,
-		SccfNumber:           sccfNumber,
 		RevenueCode:          revenueCode,
-		BillType:             billType,
 		Modifier:             modifier,
-		PlanCode:             planCode,
-		SfMessageCode:        sfMessageCode,
-		PricingMethod:        pricingMethod,
-		PricingRule:          pricingRule,
-		DeliveryMethod:       deliveryMethod,
-		InputDate:            inputDate,
-		FileName:             fileName,
+		DosFrom:              dosFrom,
+		DosTo:                dosTo,
+		PlaceOfService:       placeOfService,
 	}
 }
 

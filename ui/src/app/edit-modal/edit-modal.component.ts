@@ -66,6 +66,7 @@ export class EditModalComponent implements OnInit {
 			//this.selectedActiveProfessionalClaims = data.filter(claim => claim.id === this.selectedActiveProfessionalClaimIds[0]);
 			//this.populateForm(this.selectedActiveProfessionalClaims);
 		}
+		console.log("selectedId=", selectedId);
     this.claimsService.getClaimsListByIds(selectedId).subscribe((data: Claims[]) => {
 		// if (this.selectedActiveInstitutionalClaimIds !== undefined && this.selectedActiveInstitutionalClaimIds.length === 1) {
 		 	this.isMultiple = false;
