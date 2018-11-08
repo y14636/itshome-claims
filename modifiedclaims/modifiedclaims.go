@@ -14,7 +14,7 @@ import (
 )
 
 const READY_STATUS = "Ready"
-const SELECT_STATEMENT = "SELECT DISTINCT mc.SubscriberId, mc.OriginalClaimID, mc.SCCFNumber, mp.ProcedureCode, mc.DiagnosisCode, mp.Modifier, mc.PatientAccountNumber, COALESCE(mc.NetworkIndicator, 'N/A'), COALESCE(mc.FromDate, ''), COALESCE(mc.ToDate, ''), mc.Status, mp.DateOfService, mp.DateOfServiceTo, mc.CREATE_DT, COALESCE(mc.CREATED_BY, '') FROM ITSHome.ModifiedClaims mc, ITSHome.ModifiedProcedures mp WHERE mc.Id = mp.ModifiedClaimID AND mc.Status = 'Ready' ORDER BY CREATE_DT DESC"
+const SELECT_STATEMENT = "SELECT mc.SubscriberId, mc.OriginalClaimID, mc.SCCFNumber, COALESCE(mp.ProcedureCode, ''), mc.DiagnosisCode, COALESCE(mp.Modifier, ''), mc.PatientAccountNumber, COALESCE(mc.NetworkIndicator, 'N/A'), COALESCE(mc.FromDate, ''), COALESCE(mc.ToDate, ''), mc.Status, COALESCE(mp.DateOfService, ''), COALESCE(mp.DateOfServiceTo, ''), mc.CREATE_DT, COALESCE(mc.CREATED_BY, '') FROM ITSHome.ModifiedClaims mc LEFT OUTER JOIN ITSHome.ModifiedProcedures mp ON mc.Id = mp.ModifiedClaimID WHERE mc.Status = 'Ready' ORDER BY CREATE_DT DESC"
 
 var (
 	mtx   sync.RWMutex
@@ -168,7 +168,7 @@ func AddMultipleClaims(claimsData string) error {
 		if err != nil {
 			log.Fatal("Creating Modified Procedures failed: ", err.Error())
 		}
-		fmt.Printf("Inserted ID: %d successfully.\n", createProceduresID)
+		fmt.Printf("Inserted createProceduresID: %d successfully.\n", createProceduresID)
 		procId := int(createProceduresID)
 		pid := strconv.Itoa(procId)
 
