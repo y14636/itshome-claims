@@ -7,28 +7,28 @@
 <form [formGroup]="claimsForm" (ngSubmit)="onSubmit(claimsForm)">
 <div class="modal-body">
   <div class="row form-row">
-      <div *ngIf="!isMultiple" class="form-group">
+      <!-- <div *ngIf="!isMultiple" class="form-group">
           <label for="prefix">Prefix</label>
           <input type="text" class="form-control" formControlName="prefix"/>
+      </div>     -->
+      <div class="form-group">
+	    <label for="subscriberId">Subscriber ID</label>
+        <input type="text" class="form-control" formControlName="subscriberId"/>
+      </div>
+      <div class="form-group">
+	    <label for="suffix">Suffix</label>
+        <input type="text" class="form-control" formControlName="suffix"/>
+      </div>
+      <div class="form-group">
+	    <label for="patientAccountNumber">Patient Account Number</label>
+		<input type="text" class="form-control" formControlName="patientAccountNumber"/>
+      </div>
+      <div class="form-group">
+        <label for="procedureCode">Procedure Code</label>
+        <input type="text" class="form-control" formControlName="procedureCode"/>
       </div>    
-      <div class="form-group">
-	        <label for="subscriberId">Subscriber ID</label>
-          <input type="text" class="form-control" formControlName="subscriberId"/>
-      </div>
-      <div class="form-group">
-	        <label for="suffix">Suffix</label>
-          <input type="text" class="form-control" formControlName="suffix"/>
-      </div>
-      <div class="form-group">
-	        <label for="patientAccountNumber">Patient Account Number</label>
-		      <input type="text" class="form-control" formControlName="patientAccountNumber"/>
-	    </div>
   </div>
   <div class="row form-row">
-      <div class="form-group">
-	        <label for="procedureCode">Procedure Code</label>
-          <input type="text" class="form-control" formControlName="procedureCode"/>
-      </div>
       <div class="form-group">
 	        <label for="diagnosisCode">Diagnosis Code</label>
           <input type="text" class="form-control" formControlName="diagnosisCode"/>
@@ -41,12 +41,12 @@
 	        <label for="serviceId">Service ID</label>
           <input type="text" class="form-control" formControlName="serviceId"/>
       </div>
+      <div *ngIf="!isMultiple" class="form-group">
+            <label for="receiptDate">Receipt Date</label>
+            <input type="text" class="form-control" formControlName="receiptDate"/>
+        </div>  
   </div>
   <div class="row form-row">
-      <div *ngIf="!isMultiple" class="form-group">
-          <label for="receiptDate">Receipt Date</label>
-          <input type="text" class="form-control" formControlName="receiptDate"/>
-      </div>
       <div *ngIf="!isMultiple" class="form-group">
           <label for="fromDate">From Date (DOS)</label>
           <input type="text" class="form-control" formControlName="fromDate"/>
@@ -58,13 +58,13 @@
       <div *ngIf="!isMultiple" class="form-group">
           <label for="claimtype">Claim Type</label>
           <input type="text" class="form-control" formControlName="claimtype"/>
-      </div>    
-  </div>
-  <div class="row form-row">
+      </div>   
       <div *ngIf="!isMultiple" class="form-group">
 	        <label for="providerId">Provider ID</label>
           <input type="text" class="form-control" formControlName="providerId"/>
-      </div>
+      </div> 
+  </div>
+  <div class="row form-row">
 	    <div *ngIf="!isMultiple" class="form-group">
 	        <label for="providerType">Facility Type</label>
           <input type="text" class="form-control" formControlName="providerType"/>
@@ -76,13 +76,13 @@
       <div *ngIf="!isMultiple" class="form-group">
           <label for="sccfNumber">SCCF Number</label>
           <input type="text" class="form-control" formControlName="sccfNumber"/>
-      </div>  
-  </div>
-  <div class="row form-row">
-	    <div *ngIf="!isMultiple" class="form-group">
+      </div> 
+      <div *ngIf="!isMultiple" class="form-group">
 	        <label for="planCode">Plan Code Host/Local</label>
           <input type="text" class="form-control" formControlName="planCode"/>
-      </div>
+      </div> 
+  </div>
+  <div class="row form-row">
       <div *ngIf="!isMultiple" class="form-group">
 	        <label for="sfMessageCode">SF Message Code</label>
           <input type="text" class="form-control" formControlName="sfMessageCode"/>
@@ -95,12 +95,10 @@
           <label for="pricingRule">Pricing Rule</label>
           <input type="text" class="form-control" formControlName="pricingRule"/>
       </div>  
-  </div>
-  <div *ngIf="!isMultiple" class="row form-row">
       <div class="form-group">
-          <label for="deliveryMethod">Delivery Method</label>
-          <input type="text" class="form-control" formControlName="deliveryMethod"/>
-      </div>
+            <label for="deliveryMethod">Delivery Method</label>
+            <input type="text" class="form-control" formControlName="deliveryMethod"/>
+        </div>  
   </div>
   <div class="row form-row hidden">
       <div class="form-group hidden">

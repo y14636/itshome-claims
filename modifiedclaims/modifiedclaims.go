@@ -14,13 +14,14 @@ import (
 )
 
 const READY_STATUS = "Ready"
-const SELECT_STATEMENT = "SELECT mc.SubscriberId, mc.OriginalClaimID, mc.SCCFNumber, COALESCE(mp.ProcedureCode, ''), mc.DiagnosisCode, COALESCE(mp.Modifier, ''), mc.PatientAccountNumber, COALESCE(mc.NetworkIndicator, 'N/A'), COALESCE(mc.FromDate, ''), COALESCE(mc.ToDate, ''), mc.Status, COALESCE(mp.DateOfService, ''), COALESCE(mp.DateOfServiceTo, ''), mc.CREATE_DT, COALESCE(mc.CREATED_BY, '') FROM ITSHome.ModifiedClaims mc LEFT OUTER JOIN ITSHome.ModifiedProcedures mp ON mc.Id = mp.ModifiedClaimID WHERE mc.Status = 'Ready' ORDER BY CREATE_DT DESC"
+const SELECT_STATEMENT = "SELECT mc.Id, mc.SubscriberId, mc.OriginalClaimID, mc.SCCFNumber, COALESCE(mp.ProcedureCode, ''), mc.DiagnosisCode, COALESCE(mp.Modifier, ''), mc.PatientAccountNumber, COALESCE(mc.NetworkIndicator, 'N/A'), COALESCE(mc.FromDate, ''), COALESCE(mc.ToDate, ''), mc.Status, COALESCE(mp.DateOfService, ''), COALESCE(mp.DateOfServiceTo, ''), mc.CREATE_DT, COALESCE(mc.CREATED_BY, '') FROM ITSHome.ModifiedClaims mc LEFT OUTER JOIN ITSHome.ModifiedProcedures mp ON mc.Id = mp.ModifiedClaimID WHERE mc.Status = 'Ready' ORDER BY CREATE_DT DESC"
 
 var (
 	mtx   sync.RWMutex
 	once  sync.Once
 	condb *sql.DB
 
+	id                   int
 	subscriberId         string
 	originalClaimID      int
 	sccfNumber           string
@@ -48,6 +49,7 @@ func initializeList() {
 
 // Modified Claims data structure
 type ModifiedClaims struct {
+	ID                   string `json:"id"`
 	SubscriberId         string `json:"subscriberId"`
 	OriginalClaimID      string `json:"originalClaimID"`
 	SccfNumber           string `json:"sccfNumber"`
@@ -83,12 +85,13 @@ func GetModifiedClaims() []ModifiedClaims {
 	}
 	defer rows.Close()
 	for rows.Next() {
-		err := rows.Scan(&subscriberId, &originalClaimID, &sccfNumber, &procedureCode, &diagnosisCode, &modifier, &patientAccountNumber, &networkIndicator, &fromDate, &toDate, &status, &dosFrom, &dosTo, &createDate, &createdBy)
+		err := rows.Scan(&id, &subscriberId, &originalClaimID, &sccfNumber, &procedureCode, &diagnosisCode, &modifier, &patientAccountNumber, &networkIndicator, &fromDate, &toDate, &status, &dosFrom, &dosTo, &createDate, &createdBy)
 		if err != nil {
 			log.Fatal(err)
 		}
 		strClaimId := strconv.Itoa(originalClaimID)
-		t := newResultAll(subscriberId, strClaimId, sccfNumber, procedureCode, diagnosisCode, modifier, patientAccountNumber, networkIndicator, fromDate, toDate, status, dosFrom, dosTo, createDate, createdBy)
+		strId := strconv.Itoa(id)
+		t := newResultAll(strId, subscriberId, strClaimId, sccfNumber, procedureCode, diagnosisCode, modifier, patientAccountNumber, networkIndicator, fromDate, toDate, status, dosFrom, dosTo, createDate, createdBy)
 		mList = append(mList, t)
 	}
 	err = rows.Err()
@@ -135,9 +138,9 @@ func AddMultipleClaims(claimsData string) error {
 
 	claimIds := strings.Split(result[1], ",")
 	fmt.Println("length of claimIds", len(claimIds))
-	if len(claimIds) == 1 {
-		claimIds[0] = utilities.TrimSuffix(claimIds[0], ";")
-	}
+	// if len(claimIds) == 1 {
+	// 	claimIds[0] = utilities.TrimSuffix(claimIds[0], ";")
+	// }
 	currentTime := time.Now()
 	currentDateTime := currentTime.Format("2006-01-02 15:04:05")
 	modifiedBy := "mprue"
@@ -146,6 +149,7 @@ func AddMultipleClaims(claimsData string) error {
 
 	// Display all elements.
 	for i := range claimIds {
+		claimIds[i] = utilities.TrimSuffix(claimIds[i], ";")
 		fmt.Println("Claim Ids", claimIds[i])
 		// Create claims
 		createID, err := CreateModifiedClaims(condb, claimIds[i], modifiedBy, currentDateTime)
@@ -156,34 +160,41 @@ func AddMultipleClaims(claimsData string) error {
 		id := int(createID)
 		t := strconv.Itoa(id)
 
-		newCriteria := UpdateSubscriberId(result[0])
+		newCriteria := UpdateSubscriberId(result[0], id)
 		updateID, err := UpdateModifiedClaims(condb, newCriteria, t)
 		if err != nil {
 			log.Fatal("Updating Modified Claims failed: ", err.Error())
 		}
 		fmt.Printf("Updated ID: %d successfully.\n", updateID)
 
-		// Create modified procedures
-		createProceduresID, err := CreateModifiedProcedures(condb, claimIds[i], modifiedBy, currentDateTime)
+		count, err := CheckIfOriginalProceduresExist(updateID)
 		if err != nil {
-			log.Fatal("Creating Modified Procedures failed: ", err.Error())
+			log.Fatal("ReadEmployees failed:", err.Error())
 		}
-		fmt.Printf("Inserted createProceduresID: %d successfully.\n", createProceduresID)
-		procId := int(createProceduresID)
-		pid := strconv.Itoa(procId)
 
-		updateProceduresID, err := UpdateModifiedProcedures(condb, newCriteria, pid)
-		if err != nil {
-			log.Fatal("Updating Modified Procedures failed: ", err.Error())
+		if count > 0 {
+			// Create modified procedures
+			createProceduresID, err := CreateModifiedProcedures(condb, claimIds[i], modifiedBy, currentDateTime)
+			if err != nil {
+				log.Fatal("Creating Modified Procedures failed: ", err.Error())
+			}
+			fmt.Printf("Inserted createProceduresID: %d successfully.\n", createProceduresID)
+			procId := int(createProceduresID)
+			pid := strconv.Itoa(procId)
+
+			updateProceduresID, err := UpdateModifiedProcedures(condb, newCriteria, pid)
+			if err != nil {
+				log.Fatal("Updating Modified Procedures failed: ", err.Error())
+			}
+			fmt.Printf("Updated Procedures ID: %d successfully.\n", updateProceduresID)
 		}
-		fmt.Printf("Updated Procedures ID: %d successfully.\n", updateProceduresID)
 	}
 
 	fmt.Println("update criteria", result[0])
 	return nil
 }
 
-func UpdateSubscriberId(criteria string) string {
+func UpdateSubscriberId(criteria string, id int) string {
 	strCriteria := strings.Split(criteria, ";")
 	var newCriteria string
 	var subIdHolder string
@@ -201,6 +212,18 @@ func UpdateSubscriberId(criteria string) string {
 				newCriteria += parameter[0] + "=" + parameter[1] + ";"
 				fmt.Println("new criteria", newCriteria)
 			}
+		}
+	}
+
+	if len(subIdHolder) == 0 && len(suffixHolder) > 0 {
+		subId := strings.TrimSpace(GetSubscriberId(id))
+		fmt.Println("Inside UpdateSubscriberId - subscriberId = ", subId)
+		if utilities.IsNumeric(subId) && len(subId) > 9 {
+			subIdHolder = utilities.TrimSuffix(subId, subId[len(subId)-2:])
+		} else if !utilities.IsNumeric(subId) && len(subId) > 12 {
+			subIdHolder = utilities.TrimSuffix(subId, subId[len(subId)-2:])
+		} else {
+			subIdHolder = subId
 		}
 	}
 
@@ -278,15 +301,102 @@ func UpdateModifiedProcedures(db *sql.DB, criteria string, modifiedClaimId strin
 	return 0, nil
 }
 
-// Delete will remove a claim from the Claims list
-// func Delete(id string) error {
-// 	location, err := findClaimsLocation(id)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	removeElementByLocation(location)
-// 	return nil
-// }
+func GetSubscriberId(id int) string {
+	fmt.Println("Inside GetSubscriberId")
+	var subscriberId string
+	var errdb error
+	condb, errdb = utilities.GetSqlConnection()
+	if errdb != nil {
+		log.Fatal("Open connection failed:", errdb.Error())
+	}
+	fmt.Printf("Connected!\n")
+	//defer condb.Close()
+
+	rows, err := condb.Query("SELECT SubscriberId FROM ITSHome.ModifiedClaims WHERE Id = ?", id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(&subscriberId)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return subscriberId
+}
+
+func CheckIfOriginalProceduresExist(id int64) (int, error) {
+	rows, err := condb.Query("SELECT OriginalClaimID FROM ITSHome.OriginalProcedures WHERE OriginalClaimID = ?", id)
+	if err != nil {
+		fmt.Println("Error reading rows: " + err.Error())
+		return -1, err
+	}
+	//defer rows.Close()
+	count := 0
+	for rows.Next() {
+		var name, location string
+		var id int
+		err := rows.Scan(&id, &name, &location)
+		if err != nil {
+			fmt.Println("Error reading rows: " + err.Error())
+			return -1, err
+		}
+		fmt.Printf("ID: %d\n", id)
+		count++
+	}
+	return count, nil
+}
+
+//Delete will remove a claim from the Claims list
+func Delete(id string) error {
+	fmt.Println("ID to delete", id)
+
+	var errdb error
+	condb, errdb = utilities.GetSqlConnection()
+	if errdb != nil {
+		log.Fatal("Open connection failed:", errdb.Error())
+	}
+	fmt.Printf("Connected!\n")
+	defer condb.Close()
+
+	tsql := fmt.Sprintf("DELETE FROM ITSHome.ModifiedProcedures WHERE ModifiedClaimID ='%s';", id)
+	result, err := condb.Exec(tsql)
+	if err != nil {
+		fmt.Println("Error deleting ModifiedProcedures row: " + err.Error())
+		return err
+	}
+
+	count, err2 := result.RowsAffected()
+	if err2 != nil {
+		fmt.Println("Error getting ModifiedProcedures row affected: " + err2.Error())
+		return err2
+	} else {
+		fmt.Println("Deleted ModifiedProcedures row: " + strconv.FormatInt(count, 10))
+	}
+
+	tsql = fmt.Sprintf("DELETE FROM ITSHome.ModifiedClaims WHERE Id ='%s';", id)
+	result, err = condb.Exec(tsql)
+	if err != nil {
+		fmt.Println("Error deleting ModifiedClaims row: " + err.Error())
+		return err
+	}
+
+	count2, err3 := result.RowsAffected()
+	if err3 != nil {
+		fmt.Println("Error deleting ModifiedClaims row: " + err3.Error())
+		return err3
+	} else {
+		fmt.Println("Deleted ModifiedClaims row: " + strconv.FormatInt(count2, 10))
+	}
+
+	return nil
+}
 
 // func newModifiedClaim(claimType string, fromDate string, toDate string, placeOfService string, providerId string,
 // 	providerType string, providerSpecialty string, procedureCode string, diagnosisCode string,
@@ -342,10 +452,11 @@ func isMatchingID(a string, b string) bool {
 	return a == b
 }
 
-func newResultAll(subscriberId string, originalClaimID string, sccfNumber string, procedureCode string, diagnosisCode string,
+func newResultAll(id string, subscriberId string, originalClaimID string, sccfNumber string, procedureCode string, diagnosisCode string,
 	modifier string, patientAccountNumber string, networkIndicator string, fromDate string, toDate string, status string,
 	dosFrom string, dosTo string, createDate string, createdBy string) ModifiedClaims {
 	return ModifiedClaims{
+		ID:                   id,
 		SubscriberId:         subscriberId,
 		OriginalClaimID:      originalClaimID,
 		SccfNumber:           sccfNumber,

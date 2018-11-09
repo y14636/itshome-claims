@@ -196,6 +196,11 @@ func CleanParameters(parameters string) string {
 	return TrimSuffix(criteria, " AND ")
 }
 
+func IsNumeric(s string) bool {
+	_, err := strconv.ParseFloat(s, 64)
+	return err == nil
+}
+
 func TrimSuffix(s, suffix string) string {
 	if strings.HasSuffix(s, suffix) {
 		s = s[:len(s)-len(suffix)]

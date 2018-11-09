@@ -22,15 +22,12 @@ func main() {
 	})
 
 	r.GET("/claims", handlers.GetClaimsListHandler)
-	//r.GET("/claims", handlers.GetClaimsResultsHandler)
 	r.GET("/modifiedclaims", handlers.GetModifiedClaimsListHandler)
-	//r.GET("/searchclaims/:search", handlers.GetClaimsResultsHandler)
 	r.GET("/searchclaims/:search", handlers.GetClaimsResultsHandler)
 	r.GET("/claims/:claimsId", handlers.GetClaimsListByIdHandler)
 	r.POST("/claims", handlers.AddClaimsHandler)
-	//r.POST("/modifiedclaims", handlers.AddModifiedClaimsHandler)
 	r.GET("/modifiedclaims/:claimsData", handlers.AddMultipleClaimsHandler)
-	//r.DELETE("/modifiedclaims/:id", handlers.DeleteClaimsHandler)
+	r.DELETE("/modifiedclaims/:id", handlers.DeleteClaimsHandler)
 
 	err := r.Run(":3000")
 	if err != nil {

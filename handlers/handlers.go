@@ -72,14 +72,14 @@ func AddClaimsHandler(c *gin.Context) {
 // }
 
 // DeleteClaimsHandler will delete a specified claim based on user http input
-// func DeleteClaimsHandler(c *gin.Context) {
-// 	claimsID := c.Param("id")
-// 	if err := modifiedclaims.Delete(claimsID); err != nil {
-// 		c.JSON(http.StatusInternalServerError, err)
-// 		return
-// 	}
-// 	c.JSON(http.StatusOK, "")
-// }
+func DeleteClaimsHandler(c *gin.Context) {
+	claimsID := c.Param("id")
+	if err := modifiedclaims.Delete(claimsID); err != nil {
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, "")
+}
 
 func convertHTTPBodyToClaims(httpBody io.ReadCloser) (claims.Claims, int, error) {
 	body, err := ioutil.ReadAll(httpBody)

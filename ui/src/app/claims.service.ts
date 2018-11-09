@@ -41,8 +41,8 @@ export class ClaimsService {
     return this.httpClient.get(environment.gateway + '/modifiedclaims/' + claimsData);
   }
 
-  deleteClaims(claims: Claims) {
-    return this.httpClient.delete(environment.gateway + '/modifiedclaims/' + claims.id);
+  deleteClaims(mClaims: ModifiedClaims) {
+    return this.httpClient.delete(environment.gateway + '/modifiedclaims/' + mClaims.id);
   }
 }
 
@@ -81,6 +81,7 @@ export class Claims {
 }
 
 export class ModifiedClaims {
+  id:string;
   subscriberId: string;
 	originalClaimID: string;
 	sccfNumber: string;

@@ -18,7 +18,7 @@ export class EditModalComponent implements OnInit {
   @Input ()procedureCode: 						string;
   @Input ()diagnosisCode: 						string;
   @Input ()modifier: 							string;
-  prefix:										string;
+  //prefix:										string;
   fromDate: 									string;
   toDate: 										string;
   claimtype: 									string;
@@ -56,29 +56,33 @@ export class EditModalComponent implements OnInit {
   getClaimsListByIds() {
 		var selectedId;
 		if (this.selectedActiveInstitutionalClaimIds !== undefined && this.selectedActiveInstitutionalClaimIds.length === 1) {
-			//this.isMultiple = false;
+			this.isMultiple = false;
 			selectedId = this.selectedActiveInstitutionalClaimIds[0];
 			//this.selectedActiveInstitutionalClaims = data.filter(claim => claim.id === this.selectedActiveInstitutionalClaimIds[0]);
 			//this.populateForm(this.selectedActiveInstitutionalClaims);
 		} else if (this.selectedActiveProfessionalClaimIds !== undefined && this.selectedActiveProfessionalClaimIds.length === 1) {
-			//this.isMultiple = false;
+			this.isMultiple = false;
 			selectedId = this.selectedActiveProfessionalClaimIds[0];
 			//this.selectedActiveProfessionalClaims = data.filter(claim => claim.id === this.selectedActiveProfessionalClaimIds[0]);
 			//this.populateForm(this.selectedActiveProfessionalClaims);
 		}
-		console.log("selectedId=", selectedId);
-    this.claimsService.getClaimsListByIds(selectedId).subscribe((data: Claims[]) => {
-		// if (this.selectedActiveInstitutionalClaimIds !== undefined && this.selectedActiveInstitutionalClaimIds.length === 1) {
-		 	this.isMultiple = false;
-		// 	this.selectedActiveInstitutionalClaims = data.filter(claim => claim.id === this.selectedActiveInstitutionalClaimIds[0]);
-		 	this.populateForm(data.filter(claim =>claim));
-		// } else if (this.selectedActiveProfessionalClaimIds !== undefined && this.selectedActiveProfessionalClaimIds.length === 1) {
-		// 	this.isMultiple = false;
-		// 	this.selectedActiveProfessionalClaims = data.filter(claim => claim.id === this.selectedActiveProfessionalClaimIds[0]);
-		// 	this.populateForm(this.selectedActiveProfessionalClaims);
-		// }
-		this.updateClaimForm();
-    });
+		if (!this.isMultiple) {
+			console.log("selectedId=", selectedId);
+			this.claimsService.getClaimsListByIds(selectedId).subscribe((data: Claims[]) => {
+				// if (this.selectedActiveInstitutionalClaimIds !== undefined && this.selectedActiveInstitutionalClaimIds.length === 1) {
+					this.isMultiple = false;
+				// 	this.selectedActiveInstitutionalClaims = data.filter(claim => claim.id === this.selectedActiveInstitutionalClaimIds[0]);
+					this.populateForm(data.filter(claim =>claim));
+				// } else if (this.selectedActiveProfessionalClaimIds !== undefined && this.selectedActiveProfessionalClaimIds.length === 1) {
+				// 	this.isMultiple = false;
+				// 	this.selectedActiveProfessionalClaims = data.filter(claim => claim.id === this.selectedActiveProfessionalClaimIds[0]);
+				// 	this.populateForm(this.selectedActiveProfessionalClaims);
+				// }
+				this.updateClaimForm();
+			});
+		} else {
+			this.updateClaimForm();
+		}
   }
   
   isaNumber(text) {
@@ -97,7 +101,7 @@ export class EditModalComponent implements OnInit {
 	  procedureCode: '',
 	  diagnosisCode: '',
 	  modifier: '',
-	  prefix: [{value: '', disabled: true}],
+	  //prefix: [{value: '', disabled: true}],
 	  fromDate: [{value: '', disabled: true}],
 	  toDate: [{value: '', disabled: true}],
 	  claimtype: [{value: '', disabled: true}],
@@ -120,32 +124,38 @@ export class EditModalComponent implements OnInit {
 
   populateForm(selectedClaims: Claims[]) {
 	console.log("This institutional claim sub id= " + selectedClaims[0].subscriberId);
-	var sub = selectedClaims[0].subscriberId.slice(0, 1);
+	var subscriberId = selectedClaims[0].subscriberId.trim();
+	console.log("length=", subscriberId.length);
+	var sub = subscriberId.slice(0, 1);
 	if (sub != null && this.isaNumber(sub)) {
-		this.subscriberId = selectedClaims[0].subscriberId.slice(0, 9);
+		this.subscriberId = subscriberId.slice(0, 9);
 	} else {
-		this.subscriberId = selectedClaims[0].subscriberId.length > 0 ? selectedClaims[0].subscriberId.slice(3, 12) : selectedClaims[0].subscriberId;
+		this.subscriberId = subscriberId.length > 0 ? subscriberId.slice(0, 12) : subscriberId;
 	}
-	this.prefix = selectedClaims[0].subscriberId.length > 12 ? selectedClaims[0].subscriberId.slice(0, 3) : 'N/A';
-	this.suffix = selectedClaims[0].subscriberId.length > 9 ? selectedClaims[0].subscriberId.slice(-2) : 'N/A';
-	this.patientAccountNumber = selectedClaims[0].patientAccountNumber;
-	this.procedureCode = selectedClaims[0].procedureCode;
-	this.diagnosisCode = selectedClaims[0].diagnosisCode;
-	this.modifier = selectedClaims[0].modifier;
-	this.fromDate = selectedClaims[0].fromDate;
-	this.toDate = selectedClaims[0].toDate;
-	this.claimtype = selectedClaims[0].claimtype;
-	this.serviceId = selectedClaims[0].serviceId;
-	this.receiptDate = selectedClaims[0].receiptDate;
-	this.providerType = selectedClaims[0].providerType;
-	this.providerId = selectedClaims[0].providerId;
-	this.providerSpecialty = selectedClaims[0].providerSpecialty;
-	this.sccfNumber = selectedClaims[0].sccfNumber;
-	this.planCode = selectedClaims[0].planCode;
-	this.sfMessageCode = selectedClaims[0].sfMessageCode;
-	this.pricingMethod = selectedClaims[0].pricingMethod;
-	this.pricingRule = selectedClaims[0].pricingRule;
-	this.deliveryMethod = selectedClaims[0].deliveryMethod;
+	
+	//this.prefix = subscriberId.length > 12 ? subscriberId.slice(0, 3) : 'N/A';
+	//console.log("prefix=", this.prefix);
+	this.suffix = subscriberId.length > 9 ? subscriberId.slice(-2) : 'N/A';
+	console.log("suffix=", this.suffix);
+
+	this.patientAccountNumber = selectedClaims[0].patientAccountNumber.trim();
+	this.procedureCode = selectedClaims[0].procedureCode.trim();
+	this.diagnosisCode = selectedClaims[0].diagnosisCode.trim();
+	this.modifier = selectedClaims[0].modifier.trim();
+	this.fromDate = selectedClaims[0].fromDate.trim();
+	this.toDate = selectedClaims[0].toDate.trim();
+	this.claimtype = selectedClaims[0].claimtype.trim();
+	this.serviceId = selectedClaims[0].serviceId.trim();
+	this.receiptDate = selectedClaims[0].receiptDate.trim();
+	this.providerType = selectedClaims[0].providerType.trim();
+	this.providerId = selectedClaims[0].providerId.trim();
+	this.providerSpecialty = selectedClaims[0].providerSpecialty.trim();
+	this.sccfNumber = selectedClaims[0].sccfNumber.trim();
+	this.planCode = selectedClaims[0].planCode.trim();
+	this.sfMessageCode = selectedClaims[0].sfMessageCode.trim();
+	this.pricingMethod = selectedClaims[0].pricingMethod.trim();
+	this.pricingRule = selectedClaims[0].pricingRule.trim();
+	this.deliveryMethod = selectedClaims[0].deliveryMethod.trim();
   }
 
   onSubmit(form) {
@@ -162,7 +172,7 @@ export class EditModalComponent implements OnInit {
 					providerSpecialty: form.getRawValue().providerSpecialty,
 					diagnosisCode: form.getRawValue().diagnosisCode,
 					networkIndicator: 'na',
-					subscriberId: form.getRawValue().prefix + form.getRawValue().subscriberId + form.getRawValue().suffix,
+					subscriberId: form.getRawValue().subscriberId + form.getRawValue().suffix,
 					patientAccountNumber: form.getRawValue().patientAccountNumber,
 					sccfNumber: form.getRawValue().sccfNumber,
 					billType: 'na',
@@ -231,7 +241,7 @@ export class EditModalComponent implements OnInit {
 
   updateClaimForm() {
 	  this.claimsForm.patchValue({
-		  prefix: this.prefix,
+		  //prefix: this.prefix,
 		  subscriberId: this.subscriberId,
 		  suffix: this.suffix,
 		  patientAccountNumber: this.patientAccountNumber,

@@ -117,26 +117,26 @@ export class ClaimsComponent implements OnInit {
 	
 	private reInitDatatable1(): void {
     if (this.table1) {
-      this.table1.destroy()
-      this.table1=null
+      this.table1.destroy();
+      this.table1=null;
     }
-    setTimeout(() => this.initDatatable1(),0)
+    setTimeout(() => this.initDatatable1(),0);
 	}
 	
 	private reInitDatatable2(): void {
     if (this.table2) {
-      this.table2.destroy()
-      this.table2=null
+      this.table2.destroy();
+      this.table2=null;
     }
-    setTimeout(() => this.initDatatable2(),0)
+    setTimeout(() => this.initDatatable2(),0);
 	}
 	
 	private reInitDatatable3(): void {
     if (this.table3) {
-      this.table3.destroy()
-      this.table3=null
+      this.table3.destroy();
+      this.table3=null;
     }
-    setTimeout(() => this.initDatatable3(),0)
+    setTimeout(() => this.initDatatable3(),0);
 	}
 	
   private createInstForm(option:string) {
@@ -402,8 +402,9 @@ export class ClaimsComponent implements OnInit {
 		}
   }
 	
-	deleteClaims(claims: Claims) {
-    this.claimsService.deleteClaims(claims).subscribe(() => {
+	deleteClaims(mClaims: ModifiedClaims) {
+		console.log("deleted id=", mClaims.id);
+    this.claimsService.deleteClaims(mClaims).subscribe(() => {
 			this.getModifiedClaims();
 			this.reInitDatatable3();
     })
