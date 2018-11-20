@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/rs/xid"
+	"github.com/y14636/itshome-claims/model"
 	"github.com/y14636/itshome-claims/utilities"
 )
 
@@ -15,7 +16,7 @@ const SELECT_STATEMENT string = "SELECT orig.Id, orig.ClaimType, COALESCE(orig.S
 const SELECT_STATEMENT_ALL string = "SELECT orig.Id, orig.ClaimType, COALESCE(orig.ServiceId, 'N/A') AS ServiceId, orig.ReceiptDate, orig.FromDate, orig.ToDate, orig.ProviderId, orig.ProviderType, orig.ProviderSpecialty, orig.DiagnosisCode, orig.NetworkIndicator, orig.SubscriberId, orig.PatientAccountNumber, orig.SCCFNumber, orig.BillType, orig.PlanCode, orig.SFMessageCode, orig.DeliveryMethod, orig.InputDate, orig.FileName FROM ITSHome.OriginalClaims orig"
 
 var (
-	list                 = []Claims{}
+	list                 = []structs.Claims{}
 	mtx                  sync.RWMutex
 	once                 sync.Once
 	id                   int
@@ -56,74 +57,15 @@ func init() {
 }
 
 func initializeList() {
-	list = []Claims{}
-
+	list = []structs.Claims{}
 	//dummy Institutional claims
 	// Add("11", "N/A", "20180110", "20180101", "20180110", "NA", "000000001000", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098001", "99999999", "30120180400000000",
 	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile1.dat")
-	// Add("12", "N/A", "20180710", "20180701", "20180710", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "22222222", "30120180400000000",
-	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
-	// Add("11", "N/A", "20180210", "20180201", "20180210", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "33333333", "30120180400000000",
-	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
-	// Add("11", "N/A", "20180310", "20180301", "20180310", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "44444444", "30120180400000000",
-	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
-	// Add("11", "N/A", "20180410", "20180401", "20180410", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "55555555", "30120180400000000",
-	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
-	// Add("12", "N/A", "20180510", "20180501", "20180510", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "66666666", "30120180400000000",
-	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
-	// Add("12", "N/A", "20180610", "20180601", "20180610", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "77777777", "30120180400000000",
-	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
-	// Add("11", "N/A", "20180810", "20180801", "20180810", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "88888888", "30120180400000000",
-	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
-	// Add("11", "N/A", "20180910", "20180901", "20180910", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "99999991", "30120180400000000",
-	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
-	// Add("11", "N/A", "20181010", "20181001", "20181010", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098002", "99999992", "30120180400000000",
-	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
-	// Add("12", "N/A", "20180107", "20180111", "20180112", "NA", "000000001001", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098004", "99999993", "30120180400000000",
-	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile3.dat")
-	// //dummy Professional claims
-	// Add("20", "600", "20180110", "20180105", "20180110", "30", "000000001001", "A4", "111N00000X  ", "99212", "M5134", "3", "PAY20089098001", "11111111", "30120180400000001",
-	// 	"NA", "111", "50", "302", "P302", "40", "9", "A", "20180110", "testfile2.dat")
 }
 
-// Claims data structure
-type Claims struct {
-	ID                   string `json:"id"`
-	ClaimType            string `json:"claimtype"`
-	ServiceId            string `json:"serviceId"`
-	ReceiptDate          string `json:"receiptDate"`
-	FromDate             string `json:"fromDate"`
-	ToDate               string `json:"toDate"`
-	ProviderId           string `json:"providerId"`
-	ProviderType         string `json:"providerType"`
-	ProviderSpecialty    string `json:"providerSpecialty"`
-	DiagnosisCode        string `json:"diagnosisCode"`
-	NetworkIndicator     string `json:"networkIndicator"`
-	SubscriberId         string `json:"subscriberId"`
-	PatientAccountNumber string `json:"patientAccountNumber"`
-	SccfNumber           string `json:"sccfNumber"`
-	BillType             string `json:"billType"`
-	PlanCode             string `json:"planCode"`
-	SfMessageCode        string `json:"sfMessageCode"`
-	DeliveryMethod       string `json:"deliveryMethod"`
-	InputDate            string `json:"inputDate"`
-	FileName             string `json:"fileName"`
-	CreateDate           string `json:"createDate"`
-	CreatedBy            string `json:"createdBy"`
-	PsfMessageCode       string `json:"pSfMessageCode"`
-	PricingMethod        string `json:"pricingMethod"`
-	PricingRule          string `json:"pricingRule"`
-	ProcedureCode        string `json:"procedureCode"`
-	RevenueCode          string `json:"revenueCode"`
-	Modifier             string `json:"modifier"`
-	DosFrom              string `json:"dosFrom"`
-	DosTo                string `json:"dosTo"`
-	PlaceOfService       string `json:"placeOfService"`
-}
-
-// Get retrieves all elements from the claims list
-func Get() []Claims {
-	var list []Claims
+// Get retrieves all elements from the structs.Claims list
+func Get() []structs.Claims {
+	var list []structs.Claims
 
 	condb, errdb := utilities.GetSqlConnection()
 	if errdb != nil {
@@ -160,9 +102,9 @@ func Get() []Claims {
 	return list
 }
 
-func GetListById(claimId string) []Claims {
+func GetListById(claimId string) []structs.Claims {
 	fmt.Println("inside GetListById", claimId)
-	var list []Claims
+	var list []structs.Claims
 
 	condb, errdb := utilities.GetSqlConnection()
 	if errdb != nil {
@@ -217,7 +159,7 @@ func Add(claimType string, serviceId string, receiptDate string, fromDate string
 	return t.ID
 }
 
-// Delete will remove a claim from the Claims list
+// Delete will remove a claim from the structs.Claims list
 func Delete(id string) error {
 	location, err := findClaimsLocation(id)
 	if err != nil {
@@ -231,8 +173,8 @@ func newResult(id string, claimType string, serviceId string, receiptDate string
 	providerType string, providerSpecialty string, diagnosisCode string, networkIndicator string, subscriberId string, patientAccountNumber string,
 	sccfNumber string, billType string, planCode string, sfMessageCode string, deliveryMethod string, inputDate string, fileName string,
 	createDate string, createdBy string, pSfMessageCode string, pricingMethod string, pricingRule string, procedureCode string, revenueCode string,
-	modifier string, dosFrom string, dosTo string, placeOfService string) Claims {
-	return Claims{
+	modifier string, dosFrom string, dosTo string, placeOfService string) structs.Claims {
+	return structs.Claims{
 		ID:                   id,
 		ClaimType:            claimType,
 		ServiceId:            serviceId,
@@ -271,8 +213,8 @@ func newClaim(claimType string, serviceId string, receiptDate string, fromDate s
 	providerType string, providerSpecialty string, procedureCode string, diagnosisCode string,
 	networkIndicator string, subscriberId string, patientAccountNumber string, sccfNumber string,
 	revenueCode string, billType string, modifier string, planCode string, sfMessageCode string,
-	pricingMethod string, pricingRule string, deliveryMethod string, inputDate string, fileName string) Claims {
-	return Claims{
+	pricingMethod string, pricingRule string, deliveryMethod string, inputDate string, fileName string) structs.Claims {
+	return structs.Claims{
 		ID:                   xid.New().String(),
 		ClaimType:            claimType,
 		ServiceId:            serviceId,

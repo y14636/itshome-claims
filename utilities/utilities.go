@@ -13,6 +13,8 @@ import (
 	_ "github.com/denisenkom/go-mssqldb"
 )
 
+const ORIG_CLAIMS_TABLE_PREFIX = "orig."
+
 var (
 	options Options
 )
@@ -170,6 +172,11 @@ func CleanParameters(parameters string) string {
 					fmt.Println("string after removing", criteria)
 				}
 			}
+
+			if strings.Contains(criteria, "SFMessageCode") {
+				criteria = ORIG_CLAIMS_TABLE_PREFIX + criteria
+			}
+			fmt.Println("string after attempting to add orig. prefix", criteria)
 
 			if len(removedValues) == len(matches) {
 				strInClause := removeFieldName + " IN ("

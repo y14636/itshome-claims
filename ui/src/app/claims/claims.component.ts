@@ -6,8 +6,6 @@ import { ErrorModalComponent } from '../error-modal/error-modal.component';
 import { FormGroup, FormArray, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { HttpErrorResponse } from '@angular/common/http';
-// import { Subject } from 'rxjs';
-// import { DataTableDirective } from 'angular-datatables';
 import * as $ from 'jquery';
 import 'datatables.net';
 import 'datatables.net-bs4';
@@ -42,9 +40,9 @@ export class ClaimsComponent implements OnInit {
 	showInstButton: boolean;
 	showProfButton: boolean;
 	dataTable: any;
-	public table1: any;
-	public table2: any;
-	public table3: any;
+	public instTable: any;
+	public profTable: any;
+	public modTable: any;
 	submittedInstForm = false;
 	submittedProfForm = false;
 
@@ -91,52 +89,53 @@ export class ClaimsComponent implements OnInit {
 			}    
 		});
 	}
-	private initDatatable1(): void {
-    let table1: any = $('#table1');
-    this.table1 = table1.DataTable({
+	private initInstTable(): void {
+    let instTable: any = $('#instTable');
+    this.instTable = instTable.DataTable({
 			searching: false,
 			"pagingType": "full_numbers"
     });
 	}
 	
-	private initDatatable2(): void {
-		let table2: any = $('#table2');
-		this.table2 = table2.DataTable({
+	private initProfTable(): void {
+		let profTable: any = $('#profTable');
+		this.profTable = profTable.DataTable({
 			searching: false,
 			"pagingType": "full_numbers"
 		});
 	}
 	
-	private initDatatable3(): void {
-		let table3: any = $('#table3');
-		this.table3 = table3.DataTable({
+	private initModTable(): void {
+		let modTable: any = $('#modTable');
+		this.modTable = modTable.DataTable({
 			searching: false,
 			"pagingType": "full_numbers"
 		});
 	}
 	
-	private reInitDatatable1(): void {
-    if (this.table1) {
-      this.table1.destroy();
-      this.table1=null;
+	private reInitInstTable(): void {
+    if (this.instTable) {
+      this.instTable.destroy();
+      this.instTable=null;
     }
-    setTimeout(() => this.initDatatable1(),0);
+    setTimeout(() => this.initInstTable(),0);
 	}
 	
-	private reInitDatatable2(): void {
-    if (this.table2) {
-      this.table2.destroy();
-      this.table2=null;
+	private reInitProfTable(): void {
+    if (this.profTable) {
+      this.profTable.destroy();
+      this.profTable=null;
     }
-    setTimeout(() => this.initDatatable2(),0);
+    setTimeout(() => this.initProfTable(),0);
 	}
 	
-	private reInitDatatable3(): void {
-    if (this.table3) {
-      this.table3.destroy();
-      this.table3=null;
+	private reInitModTable(): void {
+    if (this.modTable) {
+			console.log("modTable exists")
+      this.modTable.destroy();
+      this.modTable=null;
     }
-    setTimeout(() => this.initDatatable3(),0);
+    setTimeout(() => this.initModTable(),0);
 	}
 	
   private createInstForm(option:string) {
@@ -257,9 +256,9 @@ export class ClaimsComponent implements OnInit {
 	  this.viewMode = tab;
 	  this.selectedActiveInstitutionalClaimIds = [];
 		this.selectedActiveProfessionalClaimIds = [];
-		setTimeout(() => this.initDatatable1(),0);
-		setTimeout(() => this.initDatatable2(),0);
-		setTimeout(() => this.initDatatable3(),0);
+		setTimeout(() => this.initInstTable(),0);
+		setTimeout(() => this.initProfTable(),0);
+		setTimeout(() => this.initModTable(),0);
   }
   
   openEditModal(claimType:string, claims: Claims) {
@@ -308,15 +307,15 @@ export class ClaimsComponent implements OnInit {
     this.claimsService.getClaimsList().subscribe((data: Claims[]) => {
       this.activeInstitutionalClaims = data.filter(claim => claim.claimtype === '11' || claim.claimtype === '12');
 			this.activeProfessionalClaims = data.filter(claim => claim.claimtype === '20');
-			if (this.table1) {
-				this.reInitDatatable1();
+			if (this.instTable) {
+				this.reInitInstTable();
 			} else {
-				setTimeout(() => this.initDatatable1(),0);
+				setTimeout(() => this.initInstTable(),0);
 			}
-			if (this.table2) {
-				this.reInitDatatable2();
+			if (this.profTable) {
+				this.reInitProfTable();
 			} else {
-				setTimeout(() => this.initDatatable2(),0);
+				setTimeout(() => this.initProfTable(),0);
 			}
     });
   }
@@ -324,21 +323,21 @@ export class ClaimsComponent implements OnInit {
   getModifiedClaims() {
 	  this.claimsService.getModifiedClaimsList().subscribe((data: ModifiedClaims[]) => {
 			this.modifiedClaims = data.filter(claim => claim);
-			//setTimeout(() => this.initDatatable3(),0);
+			//setTimeout(() => this.initModTable(),0);
 		  });	
   }
 	
 	searchActiveInstitutionalClaims(strFormData) {
 		this.claimsService.getSearchResults(strFormData).subscribe((data: Claims[]) => {
 			this.activeInstitutionalClaims = data.filter(claim => claim);
-			this.reInitDatatable1();
+			this.reInitInstTable();
 		});
 	}
 
 	searchActiveProfessionalClaims(strFormData) {
 		this.claimsService.getSearchResults(strFormData).subscribe((data: Claims[]) => {
 			this.activeProfessionalClaims = data.filter(claim => claim);
-			this.reInitDatatable2();
+			this.reInitProfTable();
 		});
 	}
   
@@ -406,14 +405,16 @@ export class ClaimsComponent implements OnInit {
 		console.log("deleted id=", mClaims.id);
     this.claimsService.deleteClaims(mClaims).subscribe(() => {
 			this.getModifiedClaims();
-			this.reInitDatatable3();
+			this.reInitModTable();
     })
 	}
 	
-  onSubmit(claimType:string, model: any, e: any) {
+  onSubmit(claimType:string, model: any) {
 	    //e.preventDefault();
 			//alert('Form data are: '+JSON.stringify(model));
-
+			this.selectedActiveInstitutionalClaimIds = [];
+			this.selectedActiveProfessionalClaimIds = [];
+	
 			let strFormData = JSON.stringify(model);
 			
 			if (claimType === 'Institutional') {
