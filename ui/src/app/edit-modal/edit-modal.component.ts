@@ -181,7 +181,7 @@ export class EditModalComponent implements OnInit {
 		} 
 		//alert('Form data are: '+JSON.stringify(this.claimsForm.value));
 		let strFormData = JSON.stringify(this.claimsForm.value);
-		this.claimsService.addMultipleClaims(strFormData).subscribe(() => {});
+		this.claimsService.addClaims(strFormData).subscribe(() => {});
 
 		this.activeModal.close(this.claimsForm.value);
   }

@@ -135,7 +135,7 @@ export class ClaimsComponent implements OnInit {
       this.modTable.destroy();
       this.modTable=null;
     }
-    setTimeout(() => this.initModTable(),0);
+    setTimeout(() => this.initModTable(),1000);
 	}
 	
   private createInstForm(option:string) {

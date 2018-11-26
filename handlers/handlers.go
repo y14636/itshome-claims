@@ -19,9 +19,9 @@ func GetClaimsResultsHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, searchclaims.GetResults(searchString))
 }
 
-func AddMultipleClaimsHandler(c *gin.Context) {
+func AddClaimsHandler(c *gin.Context) {
 	claimsDataString := c.Param("claimsData")
-	if err := modifiedclaims.AddMultipleClaims(claimsDataString); err != nil {
+	if err := modifiedclaims.AddClaims(claimsDataString); err != nil {
 		c.JSON(http.StatusInternalServerError, err)
 		return
 	}
@@ -45,18 +45,18 @@ func GetModifiedClaimsListHandler(c *gin.Context) {
 }
 
 // AddClaimsHandler adds a new claim to the claims list
-func AddClaimsHandler(c *gin.Context) {
-	claimsItem, statusCode, err := convertHTTPBodyToClaims(c.Request.Body)
-	if err != nil {
-		c.JSON(statusCode, err)
-		return
-	}
-	c.JSON(statusCode, gin.H{"id": claims.Add(claimsItem.ClaimType, claimsItem.ServiceId, claimsItem.ReceiptDate, claimsItem.FromDate, claimsItem.ToDate, claimsItem.PlaceOfService, claimsItem.ProviderId,
-		claimsItem.ProviderType, claimsItem.ProviderSpecialty, claimsItem.ProcedureCode, claimsItem.DiagnosisCode,
-		claimsItem.NetworkIndicator, claimsItem.SubscriberId, claimsItem.PatientAccountNumber, claimsItem.SccfNumber,
-		claimsItem.RevenueCode, claimsItem.BillType, claimsItem.Modifier, claimsItem.PlanCode, claimsItem.SfMessageCode,
-		claimsItem.PricingMethod, claimsItem.PricingRule, claimsItem.DeliveryMethod, claimsItem.InputDate, claimsItem.FileName)})
-}
+// func AddClaimsHandler(c *gin.Context) {
+// 	claimsItem, statusCode, err := convertHTTPBodyToClaims(c.Request.Body)
+// 	if err != nil {
+// 		c.JSON(statusCode, err)
+// 		return
+// 	}
+// 	c.JSON(statusCode, gin.H{"id": claims.Add(claimsItem.ClaimType, claimsItem.ServiceId, claimsItem.ReceiptDate, claimsItem.FromDate, claimsItem.ToDate, claimsItem.PlaceOfService, claimsItem.ProviderId,
+// 		claimsItem.ProviderType, claimsItem.ProviderSpecialty, claimsItem.ProcedureCode, claimsItem.DiagnosisCode,
+// 		claimsItem.NetworkIndicator, claimsItem.SubscriberId, claimsItem.PatientAccountNumber, claimsItem.SccfNumber,
+// 		claimsItem.RevenueCode, claimsItem.BillType, claimsItem.Modifier, claimsItem.PlanCode, claimsItem.SfMessageCode,
+// 		claimsItem.PricingMethod, claimsItem.PricingRule, claimsItem.DeliveryMethod, claimsItem.InputDate, claimsItem.FileName)})
+// }
 
 // DeleteClaimsHandler will delete a specified claim based on user http input
 func DeleteClaimsHandler(c *gin.Context) {

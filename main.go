@@ -6,9 +6,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/y14636/itshome-claims/handlers"
+	logConfig "github.com/y14636/itshome-claims/logging"
 )
 
 func main() {
+	logConfig.InitializeLogging("./logs/claims.log")
 
 	r := gin.Default()
 	r.Use(CORSMiddleware())
@@ -26,8 +28,8 @@ func main() {
 	r.GET("/modifiedclaims", handlers.GetModifiedClaimsListHandler)
 	r.GET("/searchclaims/:search", handlers.GetClaimsResultsHandler)
 	r.GET("/claims/:claimsId", handlers.GetClaimsListByIdHandler)
-	r.POST("/claims", handlers.AddClaimsHandler)
-	r.GET("/modifiedclaims/:claimsData", handlers.AddMultipleClaimsHandler)
+	//r.POST("/claims", handlers.AddClaimsHandler)
+	r.GET("/modifiedclaims/:claimsData", handlers.AddClaimsHandler)
 	r.DELETE("/modifiedclaims/:id", handlers.DeleteClaimsHandler)
 
 	err := r.Run(":3000")
