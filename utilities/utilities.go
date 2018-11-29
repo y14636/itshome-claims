@@ -90,7 +90,7 @@ func ParseParameters(parameters string) string {
 			criteria += k + "='" + strconv.FormatFloat(vv, 'f', -1, 64) + "';"
 		case []interface{}:
 			log.Println(k, "is an array:")
-			if k == "instInputItems" || k == "profInputItems" || k == "hiddenInputItems" || k == "selectedActiveInstitutionalClaimIds" {
+			if k == "instInputItems" || k == "profInputItems" || k == "hiddenInputItems" || k == "selectedActiveInstitutionalClaimIds" || k == "selectedActiveProfessionalClaimIds" {
 				var strInClauseValues string
 				for i, u := range vv {
 					log.Println("Key:", i, "Value:", u)

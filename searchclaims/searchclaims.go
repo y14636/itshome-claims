@@ -104,7 +104,6 @@ func GetClaimsThreshold(criteria string) string {
 			paramValue = fieldName[1]
 			log.Println("paramValue", paramValue)
 			newCriteria = strings.Replace(newCriteria, paramName+"="+paramValue+";", "", -1)
-			//fmt.Println("string after removing", criteria)
 		}
 	}
 	return newCriteria + "|" + paramName + "=" + paramValue

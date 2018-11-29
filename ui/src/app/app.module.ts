@@ -3,7 +3,6 @@ import { NgModule } from '@angular/core';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { AppRoutingModule } from './app-routing.module';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
-//import { DataTablesModule } from 'angular-datatables';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
 import { AuthGuardService } from './auth-guard.service';
@@ -14,7 +13,11 @@ import { ClaimsService } from './claims.service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { EditModalComponent } from './edit-modal/edit-modal.component';
 import { ErrorModalComponent } from './error-modal/error-modal.component';
+//import { LogService } from './shared/log.service';
+//import { LogPublishersService } from "./shared/log-publishers.service";
 //import { TokenInterceptor } from './token.interceptor';
+import { LoggerModule, NgxLoggerLevel } from 'ngx-logger';
+import { environment } from '../environments/environment';
 
 @NgModule({
   declarations: [
@@ -31,8 +34,10 @@ import { ErrorModalComponent } from './error-modal/error-modal.component';
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
-//	  DataTablesModule,
-	  NgbModule.forRoot()
+    NgbModule.forRoot(),
+    LoggerModule.forRoot({serverLoggingUrl: environment.gateway + "/logging", 
+                          level: NgxLoggerLevel.DEBUG, 
+                          serverLogLevel: NgxLoggerLevel.DEBUG})
   ],
   providers: [AuthGuardService, ClaimsService],
   bootstrap: [AppComponent],

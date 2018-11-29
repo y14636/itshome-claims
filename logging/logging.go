@@ -1,6 +1,7 @@
 package logging
 
 import (
+	"fmt"
 	. "os"
 
 	log "github.com/sirupsen/logrus"
@@ -18,4 +19,9 @@ func InitializeLogging(logFile string) {
 
 	log.SetFormatter(&log.TextFormatter{})
 	//log.SetFormatter(&log.JSONFormatter{})
+}
+
+func LogWebMessages(message string) error {
+	fmt.Println("logging web message 1", message)
+	return nil
 }

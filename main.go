@@ -31,6 +31,7 @@ func main() {
 	//r.POST("/claims", handlers.AddClaimsHandler)
 	r.GET("/modifiedclaims/:claimsData", handlers.AddClaimsHandler)
 	r.DELETE("/modifiedclaims/:id", handlers.DeleteClaimsHandler)
+	r.POST("/logging", handlers.LogWebMessages)
 
 	err := r.Run(":3000")
 	if err != nil {

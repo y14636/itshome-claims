@@ -1,10 +1,8 @@
 package claims
 
 import (
-	//	"errors"
-	//	"fmt"
 	"strconv"
-	"sync" //	"github.com/rs/xid"
+	"sync"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/y14636/itshome-claims/model"
@@ -16,8 +14,8 @@ const SELECT_STATEMENT_ALL string = "SELECT orig.Id, orig.ClaimType, COALESCE(or
 
 var (
 	list = []structs.Claims{}
-	//	mtx                  sync.RWMutex
 	once                 sync.Once
+
 	id                   int
 	claimType            string
 	serviceId            string
@@ -57,9 +55,6 @@ func init() {
 
 func initializeList() {
 	list = []structs.Claims{}
-	//dummy Institutional claims
-	// Add("11", "N/A", "20180110", "20180101", "20180110", "NA", "000000001000", "0001", "314000000X", "52260", "N3010", "NA", "INT20089098001", "99999999", "30120180400000000",
-	// 	"0450", "111", "59", "302", "P302", "30", "012", "2", "20180110", "testfile1.dat")
 }
 
 // Get retrieves all elements from the structs.Claims list
@@ -141,33 +136,6 @@ func GetListById(claimId string) []structs.Claims {
 
 }
 
-// Add will add a new claim
-// func Add(claimType string, serviceId string, receiptDate string, fromDate string, toDate string, placeOfService string, providerId string,
-// 	providerType string, providerSpecialty string, procedureCode string, diagnosisCode string,
-// 	networkIndicator string, subscriberId string, patientAccountNumber string, sccfNumber string,
-// 	revenueCode string, billType string, modifier string, planCode string, sfMessageCode string,
-// 	pricingMethod string, pricingRule string, deliveryMethod string, inputDate string, fileName string) string {
-// 	t := newClaim(claimType, serviceId, receiptDate, fromDate, toDate, placeOfService, providerId,
-// 		providerType, providerSpecialty, procedureCode, diagnosisCode,
-// 		networkIndicator, subscriberId, patientAccountNumber, sccfNumber,
-// 		revenueCode, billType, modifier, planCode, sfMessageCode,
-// 		pricingMethod, pricingRule, deliveryMethod, inputDate, fileName)
-// 	mtx.Lock()
-// 	list = append(list, t)
-// 	mtx.Unlock()
-// 	return t.ID
-// }
-
-// // Delete will remove a claim from the structs.Claims list
-// func Delete(id string) error {
-// 	location, err := findClaimsLocation(id)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	removeElementByLocation(location)
-// 	return nil
-// }
-
 func newResult(id string, claimType string, serviceId string, receiptDate string, fromDate string, toDate string, providerId string,
 	providerType string, providerSpecialty string, diagnosisCode string, networkIndicator string, subscriberId string, patientAccountNumber string,
 	sccfNumber string, billType string, planCode string, sfMessageCode string, deliveryMethod string, inputDate string, fileName string,
@@ -207,63 +175,3 @@ func newResult(id string, claimType string, serviceId string, receiptDate string
 		PlaceOfService:       placeOfService,
 	}
 }
-
-// func newClaim(claimType string, serviceId string, receiptDate string, fromDate string, toDate string, placeOfService string, providerId string,
-// 	providerType string, providerSpecialty string, procedureCode string, diagnosisCode string,
-// 	networkIndicator string, subscriberId string, patientAccountNumber string, sccfNumber string,
-// 	revenueCode string, billType string, modifier string, planCode string, sfMessageCode string,
-// 	pricingMethod string, pricingRule string, deliveryMethod string, inputDate string, fileName string) structs.Claims {
-// 	return structs.Claims{
-// 		ID:                   xid.New().String(),
-// 		ClaimType:            claimType,
-// 		ServiceId:            serviceId,
-// 		ReceiptDate:          receiptDate,
-// 		FromDate:             fromDate,
-// 		ToDate:               toDate,
-// 		PlaceOfService:       placeOfService,
-// 		ProviderId:           providerId,
-// 		ProviderType:         providerType,
-// 		ProviderSpecialty:    providerSpecialty,
-// 		ProcedureCode:        procedureCode,
-// 		DiagnosisCode:        diagnosisCode,
-// 		NetworkIndicator:     networkIndicator,
-// 		SubscriberId:         subscriberId,
-// 		PatientAccountNumber: patientAccountNumber,
-// 		SccfNumber:           sccfNumber,
-// 		RevenueCode:          revenueCode,
-// 		BillType:             billType,
-// 		Modifier:             modifier,
-// 		PlanCode:             planCode,
-// 		SfMessageCode:        sfMessageCode,
-// 		PricingMethod:        pricingMethod,
-// 		PricingRule:          pricingRule,
-// 		DeliveryMethod:       deliveryMethod,
-// 		InputDate:            inputDate,
-// 		FileName:             fileName,
-// 	}
-// }
-
-// func findClaimsLocation(id string) (int, error) {
-// 	mtx.RLock()
-// 	defer mtx.RUnlock()
-// 	for i, t := range list {
-// 		// if isMatchingID(t.ID, id) {
-// 		// 	return i, nil
-// 		// }
-// 		log.Println("Subscriber ID=", t.SubscriberId)
-// 		if isMatchingID(t.SubscriberId, id) {
-// 			return i, nil
-// 		}
-// 	}
-// 	return 0, errors.New("could not find claims based on id")
-// }
-
-// func removeElementByLocation(i int) {
-// 	mtx.Lock()
-// 	list = append(list[:i], list[i+1:]...)
-// 	mtx.Unlock()
-// }
-
-// func isMatchingID(a string, b string) bool {
-// 	return a == b
-// }

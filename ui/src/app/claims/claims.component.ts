@@ -9,11 +9,15 @@ import { HttpErrorResponse } from '@angular/common/http';
 import * as $ from 'jquery';
 import 'datatables.net';
 import 'datatables.net-bs4';
+//import { LogService } from '../shared/log.service';
+//import { LogComponent } from '../log/log.component';
+import { NGXLogger } from 'ngx-logger';
 
 @Component({
   selector: 'app-claims',
   templateUrl: './claims.component.html',
-  styleUrls: ['./claims.component.css']
+	styleUrls: ['./claims.component.css'],
+	providers: [NGXLogger]
 })
 export class ClaimsComponent implements OnInit {
 	
@@ -47,6 +51,8 @@ export class ClaimsComponent implements OnInit {
 	submittedProfForm = false;
 
   constructor(
+//	private logger: LogService,
+	private logger: NGXLogger,
   private claimsService: ClaimsService, 
   private modalService: NgbModal, 
 	private httpService: HttpClient,
@@ -84,7 +90,6 @@ export class ClaimsComponent implements OnInit {
 	private findAndRemove(array, property, value) {
 		array.forEach(function(result, index) {
 			if(result[property] === value) {
-				//Remove from array
 				array.splice(index, 1);
 			}    
 		});
@@ -109,7 +114,9 @@ export class ClaimsComponent implements OnInit {
 		let modTable: any = $('#modTable');
 		this.modTable = modTable.DataTable({
 			searching: false,
-			"pagingType": "full_numbers"
+			"pagingType": "full_numbers",
+			"ordering": true,
+			"order": [[7, "desc"]]
 		});
 	}
 	
@@ -146,7 +153,8 @@ export class ClaimsComponent implements OnInit {
 	  hiddenInputItems: this.formBuilder.array([ this.createHiddenInputItem(0, "ClaimType", "11"), this.createHiddenInputItem(1, "ClaimType", "12") ])
     });
 	
-		console.log("Inside createInstForm()");
+		this.logger.debug("Inside createInstForm()");
+//		console.log("Inside createInstForm()");
 		var arrayControl = this.instSearchForm.get('instInputItems') as FormArray;
 		var item = arrayControl.at(0);
 		this.instSearchForm.get('instSelectItems').valueChanges.subscribe(data => {
@@ -323,7 +331,6 @@ export class ClaimsComponent implements OnInit {
   getModifiedClaims() {
 	  this.claimsService.getModifiedClaimsList().subscribe((data: ModifiedClaims[]) => {
 			this.modifiedClaims = data.filter(claim => claim);
-			//setTimeout(() => this.initModTable(),0);
 		  });	
   }
 	
@@ -410,8 +417,6 @@ export class ClaimsComponent implements OnInit {
 	}
 	
   onSubmit(claimType:string, model: any) {
-	    //e.preventDefault();
-			//alert('Form data are: '+JSON.stringify(model));
 			this.selectedActiveInstitutionalClaimIds = [];
 			this.selectedActiveProfessionalClaimIds = [];
 	

@@ -95,10 +95,10 @@ func GetModifiedClaims() []ModifiedClaims {
 }
 
 func AddClaims(claimsData string) error {
-	log.Println("Add Multiple Claims", claimsData)
+	log.Println("Add Claims", claimsData)
 
 	criteria := utilities.ParseParameters(claimsData)
-	log.Println("Add Multiple Claims", criteria)
+	log.Println("Add Claims", criteria)
 
 	result := strings.Split(criteria, "&")
 	var errdb error

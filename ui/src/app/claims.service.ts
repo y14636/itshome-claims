@@ -25,10 +25,6 @@ export class ClaimsService {
     return this.httpClient.get(environment.gateway + '/modifiedclaims');
   }
 
-  // addClaims(claims: Claims) {
-  //   return this.httpClient.post(environment.gateway + '/claims', claims);
-  // }
-  
   addModifiedClaims(claims: Claims) {
     return this.httpClient.post(environment.gateway + '/modifiedclaims', claims);
   }
