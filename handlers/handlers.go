@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/y14636/itshome-claims/claims"
@@ -67,12 +67,15 @@ func DeleteClaimsHandler(c *gin.Context) {
 
 func LogWebMessages(c *gin.Context) {
 	message, statusCode, err := convertHTTPBodyToLogging(c.Request.Body)
-	fmt.Println("LogWebMessages=", message)
 	if err != nil {
 		c.JSON(statusCode, err)
 		return
 	}
-	c.JSON(statusCode, gin.H{"messages": logging.LogWebMessages("ui-" + message.Message + message.Additional[0])})
+	logMessage := "ui-" + message.Message
+	if strings.TrimSpace(strings.Join(message.Additional, "")) != "" {
+		logMessage = logMessage + message.Additional[0]
+	}
+	c.JSON(statusCode, gin.H{"messages": logging.LogWebMessages(logMessage)})
 }
 
 func convertHTTPBodyToLogging(httpBody io.ReadCloser) (LogMessage, int, error) {
