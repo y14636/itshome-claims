@@ -9,8 +9,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 import * as $ from 'jquery';
 import 'datatables.net';
 import 'datatables.net-bs4';
-//import { LogService } from '../shared/log.service';
-//import { LogComponent } from '../log/log.component';
 import { NGXLogger } from 'ngx-logger';
 
 @Component({
@@ -51,7 +49,6 @@ export class ClaimsComponent implements OnInit {
 	submittedProfForm = false;
 
   constructor(
-//	private logger: LogService,
 	private logger: NGXLogger,
   private claimsService: ClaimsService, 
   private modalService: NgbModal, 
@@ -76,7 +73,7 @@ export class ClaimsComponent implements OnInit {
 					this.createProfForm(this.options[0]);						
       },
       (err: HttpErrorResponse) => {
-        console.log (err.message);
+        this.logger.error (err.message);
       }
 		);
 
@@ -138,7 +135,7 @@ export class ClaimsComponent implements OnInit {
 	
 	private reInitModTable(): void {
     if (this.modTable) {
-			console.log("modTable exists")
+			this.logger.debug("modTable exists")
       this.modTable.destroy();
       this.modTable=null;
     }
@@ -154,7 +151,6 @@ export class ClaimsComponent implements OnInit {
     });
 	
 		this.logger.debug("Inside createInstForm()");
-//		console.log("Inside createInstForm()");
 		var arrayControl = this.instSearchForm.get('instInputItems') as FormArray;
 		var item = arrayControl.at(0);
 		this.instSearchForm.get('instSelectItems').valueChanges.subscribe(data => {
@@ -170,19 +166,19 @@ export class ClaimsComponent implements OnInit {
 	  hiddenInputItems: this.formBuilder.array([ this.createHiddenInputItem(0, "ClaimType", "20")])
     });
 	
-		console.log("Inside createProfForm()");
+		this.logger.debug("Inside createProfForm()");
 		var arrayControl = this.profSearchForm.get('profInputItems') as FormArray;
 		var item = arrayControl.at(0);
 		this.profSearchForm.get('profSelectItems').valueChanges.subscribe(data => {
 			this.selectedProfOption = data[0].category.value;
 			item.get("type").setValue(data[0].category.type);
-			console.log("select prof event registered...");
+			this.logger.debug("select prof event registered...");
 		})
   }
   
   createHiddenInputItem(index:number, type:string, value:string): FormGroup {
 	  var inputName = "inputName" + index;
-	  console.log("hiddenInputName=", inputName);
+	  this.logger.debug("hiddenInputName=", inputName);
 	  return this.formBuilder.group({
 		[inputName]: [value],
 		type: [type]
@@ -191,7 +187,7 @@ export class ClaimsComponent implements OnInit {
   
   createInputItem(index:number, type:string): FormGroup {
 	  var inputName = "inputName" + index;
-	  console.log("inputName=", inputName);
+	  this.logger.debug("inputName=", inputName);
 	  return this.formBuilder.group({
 		[inputName]: ['', [Validators.required, Validators.minLength(1)]],
 		type: [type]
@@ -205,7 +201,7 @@ export class ClaimsComponent implements OnInit {
   }
   
   addInputItem(index:number, type:string, form:FormGroup, claimType:string): void {
-		console.log("addInputItem() index=", index);
+		this.logger.debug("addInputItem() index=", index);
 		if (claimType === 'Institutional') {
 			this.instInputItems = form.get('instInputItems') as FormArray;
 			this.instInputItems.push(this.createInputItem(index, type));
@@ -237,10 +233,10 @@ export class ClaimsComponent implements OnInit {
 	
 		for(let val of arrayControl) {
 			val.get('category').valueChanges.subscribe(data => {
-				console.log("Change happened", arrayControl.indexOf(val)+': ', val.get('category').value.name);
-				console.log("Need to update items with new type");
-				console.log("type is", val.get('category').value.type);
-				console.log("select control index=", arrayControl.indexOf(val));
+				this.logger.debug("Change happened", arrayControl.indexOf(val)+': ', val.get('category').value.name);
+				this.logger.debug("Need to update items with new type");
+				this.logger.debug("type is", val.get('category').value.type);
+				this.logger.debug("select control index=", arrayControl.indexOf(val));
 				var inputArrayControl;
 				if (claimType === 'Institutional') {
 					inputArrayControl = form.get('instInputItems') as FormArray;
@@ -275,19 +271,19 @@ export class ClaimsComponent implements OnInit {
 		  const modalRef = this.modalService.open(EditModalComponent, { size: 'lg', backdrop: 'static' });
 		  
 		  modalRef.componentInstance.title = 'Edit ' + claimType + ' Claim(s)';
-		  console.log("Inside openEditModal, claimType=" + claimType);
+		  this.logger.debug("Inside openEditModal, claimType=" + claimType);
 		  if (claimType === 'Institutional') {
-			console.log("Inside openEditModal, this.selectedActiveInstitutionalClaimIds[0]=" + this.selectedActiveInstitutionalClaimIds[0]);
+			this.logger.debug("Inside openEditModal, this.selectedActiveInstitutionalClaimIds[0]=" + this.selectedActiveInstitutionalClaimIds[0]);
 			modalRef.componentInstance.selectedActiveInstitutionalClaimIds = this.selectedActiveInstitutionalClaimIds;
 		  } else {
-			console.log("Inside openEditModal, this.selectedActiveProfessionalClaimIds[0]=" + this.selectedActiveProfessionalClaimIds[0]);
+			this.logger.debug("Inside openEditModal, this.selectedActiveProfessionalClaimIds[0]=" + this.selectedActiveProfessionalClaimIds[0]);
 			modalRef.componentInstance.selectedActiveProfessionalClaimIds = this.selectedActiveProfessionalClaimIds;
 		  }
 		  
 		  modalRef.result.then((result) => {
 			window.location.reload();
 		  }).catch((error) => {
-			console.log(error);
+			this.logger.error(error);
 		  });
 	  } else {
 		  this.openErrorModal();
@@ -299,9 +295,9 @@ export class ClaimsComponent implements OnInit {
 	  modalRef.componentInstance.title = 'Error';
 	  modalRef.componentInstance.message = 'Please select a claim to edit';
 	  modalRef.result.then((result) => {
-			console.log(result);
+			this.logger.debug(result);
 	  }).catch((error) => {
-			console.log(error);
+			this.logger.error(error);
 	  });
   }
 
@@ -349,39 +345,39 @@ export class ClaimsComponent implements OnInit {
 	}
   
   toggleActiveInstitutionalClaims(id:string, isChecked: boolean){
-	console.log("Institutional id=" + id + "isChecked=" + isChecked);
+	this.logger.debug("Institutional id=" + id + "isChecked=" + isChecked);
 	this.toggleClaims(id, isChecked, 'Institutional');
   }
   
   toggleActiveProfessionalClaims(id:string, isChecked: boolean){
-	console.log("Professional id=" + id + "isChecked=" + isChecked);
+	this.logger.debug("Professional id=" + id + "isChecked=" + isChecked);
 	this.toggleClaims(id, isChecked, 'Professional');
   }
   
   toggleClaims(id:string, isChecked: boolean, claimType:string) {
-	  console.log("isChecked=" + isChecked + ", claimType=" + claimType);
+	  this.logger.debug("isChecked=" + isChecked + ", claimType=" + claimType);
 	if (claimType === 'Institutional') {
 		this.selectedActiveProfessionalClaimIds = [];
 		if (isChecked && this.selectedActiveInstitutionalClaimIds.includes(id) === false) {
-			console.log('adding Institutional id');
+			this.logger.debug('adding Institutional id');
 			this.selectedActiveInstitutionalClaimIds.push(id);
 		} else {
 			const index: number = this.selectedActiveInstitutionalClaimIds.indexOf(id);
-			console.log('index is ' + index);
+			this.logger.debug('index is ' + index);
 			if (index !== -1) {
-				console.log('removing Institutional id');
+				this.logger.debug('removing Institutional id');
 				this.selectedActiveInstitutionalClaimIds.splice(index, 1);
 			}  
 		}
 	} else {
 		this.selectedActiveInstitutionalClaimIds = [];
 		if (isChecked && this.selectedActiveProfessionalClaimIds.includes(id) === false) {
-			console.log('adding Professional id');
+			this.logger.debug('adding Professional id');
 			this.selectedActiveProfessionalClaimIds.push(id);
 		} else {
 			const index: number = this.selectedActiveProfessionalClaimIds.indexOf(id);
 			if (index !== -1) {
-				console.log('removing Professional id');
+				this.logger.debug('removing Professional id');
 				this.selectedActiveProfessionalClaimIds.splice(index, 1);
 			}  
 		}
@@ -392,7 +388,7 @@ export class ClaimsComponent implements OnInit {
 	return (<FormArray>frmGrp.controls[key]).controls;
   }
   removeObject(index, claimType) {
-		console.log("removing index->", index);
+		this.logger.debug("removing index->", index);
 		if (claimType === "Institutional") {
 	  	this.instInputItems.removeAt(index);
 			this.instSelectItems.removeAt(index);
@@ -409,7 +405,7 @@ export class ClaimsComponent implements OnInit {
   }
 	
 	deleteClaims(mClaims: ModifiedClaims) {
-		console.log("deleted id=", mClaims.id);
+		this.logger.debug("deleted id=", mClaims.id);
     this.claimsService.deleteClaims(mClaims).subscribe(() => {
 			this.getModifiedClaims();
 			this.reInitModTable();

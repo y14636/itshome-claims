@@ -2,11 +2,13 @@ import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { FormGroup, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ClaimsService, Claims } from '../claims.service';
+import { NGXLogger } from 'ngx-logger';
 
 @Component({
   selector: 'app-edit-modal',
   templateUrl: './edit-modal.component.html',
-  styleUrls: ['./edit-modal.component.css']
+  styleUrls: ['./edit-modal.component.css'],
+  providers: [NGXLogger]
 })
 export class EditModalComponent implements OnInit {
 	
@@ -38,6 +40,7 @@ export class EditModalComponent implements OnInit {
 	isMultiple: 									boolean;
   
   constructor(
+	private logger: NGXLogger,
 	public activeModal: NgbActiveModal,
 	private claimsService: ClaimsService,
 	private formBuilder: FormBuilder
@@ -47,8 +50,8 @@ export class EditModalComponent implements OnInit {
 
   ngOnInit() {
 		this.isMultiple = true;
-	  console.log("selected Institutional Id is " + this.selectedActiveInstitutionalClaimIds);
-	  console.log("selected Professional Id is " + this.selectedActiveProfessionalClaimIds);
+	  this.logger.debug("selected Institutional Id is " + this.selectedActiveInstitutionalClaimIds);
+	  this.logger.debug("selected Professional Id is " + this.selectedActiveProfessionalClaimIds);
 	  this.getClaimsListByIds();
   }
 
@@ -62,7 +65,7 @@ export class EditModalComponent implements OnInit {
 			selectedId = this.selectedActiveProfessionalClaimIds[0];
 		}
 		if (!this.isMultiple) {
-			console.log("selectedId=", selectedId);
+			this.logger.debug("selectedId=", selectedId);
 			this.claimsService.getClaimsListByIds(selectedId).subscribe((data: Claims[]) => {
 					this.isMultiple = false;
 					this.populateForm(data.filter(claim =>claim));
@@ -109,9 +112,9 @@ export class EditModalComponent implements OnInit {
   }
 
   populateForm(selectedClaims: Claims[]) {
-	console.log("This institutional claim sub id= " + selectedClaims[0].subscriberId);
+	this.logger.debug("This institutional claim sub id= " + selectedClaims[0].subscriberId);
 	var subscriberId = selectedClaims[0].subscriberId.trim();
-	console.log("length=", subscriberId.length);
+	this.logger.debug("length=", subscriberId.length);
 	var sub = subscriberId.slice(0, 1);
 	if (sub != null && this.isaNumber(sub)) {
 		this.subscriberId = subscriberId.slice(0, 9);
@@ -120,7 +123,7 @@ export class EditModalComponent implements OnInit {
 	}
 	
 	this.suffix = subscriberId.length > 9 ? subscriberId.slice(-2) : 'N/A';
-	console.log("suffix=", this.suffix);
+	this.logger.debug("suffix=", this.suffix);
 
 	this.patientAccountNumber = selectedClaims[0].patientAccountNumber.trim();
 	this.procedureCode = selectedClaims[0].procedureCode.trim();

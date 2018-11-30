@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	logConfig.InitializeLogging("./logs/claims.log")
+	logConfig.InitializeLogging("./logs/itshome-claims.log")
 
 	r := gin.Default()
 	r.Use(CORSMiddleware())

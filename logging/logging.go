@@ -1,7 +1,6 @@
 package logging
 
 import (
-	"fmt"
 	. "os"
 
 	log "github.com/sirupsen/logrus"
@@ -22,6 +21,6 @@ func InitializeLogging(logFile string) {
 }
 
 func LogWebMessages(message string) error {
-	fmt.Println("logging web message 1", message)
+	log.Println(message)
 	return nil
 }

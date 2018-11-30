@@ -72,7 +72,7 @@ func LogWebMessages(c *gin.Context) {
 		c.JSON(statusCode, err)
 		return
 	}
-	c.JSON(statusCode, gin.H{"messages": logging.LogWebMessages(message.Message)})
+	c.JSON(statusCode, gin.H{"messages": logging.LogWebMessages("ui-" + message.Message + message.Additional[0])})
 }
 
 func convertHTTPBodyToLogging(httpBody io.ReadCloser) (LogMessage, int, error) {
