@@ -29,6 +29,7 @@
     "datatables.net-dt": "^1.10.19",
     "jquery": "^3.3.1",
     "ngx-logger": "^3.3.6",
+    "ngx-webstorage-service": "^3.1.1",
     "rxjs": "^6.2.2",
     "rxjs-compat": "^6.3.3",
     "zone.js": "~0.8.26"
