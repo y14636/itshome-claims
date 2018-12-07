@@ -2,7 +2,7 @@
   <div class="col-md-6 col-md-offset-3 loginBox">
       <h3>Log In</h3>
       <p *ngIf="message" class="text-center error">{{message}}</p>
-    <form [formGroup]="loginForm" (ngSubmit)="login()">
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <div class="form-group clearfix" [ngClass]="{ 'has-error': submitted && f.userid.errors }">
             <label for="userid" class="col-md-3 col-sm-5 col-xs-12">Userid</label>
             <div class="col-md-9 col-sm-7 col-xs-12">

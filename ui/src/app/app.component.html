@@ -1,17 +1,12 @@
 <nav class="navbar navbar-default">
   <div class="container-fluid">
     <div class="navbar-header">
-      <a class="navbar-brand" href="#">ITS Home Claims</a>
-
-      <button
-        class="btn btn-light btn-margin"
-        routerLink="/login">
-          Login
-      </button>
+      <span>ITS Home Claims</span>
+      <span class="fill-remaining-space"></span>
+      <button class="btn btn-link" (click)="onLogout()" *ngIf="isLoggedIn$ | async">Logout</button>
     </div>
   </div>
 </nav>
-
 <div class="container-fluid">
 <div class="row">
   <div class="col-sm">

@@ -23,16 +23,16 @@ export class LoginComponent implements OnInit {
       userid: ['', Validators.required],
       password: ['', Validators.required]
     });
-    this.returnUrl = '/claims';
-    this.authService.logout();
+    // this.returnUrl = '/claims';
+    // console.log("calling logout");
+    // this.authService.logout();
   }
 
   // convenience getter for easy access to form fields
   get f() { return this.loginForm.controls; }
 
   
-  login() {
-
+  onSubmit() {
     // stop here if form is invalid
     if (this.loginForm.invalid) {
         return;
@@ -40,10 +40,10 @@ export class LoginComponent implements OnInit {
     else{
       if(this.f.userid.value == this.model.userid && this.f.password.value == this.model.password){
         console.log("Login successful");
-        //this.authService.authLogin(this.model);
+        this.authService.login(this.model);
         localStorage.setItem('isLoggedIn', "true");
         localStorage.setItem('token', this.f.userid.value);
-        this.router.navigate([this.returnUrl]);
+        //this.router.navigate([this.returnUrl]);
       }
       else{
         this.message = "Please check your userid and password";
