@@ -3,6 +3,7 @@ import { FormGroup, FormBuilder, FormControl, Validators } from '@angular/forms'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { ClaimsService, Claims } from '../claims.service';
 import { NGXLogger } from 'ngx-logger';
+import { from } from 'rxjs';
 
 @Component({
   selector: 'app-edit-modal',
@@ -20,6 +21,9 @@ export class EditModalComponent implements OnInit {
   @Input ()procedureCode: 						string;
   @Input ()diagnosisCode: 						string;
   @Input ()modifier: 							string;
+  id:											string;
+  lineIndex:									string;
+  revenueCode:									string;
   fromDate: 									string;
   toDate: 										string;
   claimtype: 									string;
@@ -49,7 +53,7 @@ export class EditModalComponent implements OnInit {
 	}
 
   ngOnInit() {
-		this.isMultiple = true;
+	  this.isMultiple = true;
 	  this.logger.debug("selected Institutional Id is " + this.selectedActiveInstitutionalClaimIds);
 	  this.logger.debug("selected Professional Id is " + this.selectedActiveProfessionalClaimIds);
 	  this.getClaimsListByIds();
@@ -86,10 +90,13 @@ export class EditModalComponent implements OnInit {
 
   private createForm() {
     this.claimsForm = this.formBuilder.group({
+	  id: [{value: '', disabled: true}],
       subscriberId: '',
 	  suffix: '',
-      patientAccountNumber: '',
+	  patientAccountNumber: '',
+	  lineIndex: [{value: '', disabled: true}],
 	  procedureCode: '',
+	  revenueCode: [{value: '', disabled: true}],
 	  diagnosisCode: '',
 	  modifier: '',
 	  fromDate: [{value: '', disabled: true}],
@@ -112,6 +119,7 @@ export class EditModalComponent implements OnInit {
   }
 
   populateForm(selectedClaims: Claims[]) {
+	this.id = selectedClaims[0].id.trim();
 	this.logger.debug("This institutional claim sub id= " + selectedClaims[0].subscriberId);
 	var subscriberId = selectedClaims[0].subscriberId.trim();
 	this.logger.debug("length=", subscriberId.length);
@@ -126,7 +134,9 @@ export class EditModalComponent implements OnInit {
 	this.logger.debug("suffix=", this.suffix);
 
 	this.patientAccountNumber = selectedClaims[0].patientAccountNumber.trim();
+	this.lineIndex = selectedClaims[0].lineIndex.trim();
 	this.procedureCode = selectedClaims[0].procedureCode.trim();
+	this.revenueCode = selectedClaims[0].revenueCode.trim();
 	this.diagnosisCode = selectedClaims[0].diagnosisCode.trim();
 	this.modifier = selectedClaims[0].modifier.trim();
 	this.fromDate = selectedClaims[0].fromDate.trim();
@@ -173,8 +183,9 @@ export class EditModalComponent implements OnInit {
 				pSfMessageCode: '',
 				pricingMethod: form.getRawValue().pricingMethod,
 				pricingRule: form.getRawValue().pricingRule,
+				lineIndex: form.getRawValue().lineIndex,
 				procedureCode: form.getRawValue().procedureCode,
-				revenueCode: 'na',
+				revenueCode: form.getRawValue().revenueCode,
 				modifier: form.getRawValue().modifier,
 				dosFrom: '',
 				dosTo: '',
@@ -195,26 +206,29 @@ export class EditModalComponent implements OnInit {
 
   updateClaimForm() {
 	  this.claimsForm.patchValue({
-		  subscriberId: this.subscriberId.toUpperCase(),
-		  suffix: this.suffix.toUpperCase(),
-		  patientAccountNumber: this.patientAccountNumber.toUpperCase(),
-		  procedureCode: this.procedureCode.toUpperCase(),
-		  diagnosisCode: this.diagnosisCode.toUpperCase(),
-		  modifier: this.modifier.toUpperCase(),
+		  id: this.id,
+		  subscriberId: this.subscriberId,
+		  suffix: this.suffix,
+		  patientAccountNumber: this.patientAccountNumber,
+		  lineIndex: this.lineIndex,
+		  procedureCode: this.procedureCode,
+		  revenueCode: this.revenueCode,
+		  diagnosisCode: this.diagnosisCode,
+		  modifier: this.modifier,
 		  fromDate: this.fromDate,
 		  toDate: this.toDate,
-		  claimtype: this.claimtype.toUpperCase(),
-		  serviceId: this.serviceId.toUpperCase(),
+		  claimtype: this.claimtype,
+		  serviceId: this.serviceId,
 		  receiptDate: this.receiptDate,
-		  providerType: this.providerType.toUpperCase(),
+		  providerType: this.providerType,
 		  providerId: this.providerId,
-		  providerSpecialty: this.providerSpecialty.toUpperCase(),
-		  sccfNumber: this.sccfNumber.toUpperCase(),
-		  planCode: this.planCode.toUpperCase(),
-		  sfMessageCode: this.sfMessageCode.toUpperCase(),
-		  pricingMethod: this.pricingMethod.toUpperCase(),
-		  pricingRule: this.pricingRule.toUpperCase(),
-		  deliveryMethod: this.deliveryMethod.toUpperCase(),
+		  providerSpecialty: this.providerSpecialty,
+		  sccfNumber: this.sccfNumber,
+		  planCode: this.planCode,
+		  sfMessageCode: this.sfMessageCode,
+		  pricingMethod: this.pricingMethod,
+		  pricingRule: this.pricingRule,
+		  deliveryMethod: this.deliveryMethod,
 		  selectedActiveInstitutionalClaimIds: this.selectedActiveInstitutionalClaimIds,
 		  selectedActiveProfessionalClaimIds: this.selectedActiveProfessionalClaimIds
 	  });

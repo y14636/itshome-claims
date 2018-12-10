@@ -2,6 +2,7 @@ package claims
 
 import (
 	"strconv"
+	"strings"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
@@ -9,8 +10,8 @@ import (
 	"github.com/y14636/itshome-claims/utilities"
 )
 
-const SELECT_STATEMENT string = "SELECT orig.Id, orig.ClaimType, COALESCE(orig.ServiceId, ''), orig.ReceiptDate, orig.FromDate, orig.ToDate, orig.ProviderId, orig.ProviderType, orig.ProviderSpecialty, orig.DiagnosisCode, orig.NetworkIndicator, orig.SubscriberId, orig.PatientAccountNumber, orig.SCCFNumber, orig.BillType, orig.PlanCode, orig.SFMessageCode, orig.DeliveryMethod, orig.InputDate, orig.FileName, orig.CREATE_DT, orig.CREATED_BY, COALESCE(pricing.SFMessageCode, '') AS PsfMessageCode, COALESCE(pricing.PricingMethod, ''), COALESCE(pricing.PricingRule, ''), COALESCE(orig_proc.ProcedureCode, ''), COALESCE(orig_proc.RevenueCode, ''), COALESCE(orig_proc.Modifier, ''), COALESCE(orig_proc.DateOfService, ''), COALESCE(orig_proc.DateOfServiceTo, ''), COALESCE(orig_proc.PlaceOfService, '') FROM ITSHome.OriginalClaims orig LEFT OUTER JOIN ITSHome.OriginalPricing pricing ON orig.Id = pricing.OriginalClaimID LEFT OUTER JOIN ITSHome.OriginalProcedures orig_proc ON pricing.OriginalClaimID = orig_proc.OriginalClaimID"
-const SELECT_STATEMENT_ALL string = "SELECT TOP 1000 orig.Id, orig.ClaimType, COALESCE(orig.ServiceId, ''), orig.ReceiptDate, orig.FromDate, orig.ToDate, orig.ProviderId, orig.ProviderType, orig.ProviderSpecialty, orig.DiagnosisCode, orig.NetworkIndicator, orig.SubscriberId, orig.PatientAccountNumber, orig.SCCFNumber, orig.BillType, orig.PlanCode, orig.SFMessageCode, orig.DeliveryMethod, orig.InputDate, orig.FileName, orig.CREATE_DT, orig.CREATED_BY, COALESCE(pricing.SFMessageCode, '') AS PsfMessageCode, COALESCE(pricing.PricingMethod, ''), COALESCE(pricing.PricingRule, ''), COALESCE(orig_proc.ProcedureCode, ''), COALESCE(orig_proc.RevenueCode, ''), COALESCE(orig_proc.Modifier, ''), COALESCE(orig_proc.DateOfService, ''), COALESCE(orig_proc.DateOfServiceTo, ''), COALESCE(orig_proc.PlaceOfService, '') FROM ITSHome.OriginalClaims orig LEFT OUTER JOIN ITSHome.OriginalPricing pricing ON orig.Id = pricing.OriginalClaimID LEFT OUTER JOIN ITSHome.OriginalProcedures orig_proc ON pricing.OriginalClaimID = orig_proc.OriginalClaimID"
+const SELECT_STATEMENT string = "SELECT orig.Id, orig.ClaimType, COALESCE(orig.ServiceId, ''), orig.ReceiptDate, orig.FromDate, orig.ToDate, orig.ProviderId, orig.ProviderType, orig.ProviderSpecialty, orig.DiagnosisCode, orig.NetworkIndicator, orig.SubscriberId, orig.PatientAccountNumber, orig.SCCFNumber, orig.BillType, orig.PlanCode, orig.SFMessageCode, orig.DeliveryMethod, orig.InputDate, orig.FileName, orig.CREATE_DT, orig.CREATED_BY, COALESCE(pricing.SFMessageCode, '') AS PsfMessageCode, COALESCE(pricing.PricingMethod, ''), COALESCE(pricing.PricingRule, ''), orig_proc.LineIndex, COALESCE(orig_proc.ProcedureCode, ''), COALESCE(orig_proc.RevenueCode, ''), COALESCE(orig_proc.Modifier, ''), COALESCE(orig_proc.DateOfService, ''), COALESCE(orig_proc.DateOfServiceTo, ''), COALESCE(orig_proc.PlaceOfService, '') FROM ITSHome.OriginalClaims orig LEFT OUTER JOIN ITSHome.OriginalPricing pricing ON orig.Id = pricing.OriginalClaimID LEFT OUTER JOIN ITSHome.OriginalProcedures orig_proc ON pricing.OriginalClaimID = orig_proc.OriginalClaimID"
+const SELECT_STATEMENT_ALL string = "SELECT DISTINCT TOP 1000 orig.Id, orig.ClaimType, COALESCE(orig.ServiceId, ''), orig.ReceiptDate, orig.FromDate, orig.ToDate, orig.ProviderId, orig.ProviderType, orig.ProviderSpecialty, orig.DiagnosisCode, orig.NetworkIndicator, orig.SubscriberId, orig.PatientAccountNumber, orig.SCCFNumber, orig.BillType, orig.PlanCode, orig.SFMessageCode, orig.DeliveryMethod, orig.InputDate, orig.FileName, orig.CREATE_DT, orig.CREATED_BY, COALESCE(pricing.SFMessageCode, '') AS PsfMessageCode, COALESCE(pricing.PricingMethod, ''), COALESCE(pricing.PricingRule, ''), orig_proc.LineIndex, COALESCE(orig_proc.ProcedureCode, ''), COALESCE(orig_proc.RevenueCode, ''), COALESCE(orig_proc.Modifier, ''), COALESCE(orig_proc.DateOfService, ''), COALESCE(orig_proc.DateOfServiceTo, ''), COALESCE(orig_proc.PlaceOfService, '') FROM ITSHome.OriginalClaims orig LEFT OUTER JOIN ITSHome.OriginalPricing pricing ON orig.Id = pricing.OriginalClaimID LEFT OUTER JOIN ITSHome.OriginalProcedures orig_proc ON pricing.OriginalClaimID = orig_proc.OriginalClaimID"
 
 var (
 	list = []structs.Claims{}
@@ -41,6 +42,7 @@ var (
 	pSfMessageCode       string
 	pricingMethod        string
 	pricingRule          string
+	lineIndex            int
 	procedureCode        string
 	revenueCode          string
 	modifier             string
@@ -76,16 +78,17 @@ func Get() []structs.Claims {
 			&providerType, &providerSpecialty, &diagnosisCode, &networkIndicator, &subscriberId,
 			&patientAccountNumber, &sccfNumber, &billType, &planCode, &sfMessageCode, &deliveryMethod,
 			&inputDate, &fileName, &createDate, &createdBy, &pSfMessageCode, &pricingMethod, &pricingRule,
-			&procedureCode, &revenueCode, &modifier, &dosFrom, &dosTo, &placeOfService)
+			&lineIndex, &procedureCode, &revenueCode, &modifier, &dosFrom, &dosTo, &placeOfService)
 		if err != nil {
 			log.Fatal(err)
 		}
 		strId := strconv.Itoa(id)
+		lIndex := strconv.Itoa(lineIndex)
 		t := newResult(strId, claimType, serviceId, receiptDate, fromDate, toDate, providerId,
 			providerType, providerSpecialty, diagnosisCode, networkIndicator, subscriberId,
 			patientAccountNumber, sccfNumber, billType, planCode, sfMessageCode, deliveryMethod,
 			inputDate, fileName, createDate, createdBy, pSfMessageCode, pricingMethod, pricingRule,
-			procedureCode, revenueCode, modifier, dosFrom, dosTo, placeOfService)
+			lIndex, procedureCode, revenueCode, modifier, dosFrom, dosTo, placeOfService)
 		list = append(list, t)
 	}
 	err = rows.Err()
@@ -98,6 +101,13 @@ func Get() []structs.Claims {
 
 func GetListById(claimId string) []structs.Claims {
 	log.Println("inside GetListById", claimId)
+	result := strings.Split(claimId, "|")
+	whereClause := " WHERE orig.Id=" + result[0]
+	strLineIndex := result[1]
+	if len(strLineIndex) > 0 {
+		whereClause = whereClause + " AND orig_proc.LineIndex=" + strLineIndex
+	}
+	log.Println("inside GetListById - where clause=", claimId)
 	var list []structs.Claims
 
 	condb, errdb := utilities.GetSqlConnection()
@@ -105,7 +115,7 @@ func GetListById(claimId string) []structs.Claims {
 		log.Println(" Error open db:", errdb.Error())
 	}
 
-	rows, err := condb.Query(SELECT_STATEMENT + " WHERE orig.Id=" + claimId)
+	rows, err := condb.Query(SELECT_STATEMENT + whereClause)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -115,16 +125,17 @@ func GetListById(claimId string) []structs.Claims {
 			&providerType, &providerSpecialty, &diagnosisCode, &networkIndicator, &subscriberId,
 			&patientAccountNumber, &sccfNumber, &billType, &planCode, &sfMessageCode, &deliveryMethod,
 			&inputDate, &fileName, &createDate, &createdBy, &pSfMessageCode, &pricingMethod, &pricingRule,
-			&procedureCode, &revenueCode, &modifier, &dosFrom, &dosTo, &placeOfService)
+			&lineIndex, &procedureCode, &revenueCode, &modifier, &dosFrom, &dosTo, &placeOfService)
 		if err != nil {
 			log.Fatal(err)
 		}
 		strId := strconv.Itoa(id)
+		lIndex := strconv.Itoa(lineIndex)
 		t := newResult(strId, claimType, serviceId, receiptDate, fromDate, toDate, providerId,
 			providerType, providerSpecialty, diagnosisCode, networkIndicator, subscriberId,
 			patientAccountNumber, sccfNumber, billType, planCode, sfMessageCode, deliveryMethod,
 			inputDate, fileName, createDate, createdBy, pSfMessageCode, pricingMethod, pricingRule,
-			procedureCode, revenueCode, modifier, dosFrom, dosTo, placeOfService)
+			lIndex, procedureCode, revenueCode, modifier, dosFrom, dosTo, placeOfService)
 		list = append(list, t)
 	}
 	err = rows.Err()
@@ -139,7 +150,7 @@ func GetListById(claimId string) []structs.Claims {
 func newResult(id string, claimType string, serviceId string, receiptDate string, fromDate string, toDate string, providerId string,
 	providerType string, providerSpecialty string, diagnosisCode string, networkIndicator string, subscriberId string, patientAccountNumber string,
 	sccfNumber string, billType string, planCode string, sfMessageCode string, deliveryMethod string, inputDate string, fileName string,
-	createDate string, createdBy string, pSfMessageCode string, pricingMethod string, pricingRule string, procedureCode string, revenueCode string,
+	createDate string, createdBy string, pSfMessageCode string, pricingMethod string, pricingRule string, lineIndex string, procedureCode string, revenueCode string,
 	modifier string, dosFrom string, dosTo string, placeOfService string) structs.Claims {
 	return structs.Claims{
 		ID:                   id,
@@ -167,6 +178,7 @@ func newResult(id string, claimType string, serviceId string, receiptDate string
 		PsfMessageCode:       pSfMessageCode,
 		PricingMethod:        pricingMethod,
 		PricingRule:          pricingRule,
+		LineIndex:            lineIndex,
 		ProcedureCode:        procedureCode,
 		RevenueCode:          revenueCode,
 		Modifier:             modifier,

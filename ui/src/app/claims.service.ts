@@ -64,6 +64,7 @@ export class Claims {
   pSfMessageCode: string;
   pricingMethod: string;
   pricingRule: string;
+  lineIndex: string;
   procedureCode: string;
   revenueCode: string;
   modifier: string;

@@ -344,25 +344,25 @@ export class ClaimsComponent implements OnInit {
 		});
 	}
   
-  toggleActiveInstitutionalClaims(id:string, isChecked: boolean){
+  toggleActiveInstitutionalClaims(id:string, lineIndex:string, isChecked: boolean){
 	this.logger.debug("Institutional id=" + id + "isChecked=" + isChecked);
-	this.toggleClaims(id, isChecked, 'Institutional');
+	this.toggleClaims(id, lineIndex, isChecked, 'Institutional');
   }
   
-  toggleActiveProfessionalClaims(id:string, isChecked: boolean){
+  toggleActiveProfessionalClaims(id:string, lineIndex:string, isChecked: boolean){
 	this.logger.debug("Professional id=" + id + "isChecked=" + isChecked);
-	this.toggleClaims(id, isChecked, 'Professional');
+	this.toggleClaims(id, lineIndex, isChecked, 'Professional');
   }
   
-  toggleClaims(id:string, isChecked: boolean, claimType:string) {
+  toggleClaims(id:string, lineIndex:string, isChecked: boolean, claimType:string) {
 	  this.logger.debug("isChecked=" + isChecked + ", claimType=" + claimType);
 	if (claimType === 'Institutional') {
 		this.selectedActiveProfessionalClaimIds = [];
 		if (isChecked && this.selectedActiveInstitutionalClaimIds.includes(id) === false) {
 			this.logger.debug('adding Institutional id');
-			this.selectedActiveInstitutionalClaimIds.push(id);
+			this.selectedActiveInstitutionalClaimIds.push(id + "|" + lineIndex);
 		} else {
-			const index: number = this.selectedActiveInstitutionalClaimIds.indexOf(id);
+			const index: number = this.selectedActiveInstitutionalClaimIds.indexOf(id + "|" + lineIndex);
 			this.logger.debug('index is ' + index);
 			if (index !== -1) {
 				this.logger.debug('removing Institutional id');

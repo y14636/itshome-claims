@@ -1,16 +1,18 @@
-<nav class="navbar navbar-default">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <span>ITS Home Claims</span>
-      <span class="fill-remaining-space"></span>
-      <button class="btn btn-link" (click)="onLogout()" *ngIf="isLoggedIn$ | async">Logout</button>
+  <div class="bg-light">
+  <div class="container bg-secondary border border-primary rounded "><span><img class="p-3" src="./assets/images/home-claims-logo.png"></span></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-10"></div>
+      <div class="col-lg-2 text-right">
+        <button class="btn btn-primary btn-sm" (click)="onLogout()" *ngIf="isLoggedIn$ | async">Logout</button>
+      </div>
     </div>
-  </div>
-</nav>
+</div>
 <div class="container-fluid">
 <div class="row">
   <div class="col-sm">
     <router-outlet></router-outlet>
   </div>
+</div>
 </div>
 </div>

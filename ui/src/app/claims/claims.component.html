@@ -70,11 +70,12 @@
 		  <thead>
 		  <tr>
 			<th></th>
+			<th>Claim ID</th>
 			<th>Subscriber ID</th>
 			<th>Claim Type</th>
 			<th>SCCF Number</th>
 			<th>Procedure Code</th>
-			<th>Diagnosis Code</th>
+			<th>Revenue Code</th>
 			<th>Modifier</th>
 			<th>Patient Account Number</th>
 			<th>From Date (DOS)</th>
@@ -83,12 +84,13 @@
 		  </thead>
 		  <tbody>
 		  <tr *ngFor="let claims of activeInstitutionalClaims">
-			<td><input type="checkbox" name="{{claims.id}}" id="{{claims.id}}" (change)="toggleActiveInstitutionalClaims(claims.id, $event.target.checked)"></td>
+			<td><input type="checkbox" name="{{claims.id}}" id="{{claims.id}}" (change)="toggleActiveInstitutionalClaims(claims.id,claims.lineIndex, $event.target.checked)"></td>
+			<td>{{claims.id}}</td>
 			<td>{{claims.subscriberId}}</td>
 			<td>{{claims.claimtype}}</td>
 			<td>{{claims.sccfNumber}}</td>
 			<td>{{claims.procedureCode}}</td>
-			<td>{{claims.diagnosisCode}}</td>
+			<td>{{claims.revenueCode}}</td>
 			<td>{{claims.modifier}}</td>
 			<td>{{claims.patientAccountNumber}}</td>
 			<td>{{claims.fromDate}}</td>

@@ -27,6 +27,7 @@ type Claims struct {
 	PsfMessageCode       string `json:"pSfMessageCode"`
 	PricingMethod        string `json:"pricingMethod"`
 	PricingRule          string `json:"pricingRule"`
+	LineIndex            string `json:"lineIndex"`
 	ProcedureCode        string `json:"procedureCode"`
 	RevenueCode          string `json:"revenueCode"`
 	Modifier             string `json:"modifier"`

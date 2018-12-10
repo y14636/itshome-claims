@@ -11,8 +11,9 @@ import { AuthenticationService } from '../authentication/authentication.service'
 })
 export class LoginComponent implements OnInit {
 
-  model: ILogin = { userid: "admin", password: "admin123" };
+  model: ILogin = { userid: "admin", password: "admin" };
   loginForm: FormGroup;
+  submitted = false;
   message: string;
   returnUrl: string;
 
@@ -33,6 +34,7 @@ export class LoginComponent implements OnInit {
 
   
   onSubmit() {
+    this.submitted = true;
     // stop here if form is invalid
     if (this.loginForm.invalid) {
         return;

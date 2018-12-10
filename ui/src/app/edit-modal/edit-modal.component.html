@@ -7,6 +7,10 @@
 <form [formGroup]="claimsForm" (ngSubmit)="onSubmit(claimsForm)">
 <div class="modal-body">
   <div class="row form-row">
+      <div *ngIf="!isMultiple" class="form-group">
+        <label for="id">Claims ID</label>
+        <input type="text" class="form-control" formControlName="id"/>
+      </div>            
       <div class="form-group">
 	    <label for="subscriberId">Subscriber ID</label>
         <input type="text" class="form-control" formControlName="subscriberId"/>
@@ -19,28 +23,32 @@
 	    <label for="patientAccountNumber">Patient Account Number</label>
 		<input type="text" class="form-control" formControlName="patientAccountNumber"/>
       </div>
-      <div class="form-group">
-        <label for="procedureCode">Procedure Code</label>
-        <input type="text" class="form-control" formControlName="procedureCode"/>
-      </div>    
   </div>
   <div class="row form-row">
-      <div class="form-group">
-	        <label for="diagnosisCode">Diagnosis Code</label>
-          <input type="text" class="form-control" formControlName="diagnosisCode"/>
-      </div>
-      <div class="form-group">
-	        <label for="modifier">Modifier</label>
-		      <input type="text" class="form-control" formControlName="modifier"/>
-      </div>
-      <div *ngIf="!isMultiple" class="form-group">
-	        <label for="serviceId">Service ID</label>
-          <input type="text" class="form-control" formControlName="serviceId"/>
-      </div>
-      <div *ngIf="!isMultiple" class="form-group">
-            <label for="receiptDate">Receipt Date</label>
-            <input type="text" class="form-control" formControlName="receiptDate"/>
-        </div>  
+  <div class="form-group">
+    <label for="procedureCode">Procedure Code</label>
+    <input type="text" class="form-control" formControlName="procedureCode"/>
+  </div>            
+  <div *ngIf="!isMultiple" class="form-group">
+    <label for="revenueCode">Revenue Code</label>
+    <input type="text" class="form-control" formControlName="revenueCode"/>
+  </div>
+  <div class="form-group">
+    <label for="diagnosisCode">Diagnosis Code</label>
+    <input type="text" class="form-control" formControlName="diagnosisCode"/>
+  </div>
+  <div class="form-group">
+	<label for="modifier">Modifier</label>
+    <input type="text" class="form-control" formControlName="modifier"/>
+  </div>
+  <div *ngIf="!isMultiple" class="form-group">
+	<label for="serviceId">Service ID</label>
+    <input type="text" class="form-control" formControlName="serviceId"/>
+  </div>
+  <div *ngIf="!isMultiple" class="form-group">
+    <label for="receiptDate">Receipt Date</label>
+    <input type="text" class="form-control" formControlName="receiptDate"/>
+  </div>  
   </div>
   <div class="row form-row">
       <div *ngIf="!isMultiple" class="form-group">

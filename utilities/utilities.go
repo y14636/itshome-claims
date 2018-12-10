@@ -96,6 +96,8 @@ func ParseParameters(parameters string) string {
 					log.Println("Key:", i, "Value:", u)
 					str := fmt.Sprintf("%v", u)
 					if k == "selectedActiveInstitutionalClaimIds" || k == "selectedActiveProfessionalClaimIds" {
+						result := strings.Split(str, "|")
+						str = result[0]
 						strInClauseValues += str
 						if len(vv)-i > 1 {
 							strInClauseValues += ","
